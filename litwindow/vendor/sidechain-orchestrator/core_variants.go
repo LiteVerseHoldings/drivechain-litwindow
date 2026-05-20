@@ -24,20 +24,19 @@ func preferenceLess(a, b string) bool {
 	return variantPreference(a) < variantPreference(b)
 }
 
-// variantPreference assigns each variant a sort key. Lower wins. Patched is
-// the safest fallback in the drivechain ecosystem (works on every chain,
-// drivechain-aware), Core is next, Knots last (niche fork). Unknown
-// variants sort between core and knots so they're at least visible.
+// variantPreference assigns each variant a sort key. Lower wins.
 func variantPreference(id string) int {
 	switch id {
-	case "patched":
+	case "local-signet":
 		return 0
-	case "core":
+	case "patched":
 		return 1
-	case "knots":
-		return 3
-	default:
+	case "core":
 		return 2
+	case "knots":
+		return 4
+	default:
+		return 3
 	}
 }
 
@@ -54,14 +53,11 @@ func FilterVariantsForNetwork(variants map[string]CoreVariantSpec, network strin
 	return out
 }
 
-// ActiveCoreBinaryPath returns the on-disk path for the bitcoind variant
+// ActiveCoreBinaryPath returns the on-disk path for the L1 Core variant
 // currently selected in orchestrator_settings.json. Used by CLI commands and
 // the testharness to find the active build without constructing a full
-// Orchestrator. Non-bitcoind names always resolve via the legacy flat layout.
+// Orchestrator.
 func ActiveCoreBinaryPath(dataDir, bitwindowDir string, configs []BinaryConfig, binaryName string) string {
-	if binaryName != "bitcoind" {
-		return BinaryPath(dataDir, binaryName)
-	}
 	variantID := DefaultCoreVariantID
 	if bitwindowDir != "" {
 		if s, err := LoadSettings(bitwindowDir); err == nil && s.CoreVariant != "" {

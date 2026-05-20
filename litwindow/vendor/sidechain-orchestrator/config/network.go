@@ -37,17 +37,17 @@ func DatadirGroupForNetwork(n Network) DatadirGroup {
 func RPCPortForNetwork(n Network) int {
 	switch n {
 	case NetworkMainnet:
-		return 8332
+		return 9332
 	case NetworkForknet:
 		return 18301
 	case NetworkTestnet:
-		return 18332
+		return 19332
 	case NetworkSignet:
-		return 38332
+		return 39332
 	case NetworkRegtest:
-		return 18443
+		return 19443
 	default:
-		return 38332 // fallback to signet
+		return 39332 // fallback to signet
 	}
 }
 
@@ -55,9 +55,9 @@ func RPCPortForNetwork(n Network) int {
 func EsploraURLForNetwork(n Network) string {
 	switch n {
 	case NetworkSignet:
-		return "https://explorer.signet.drivechain.info/api"
+		return "http://localhost:3003"
 	case NetworkMainnet:
-		return "https://mempool.space/api"
+		return "https://litecoinspace.org/api"
 	case NetworkForknet:
 		return "https://explorer.forknet.drivechain.info/api"
 	case NetworkRegtest:

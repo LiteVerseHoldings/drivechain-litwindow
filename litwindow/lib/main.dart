@@ -274,7 +274,7 @@ Future<void> runMainWindow(Logger log, Directory applicationDir, File logFile) a
     minimumSize: Size(400, 400),
     size: Size(1200, 600),
     titleBarStyle: TitleBarStyle.normal,
-    title: 'Bitcoin Core + CUSF BIP 300/301 Enforcer',
+    title: 'Litecoin Core + CUSF BIP 300/301 Enforcer',
   );
 
   await windowManager.ensureInitialized();
@@ -495,7 +495,7 @@ class _BitwindowAppContent extends StatelessWidget {
     return MaterialApp.router(
       routerDelegate: router.delegate(),
       routeInformationParser: router.defaultRouteParser(),
-      title: 'Bitcoin Core + CUSF BIP 300/301 Enforcer',
+      title: 'Litecoin Core + CUSF BIP 300/301 Enforcer',
       theme: ThemeData(
         visualDensity: VisualDensity.compact,
         fontFamily: font == SailFontValues.ibmMono ? 'IBMPlexMono' : 'Inter',

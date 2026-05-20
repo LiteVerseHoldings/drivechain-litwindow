@@ -100,23 +100,23 @@ func (b BinaryDirConfig) RootDirNetwork(network Network) string {
 }
 
 // DatadirNetwork returns the network-aware datadir used for most file lookups.
-// For bitcoind, if bitcoinOverride is non-empty it is used as the base (from
-// the user's `datadir=` setting in bitwindow-bitcoin.conf); otherwise we fall
-// back to the platform default. bitcoind and bitwindowd add a per-network
+// For the L1 Core binary, if bitcoinOverride is non-empty it is used as the base (from
+// the user's `datadir=` setting in litwindow-litecoin.conf); otherwise we fall
+// back to the platform default. the L1 Core binary and bitwindowd add a per-network
 // subdir (e.g. "signet/"); other binaries keep the flat root dir.
 // Dart: Binary.datadir() + Binary.datadirNetwork() (L1537-1591)
 func (b BinaryDirConfig) DatadirNetwork(network Network, bitcoinOverride string) string {
 	baseDir := b.RootDirNetwork(network)
-	if b.BinaryName == "bitcoind" && bitcoinOverride != "" {
+	if b.IsBitcoinCore && bitcoinOverride != "" {
 		baseDir = bitcoinOverride
 	}
-	switch b.BinaryName {
-	case "bitcoind":
+	switch {
+	case b.IsBitcoinCore:
 		if network == NetworkMainnet || network == NetworkForknet {
 			return baseDir
 		}
 		return filepath.Join(baseDir, network.ReadableName())
-	case "bitwindowd":
+	case b.BinaryName == "bitwindowd":
 		return filepath.Join(baseDir, network.ReadableName())
 	default:
 		return baseDir
@@ -328,23 +328,23 @@ func DeleteFilesWithRetry(paths []string, log zerolog.Logger) {
 // GetBlockchainDataPaths returns blockchain data file paths for a binary.
 // Dart: getBlockchainDataPaths (L334-381)
 func (b BinaryDirConfig) GetBlockchainDataPaths(networkDir string, network Network, log zerolog.Logger) []string {
-	switch b.BinaryName {
-	case "bitcoind":
+	switch {
+	case b.IsBitcoinCore:
 		return GetExistingFilesInDir(networkDir, []string{
-			".lock", "anchors.dat", "banlist.json", "bitcoin.pid", "bitcoind.pid",
+			".lock", "anchors.dat", "banlist.json", "litecoin.pid", "litecoind.pid",
 			"blocks", "chainstate", "debug.log", "fee_estimates.dat", "indexes",
 			"mempool.dat", "peers.dat", "settings.json",
 		}, log)
 
-	case "bip300301-enforcer":
+	case b.BinaryName == "bip300301-enforcer":
 		rootdir := b.RootDir()
 		networkName := strings.ReplaceAll(strings.ReplaceAll(network.ReadableName(), "mainnet", "bitcoin"), "forknet", "bitcoin")
 		return GetExistingFilesInDir(rootdir, []string{"validator", "bitwindow-enforcer.conf", networkName}, log)
 
-	case "bitwindowd":
+	case b.BinaryName == "bitwindowd":
 		return GetExistingFilesInDir(networkDir, []string{"bitdrive", "bitwindow.db"}, log)
 
-	case "thunder", "plain_bitnames", "plain_bitassets", "thunder-orchard", "truthcoin", "photon", "coinshift":
+	case b.BinaryName == "thunder" || b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon" || b.BinaryName == "coinshift":
 		return GetExistingFilesInDir(networkDir, []string{"data.mdb", "lock.mdb", "logs"}, log)
 
 	default:
@@ -357,8 +357,8 @@ func (b BinaryDirConfig) GetBlockchainDataPaths(networkDir string, network Netwo
 func (b BinaryDirConfig) GetWalletPaths(networkDir string, network Network, log zerolog.Logger) []string {
 	var paths []string
 
-	switch b.BinaryName {
-	case "bip300301-enforcer":
+	switch {
+	case b.BinaryName == "bip300301-enforcer":
 		rootdir := b.RootDir()
 		networkName := strings.ReplaceAll(strings.ReplaceAll(network.ReadableName(), "mainnet", "bitcoin"), "forknet", "bitcoin")
 		walletDir := filepath.Join(rootdir, "wallet", networkName)
@@ -366,7 +366,7 @@ func (b BinaryDirConfig) GetWalletPaths(networkDir string, network Network, log 
 			paths = append(paths, walletDir)
 		}
 
-	case "bitcoind":
+	case b.IsBitcoinCore:
 		// Wallets directory
 		walletsDir := filepath.Join(networkDir, "wallets")
 		if _, err := os.Stat(walletsDir); err == nil {
@@ -378,10 +378,10 @@ func (b BinaryDirConfig) GetWalletPaths(networkDir string, network Network, log 
 			paths = append(paths, legacyWallet)
 		}
 
-	case "thunder", "plain_bitnames", "plain_bitassets", "thunder-orchard", "truthcoin", "photon", "coinshift":
+	case b.BinaryName == "thunder" || b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon" || b.BinaryName == "coinshift":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"wallet.mdb"}, log)...)
 
-	case "bitwindowd":
+	case b.BinaryName == "bitwindowd":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"wallet.json", "wallet_encryption.json"}, log)...)
 	}
 
@@ -403,35 +403,35 @@ func (b BinaryDirConfig) GetSettingsPaths(networkDir string, network Network, lo
 		paths = append(paths, GetExistingFilesInDir(dir, []string{"settings.json", "debug.log"}, log)...)
 	}
 
-	switch b.BinaryName {
-	case "bitcoind":
+	switch {
+	case b.IsBitcoinCore:
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"settings.json"}, log)...)
 		rootDir := b.RootDirNetwork(network)
 		paths = append(paths, GetExistingFilesInDir(rootDir, []string{
-			"bitwindow-bitcoin.conf", "bitcoin.conf", "drivechain.conf",
+			"litwindow-litecoin.conf", "litecoin.conf",
 		}, log)...)
 
-	case "bitwindowd":
+	case b.BinaryName == "bitwindowd":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"server.log"}, log)...)
 		rootDir := BitWindowDirs.RootDir()
 		paths = append(paths, GetExistingFilesInDir(rootDir, []string{
-			"assets", "bitwindow-bitcoin.conf",
+			"assets", "litwindow-litecoin.conf", "bitwindow-bitcoin.conf",
 			"debug.log", "downloads", "pids", "settings.json",
 		}, log)...)
 
-	case "thunder":
+	case b.BinaryName == "thunder":
 		rootDir := b.RootDir()
 		paths = append(paths, GetExistingFilesInDir(rootDir, []string{"start.sh", "thunder.conf", "thunder.zip", "thunder_app"}, log)...)
 		if dir := b.FrontendDir(); dir != "" {
 			paths = append(paths, GetExistingFilesInDir(dir, []string{"assets", "downloads", "debug.log", "settings.json"}, log)...)
 		}
 
-	case "plain_bitnames", "plain_bitassets", "thunder-orchard", "truthcoin", "photon":
+	case b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon":
 		if dir := b.FrontendDir(); dir != "" {
 			paths = append(paths, GetExistingFilesInDir(dir, []string{"assets", "downloads", "debug.log", "settings.json"}, log)...)
 		}
 
-	case "coinshift":
+	case b.BinaryName == "coinshift":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"debug.log", "settings.json"}, log)...)
 	}
 
@@ -457,19 +457,19 @@ func (b BinaryDirConfig) GetAllDatadirPaths(networkDir string) []string {
 func (b BinaryDirConfig) GetLogPaths(networkDir string, log zerolog.Logger) []string {
 	var paths []string
 
-	switch b.BinaryName {
-	case "bitcoind":
+	switch {
+	case b.IsBitcoinCore:
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"debug.log"}, log)...)
 
-	case "bip300301-enforcer":
+	case b.BinaryName == "bip300301-enforcer":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"bip300301_enforcer.log", "logs"}, log)...)
 
-	case "bitwindowd":
+	case b.BinaryName == "bitwindowd":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"server.log"}, log)...)
 		rootDir := BitWindowDirs.RootDir()
 		paths = append(paths, GetExistingFilesInDir(rootDir, []string{"debug.log"}, log)...)
 
-	case "thunder", "plain_bitnames", "plain_bitassets", "thunder-orchard", "truthcoin", "photon", "coinshift":
+	case b.BinaryName == "thunder" || b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon" || b.BinaryName == "coinshift":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"logs"}, log)...)
 	}
 
@@ -488,17 +488,17 @@ func (b BinaryDirConfig) GetLogPaths(networkDir string, log zerolog.Logger) []st
 // LogPath returns the log file path for this binary.
 // Dart: logPath (L1378-1392)
 func (b BinaryDirConfig) LogPath(networkDir string) string {
-	switch b.BinaryName {
-	case "bitcoind":
+	switch {
+	case b.IsBitcoinCore:
 		return filepath.Join(networkDir, "debug.log")
 
-	case "bitwindowd":
+	case b.BinaryName == "bitwindowd":
 		return filepath.Join(networkDir, "server.log")
 
-	case "bip300301-enforcer":
+	case b.BinaryName == "bip300301-enforcer":
 		return findLatestEnforcerLog(networkDir)
 
-	case "thunder", "plain_bitnames", "plain_bitassets", "thunder-orchard", "truthcoin", "photon", "coinshift":
+	case b.BinaryName == "thunder" || b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon" || b.BinaryName == "coinshift":
 		return findLatestDirVersionedLog(networkDir)
 
 	default:
@@ -674,9 +674,10 @@ func (b BinaryDirConfig) ExtraFilesForDeletion(assetsDir string) []string {
 }
 
 func (b BinaryDirConfig) staticExtraFiles() []string {
+	if b.IsBitcoinCore {
+		return []string{"litecoin-cli", "litecoin-tx", "litecoin-wallet", "litecoin-cli.exe", "litecoin-tx.exe", "litecoin-wallet.exe", "qt"}
+	}
 	switch b.BinaryName {
-	case "bitcoind":
-		return []string{"bitcoin-cli", "bitcoin-util", "bitcoin-cli.exe", "bitcoin-util.exe", "qt"}
 	case "bip300301-enforcer":
 		return []string{"LICENSE", "grpcurl"}
 	case "bitwindowd":

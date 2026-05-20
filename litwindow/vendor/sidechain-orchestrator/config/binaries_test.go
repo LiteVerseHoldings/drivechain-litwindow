@@ -20,11 +20,11 @@ func TestBitcoinCoreSignetPath(t *testing.T) {
 	var want string
 	switch runtime.GOOS {
 	case "darwin":
-		want = filepath.Join(home(), "Library", "Application Support", "Drivechain")
+		want = filepath.Join(home(), "Library", "Application Support", "LitecoinSignet")
 	case "windows":
-		want = filepath.Join(home(), "AppData", "Roaming", "Drivechain")
+		want = filepath.Join(home(), "AppData", "Roaming", "LitecoinSignet")
 	default: // linux
-		want = filepath.Join(home(), ".drivechain")
+		want = filepath.Join(home(), ".litecoin-signet")
 	}
 	if p != want {
 		t.Errorf("BitcoinCore signet path = %q, want %q", p, want)
@@ -36,12 +36,12 @@ func TestBitcoinCoreMainnetPath(t *testing.T) {
 	var want string
 	switch runtime.GOOS {
 	case "darwin":
-		want = filepath.Join(home(), "Library", "Application Support", "Bitcoin")
+		want = filepath.Join(home(), "Library", "Application Support", "Litecoin")
 	case "windows":
-		want = filepath.Join(home(), "AppData", "Roaming", "Bitcoin")
+		want = filepath.Join(home(), "AppData", "Roaming", "Litecoin")
 	default: // linux
-		// Dart L1503: BitcoinCore linux appdir is ~/ (home), so mainnet = ~/.bitcoin
-		want = filepath.Join(home(), ".bitcoin")
+		// Core linux appdir is ~/ (home), so mainnet = ~/.litecoin.
+		want = filepath.Join(home(), ".litecoin")
 	}
 	if p != want {
 		t.Errorf("BitcoinCore mainnet path = %q, want %q", p, want)
@@ -53,11 +53,11 @@ func TestBitcoinCoreForknetPath(t *testing.T) {
 	var want string
 	switch runtime.GOOS {
 	case "darwin":
-		want = filepath.Join(home(), "Library", "Application Support", "Drivechain")
+		want = filepath.Join(home(), "Library", "Application Support", "LitecoinSignet")
 	case "windows":
-		want = filepath.Join(home(), "AppData", "Roaming", "Drivechain")
+		want = filepath.Join(home(), "AppData", "Roaming", "LitecoinSignet")
 	default:
-		want = filepath.Join(home(), ".drivechain")
+		want = filepath.Join(home(), ".litecoin-signet")
 	}
 	if p != want {
 		t.Errorf("BitcoinCore forknet path = %q, want %q", p, want)

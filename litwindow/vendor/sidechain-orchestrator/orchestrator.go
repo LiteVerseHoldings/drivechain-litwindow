@@ -389,7 +389,7 @@ func (o *Orchestrator) StopAllMonitors() {
 //
 // Strategy:
 //  1. Check bitwindow's PID directory (the primary app may have written it)
-//  2. Check the native bitcoind.pid in Bitcoin Core's datadir
+//  2. Check the native Core daemon PID file in Litecoin Core's datadir
 //  3. Fall back to pgrep by binary name
 func (o *Orchestrator) discoverPid(cfg BinaryConfig) int {
 	// 1. Check bitwindow's PID directory
@@ -405,26 +405,27 @@ func (o *Orchestrator) discoverPid(cfg BinaryConfig) int {
 		}
 	}
 
-	// 2. For Bitcoin Core: check native bitcoind.pid in datadir
-	// Dart: BitcoinCorePidTracker watches {datadir}/{network}/bitcoind.pid
+	// 2. For Litecoin Core: check native litecoind.pid in datadir
+	// Dart: BitcoinCorePidTracker watches {datadir}/{network}/litecoind.pid
 	if cfg.Name == "bitcoind" && o.BitcoinConf != nil {
-		// Build path: {datadir}/{network-subdir}/bitcoind.pid
+		// Build path: {datadir}/{network-subdir}/{binary}.pid
 		dataDir := o.BitcoinConf.DetectedDataDir
 		if dataDir == "" {
 			dataDir = config.BitcoinCoreDirs.RootDirNetwork(o.BitcoinConf.Network)
 		}
 		networkSubdir := config.CoreSectionForNetwork(o.BitcoinConf.Network)
+		pidFilename := cfg.BinaryName + ".pid"
 		pidPath := ""
 		if networkSubdir == "main" {
-			pidPath = dataDir + "/bitcoind.pid"
+			pidPath = dataDir + "/" + pidFilename
 		} else {
-			pidPath = dataDir + "/" + networkSubdir + "/bitcoind.pid"
+			pidPath = dataDir + "/" + networkSubdir + "/" + pidFilename
 		}
 
 		if data, err := os.ReadFile(pidPath); err == nil {
 			if pid, err := strconv.Atoi(strings.TrimSpace(string(data))); err == nil && pid > 0 {
 				if isPidAlive(pid) {
-					o.log.Info().Str("binary", cfg.Name).Int("pid", pid).Str("path", pidPath).Msg("found PID from native bitcoind.pid")
+					o.log.Info().Str("binary", cfg.Name).Int("pid", pid).Str("path", pidPath).Msg("found PID from native Core pid file")
 					return pid
 				}
 			}

@@ -58,7 +58,7 @@ class BitcoinConfProvider extends ChangeNotifier {
 
   bool get isDemoMode => network == BitcoinNetwork.BITCOIN_NETWORK_MAINNET;
 
-  int rpcPort = 38332;
+  int rpcPort = 39332;
 
   BitcoinConfProvider._create(this.router);
 

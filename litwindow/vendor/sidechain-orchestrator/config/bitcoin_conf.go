@@ -10,7 +10,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const bitwindowBitcoinConfFilename = "bitwindow-bitcoin.conf"
+const bitwindowBitcoinConfFilename = "litwindow-litecoin.conf"
+const legacyBitwindowBitcoinConfFilename = "bitwindow-bitcoin.conf"
 
 // BitcoinConfManager manages Bitcoin Core configuration files.
 // Port of the data/config logic from sail_ui/lib/providers/bitcoin_conf_provider.dart.
@@ -80,7 +81,7 @@ func (m *BitcoinConfManager) LoadConfig(isFirst bool) error {
 	return nil
 }
 
-// GetConfFilePath returns the resolved -conf= path to pass to bitcoind.
+// GetConfFilePath returns the resolved -conf= path to pass to litecoind.
 // Mirrors the confFile() logic from binaries.dart.
 func (m *BitcoinConfManager) GetConfFilePath() string {
 	confInfo := m.getConfigFileInfo()
@@ -101,7 +102,7 @@ func (m *BitcoinConfManager) GetRPCPort() int {
 	return RPCPortForNetwork(m.Network)
 }
 
-// GetDefaultConfig generates the default bitcoin.conf content.
+// GetDefaultConfig generates the default litecoin.conf content.
 // Port of getDefaultConfig() from bitcoin_conf_provider.dart.
 //
 // One unified template across all networks: a common settings block (datadir,
@@ -152,7 +153,7 @@ fallbackfee=0.00021
 	return fmt.Sprintf(`%s%d
 
 # Generated code. Any changes to this file *will* get overwritten.
-# source: bitwindow bitcoin config settings
+# source: litwindow litecoin config settings
 
 # Common settings for all networks
 datadir=%s
@@ -169,7 +170,7 @@ zmqpubrawtx=tcp://127.0.0.1:29004
 rpcthreads=10
 rpcworkqueue=50
 rest=1
-uacomment=BitWindow-0.2
+uacomment=LitWindow-Litecoin-0.1
 chain=%s # current network
 
 # [Sections]
@@ -183,9 +184,6 @@ chain=%s # current network
 
 # Signet-specific settings
 [signet]
-addnode=172.105.148.135:38333
-signetblocktime=600
-signetchallenge=a91484fa7c2460891fe5212cb08432e21a4207909aa987
 acceptnonstdtxn=1
 fallbackfee=0.00021
 
@@ -275,8 +273,23 @@ func (m *BitcoinConfManager) loadOrCreateConfigContent() (string, error) {
 			if err := os.WriteFile(confPath, []byte(content), 0644); err != nil {
 				m.log.Error().Err(err).Msg("failed to write migrated config")
 			} else {
-				m.log.Info().Int("version", config.ConfigVersion).Msg("migrated bitwindow-bitcoin.conf")
+				m.log.Info().Int("version", config.ConfigVersion).Msg("migrated litwindow-litecoin.conf")
 			}
+		}
+		return content, nil
+	}
+
+	legacyConfPath := filepath.Join(m.BitwindowDir, legacyBitwindowBitcoinConfFilename)
+	if data, err := os.ReadFile(legacyConfPath); err == nil {
+		content := string(data)
+		config := ParseBitcoinConfig(content)
+		if RunBitcoinConfMigrations(config) {
+			content = config.Serialize()
+		}
+		if err := os.WriteFile(confPath, []byte(content), 0644); err != nil {
+			m.log.Warn().Err(err).Str("path", confPath).Msg("failed to migrate legacy bitcoin config filename")
+		} else {
+			m.log.Info().Str("from", legacyConfPath).Str("to", confPath).Msg("migrated legacy bitcoin config filename")
 		}
 		return content, nil
 	}
@@ -299,16 +312,16 @@ type configFileInfo struct {
 	path           string
 }
 
-// getConfigFileInfo checks for user's bitcoin.conf vs generated config.
+// getConfigFileInfo checks for user's litecoin.conf vs generated config.
 // Dart: _getConfigFileInfo (L529-544)
 func (m *BitcoinConfManager) getConfigFileInfo() configFileInfo {
 	// Dart: For mainnet, use standard Bitcoin datadir; otherwise use Drivechain datadir
 	confDir := BitcoinCoreDirs.RootDirNetwork(m.Network)
 
-	// Always check for bitcoin.conf first - user config takes priority
-	bitcoinConfPath := filepath.Join(confDir, "bitcoin.conf")
-	if _, err := os.Stat(bitcoinConfPath); err == nil {
-		return configFileInfo{hasPrivateConf: true, path: bitcoinConfPath}
+	// Always check for litecoin.conf first - user config takes priority
+	litecoinConfPath := filepath.Join(confDir, "litecoin.conf")
+	if _, err := os.Stat(litecoinConfPath); err == nil {
+		return configFileInfo{hasPrivateConf: true, path: litecoinConfPath}
 	}
 
 	// Use master config file in BitWindow directory (source of truth)

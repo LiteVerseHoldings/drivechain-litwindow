@@ -76,17 +76,19 @@ func SaveSettings(bitwindowDir string, s OrchestratorSettings) error {
 		}
 	}()
 
-	f, err := os.Open(tmp)
-	if err != nil {
-		return fmt.Errorf("reopen orchestrator settings tmp: %w", err)
-	}
-	syncErr := f.Sync()
-	closeErr := f.Close()
-	if syncErr != nil {
-		return fmt.Errorf("fsync orchestrator settings tmp: %w", syncErr)
-	}
-	if closeErr != nil {
-		return fmt.Errorf("close orchestrator settings tmp: %w", closeErr)
+	if runtime.GOOS != "windows" {
+		f, err := os.Open(tmp)
+		if err != nil {
+			return fmt.Errorf("reopen orchestrator settings tmp: %w", err)
+		}
+		syncErr := f.Sync()
+		closeErr := f.Close()
+		if syncErr != nil {
+			return fmt.Errorf("fsync orchestrator settings tmp: %w", syncErr)
+		}
+		if closeErr != nil {
+			return fmt.Errorf("close orchestrator settings tmp: %w", closeErr)
+		}
 	}
 
 	if err := os.Rename(tmp, path); err != nil {

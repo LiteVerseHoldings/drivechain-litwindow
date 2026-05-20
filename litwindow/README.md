@@ -1,6 +1,6 @@
-# BitWindow
+# LitWindow
 
-Frontend for interacting with a Drivechain-enabled layer 1 Bitcoin network.
+Frontend for interacting with a Litecoin layer 1 network and LiteVerse signet tooling.
 
 ## Prerequisites
 

@@ -1274,12 +1274,16 @@ func (h *WalletHandler) ListCoreVariants(ctx context.Context, req *connect.Reque
 		return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("orchestrator not configured"))
 	}
 	specs := h.orch.ListCoreVariants()
+	coreBinaryName := "litecoind"
+	if coreCfg, ok := h.orch.Configs()["bitcoind"]; ok && coreCfg.BinaryName != "" {
+		coreBinaryName = coreCfg.BinaryName
+	}
 	out := make([]*pb.CoreVariant, 0, len(specs))
 	for _, v := range specs {
 		out = append(out, &pb.CoreVariant{
 			Id:          v.ID,
 			DisplayName: coreVariantDisplayName(v.ID),
-			Installed:   orchestrator.CoreVariantInstalled(h.orch.DataDir, v, "bitcoind"),
+			Installed:   orchestrator.CoreVariantInstalled(h.orch.DataDir, v, coreBinaryName),
 		})
 	}
 	// Display order: Patched first (default), Core second, Knots third.
@@ -1351,8 +1355,10 @@ func (h *WalletHandler) SetTestSidechains(ctx context.Context, req *connect.Requ
 
 func coreVariantDisplayName(id string) string {
 	switch id {
+	case "local-signet":
+		return "Litecoin Signet"
 	case "core":
-		return "Bitcoin Core"
+		return "Litecoin Core"
 	case "patched":
 		return "Bitcoin Patched"
 	case "knots":
@@ -1367,12 +1373,14 @@ func coreVariantDisplayName(id string) string {
 // implicitly via the sort.Slice contract).
 func coreVariantOrder(id string) int {
 	switch id {
-	case "patched":
+	case "local-signet":
 		return 0
-	case "core":
+	case "patched":
 		return 1
-	case "knots":
+	case "core":
 		return 2
+	case "knots":
+		return 3
 	default:
 		return 99
 	}

@@ -167,9 +167,8 @@ func (v CoreVariantSpec) AvailableOn(network string) bool {
 }
 
 // DefaultCoreVariantID is the variant used when no settings file exists.
-// "patched" is the only variant available on every network (including
-// mainnet) so it's a safe default that won't get clamped to empty.
-const DefaultCoreVariantID = "patched"
+// LitWindow defaults to the locally-built Litecoin Core signet branch.
+const DefaultCoreVariantID = "local-signet"
 
 // BinDir returns the directory where binaries are stored.
 func BinDir(dataDir string) string {

@@ -139,7 +139,7 @@ func TestGetDefaultConfigMainnetMatchesEnforcerExpectations(t *testing.T) {
 		"\nzmqpubsequence=tcp://127.0.0.1:29000\n",
 		"\nrpcthreads=10\n",
 		"\nrpcworkqueue=50\n",
-		"\nuacomment=BitWindow-0.2\n",
+		"\nuacomment=LitWindow-Litecoin-0.1\n",
 	}
 	for _, line := range required {
 		if !strings.Contains(conf, line) {

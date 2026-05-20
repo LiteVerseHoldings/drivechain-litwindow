@@ -423,7 +423,7 @@ type noopBitcoinService struct {
 // bitcoind managed by this orchestrator. The proxy survives a not-yet-running
 // bitcoind via WithoutInitialConnectionCheck — btc-buf's rpcclient reconnects
 // once Core comes up.
-func startCoreProxy(ctx context.Context, orch *orchestrator.Orchestrator, log zerolog.Logger) (*coreproxy.Bitcoind, error) {
+func startCoreProxy(ctx context.Context, orch *orchestrator.Orchestrator, log zerolog.Logger) (corerpc.BitcoinServiceHandler, error) {
 	port := orch.BitcoinConf.GetRPCPort()
 	var user, password string
 	if orch.BitcoinConf.Config != nil {
@@ -440,9 +440,14 @@ func startCoreProxy(ctx context.Context, orch *orchestrator.Orchestrator, log ze
 	proxyLog := log.Level(zerolog.WarnLevel)
 	initCtx := proxyLog.WithContext(ctx)
 
-	return coreproxy.NewBitcoind(
+	proxy, err := coreproxy.NewBitcoind(
 		initCtx, host, user, password,
 		coreproxy.WithLogging(func(_ context.Context) *zerolog.Logger { return &proxyLog }),
 		coreproxy.WithoutInitialConnectionCheck(),
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	return newLitecoinCompatibleCoreProxy(initCtx, host, user, password, proxy)
 }

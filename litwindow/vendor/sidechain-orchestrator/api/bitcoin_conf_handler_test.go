@@ -3,6 +3,7 @@ package api
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -27,6 +28,9 @@ func TestValidateDirWritable(t *testing.T) {
 	})
 
 	t.Run("read-only directory fails", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("chmod read-only probe is not reliable on Windows")
+		}
 		dir := t.TempDir()
 		if err := os.Chmod(dir, 0o555); err != nil {
 			t.Skip("cannot change permissions")

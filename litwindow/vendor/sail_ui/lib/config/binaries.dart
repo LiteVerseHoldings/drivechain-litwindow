@@ -15,7 +15,7 @@ import 'package:sail_ui/sail_ui.dart';
 // home of the now-deleted Dart enum) keep working without an extra import.
 export 'package:sail_ui/gen/orchestrator/v1/orchestrator.pbenum.dart' show BinaryType;
 
-const kBitwindowBitcoinConfFilename = 'bitwindow-bitcoin.conf';
+const kBitwindowBitcoinConfFilename = 'litwindow-litecoin.conf';
 
 Never _unsupportedBinaryType(BinaryType t) => throw StateError('unsupported BinaryType: $t');
 
@@ -174,10 +174,12 @@ abstract class Binary {
     switch (type) {
       case BinaryType.BINARY_TYPE_BITCOIND:
         await _deleteFilesInDir(dir, [
-          'bitcoin-cli',
-          'bitcoin-util',
-          'bitcoin-cli.exe',
-          'bitcoin-util.exe',
+          'litecoin-cli',
+          'litecoin-tx',
+          'litecoin-wallet',
+          'litecoin-cli.exe',
+          'litecoin-tx.exe',
+          'litecoin-wallet.exe',
           'qt', // a directory!
         ]);
 
@@ -350,8 +352,8 @@ abstract class Binary {
           '.lock',
           'anchors.dat',
           'banlist.json',
-          'bitcoin.pid',
-          'bitcoind.pid',
+          'litecoin.pid',
+          'litecoind.pid',
           'blocks',
           'chainstate',
           'debug.log',
@@ -422,8 +424,7 @@ abstract class Binary {
         paths.addAll(
           await _getExistingFilesInDir(rootDirNetwork(network), [
             kBitwindowBitcoinConfFilename,
-            'bitcoin.conf',
-            'drivechain.conf',
+            'litecoin.conf',
           ]),
         );
         return paths;
@@ -655,10 +656,12 @@ abstract class Binary {
       case BinaryType.BINARY_TYPE_BITCOIND:
         paths.addAll(
           await _getExistingFilesInDir(dir, [
-            'bitcoin-cli',
-            'bitcoin-util',
-            'bitcoin-cli.exe',
-            'bitcoin-util.exe',
+            'litecoin-cli',
+            'litecoin-tx',
+            'litecoin-wallet',
+            'litecoin-cli.exe',
+            'litecoin-tx.exe',
+            'litecoin-wallet.exe',
             'qt',
           ]),
         );
@@ -994,10 +997,10 @@ class _CacheEntry {
 
 class BitcoinCore extends Binary {
   BitcoinCore({
-    super.name = 'Bitcoin Core',
-    super.version = '30.2',
-    super.description = 'Bitcoin Core',
-    super.repoUrl = 'https://github.com/bitcoin/bitcoin',
+    super.name = 'Litecoin Core',
+    super.version = '0.21.5.5-signet',
+    super.description = 'Litecoin Core with LiteVerse signet support',
+    super.repoUrl = 'https://github.com/litecoin-project/litecoin',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     int? port,
@@ -1010,14 +1013,14 @@ class BitcoinCore extends Binary {
              DirectoryConfig(
                binary: {
                  ...allNetworks({
-                   OS.linux: '.drivechain',
-                   OS.macos: 'Drivechain',
-                   OS.windows: 'Drivechain',
+                   OS.linux: '.litecoin-signet',
+                   OS.macos: 'LitecoinSignet',
+                   OS.windows: 'LitecoinSignet',
                  }),
                  BitcoinNetwork.BITCOIN_NETWORK_MAINNET: {
-                   OS.linux: '.bitcoin',
-                   OS.macos: 'Bitcoin',
-                   OS.windows: 'Bitcoin',
+                   OS.linux: '.litecoin',
+                   OS.macos: 'Litecoin',
+                   OS.windows: 'Litecoin',
                  },
                },
                flutterFrontend: {
@@ -1032,29 +1035,16 @@ class BitcoinCore extends Binary {
                downloadConfig: DownloadConfig(
                  baseUrls: {
                    ...allNetworksUrl(
-                     'https://bitcoincore.org/bin/bitcoin-core-30.2/',
+                     'https://download.litecoin.org/litecoin-0.21.5.5/',
                    ),
-                   BitcoinNetwork.BITCOIN_NETWORK_FORKNET: 'https://releases.drivechain.info/',
                  },
-                 binary: 'bitcoind',
+                 binary: 'litecoind',
                  files: {
                    ...allNetworks({
-                     OS.linux: 'bitcoin-30.2-x86_64-linux-gnu.tar.gz',
-                     OS.macos: 'bitcoin-30.2-x86_64-apple-darwin.tar.gz',
-                     OS.windows: 'bitcoin-30.2-win64.zip',
+                     OS.linux: 'linux/litecoin-0.21.5.5-x86_64-linux-gnu.tar.gz',
+                     OS.macos: '',
+                     OS.windows: 'win/litecoin-0.21.5.5-win64.zip',
                    }),
-                   BitcoinNetwork.BITCOIN_NETWORK_FORKNET: {
-                     OS.linux: 'L1-bitcoin-patched-forknet-x86_64-unknown-linux-gnu.zip',
-                     OS.macos: 'L1-bitcoin-patched-forknet-x86_64-apple-darwin.zip',
-                     OS.windows: 'L1-bitcoin-patched-forknet-x86_64-w64-msvc.zip',
-                   },
-                 },
-                 extractSubfolder: {
-                   BitcoinNetwork.BITCOIN_NETWORK_FORKNET: {
-                     OS.linux: 'forknet',
-                     OS.macos: 'forknet',
-                     OS.windows: 'forknet',
-                   },
                  },
                ),
                remoteTimestamp: null,
@@ -1062,8 +1052,8 @@ class BitcoinCore extends Binary {
                binaryPath: null,
                updateable: false,
              ),
-         // Port is determined by network
-         // mainnet: 8332, testnet: 18332, signet: 38332, regtest: 18443
+         // Port is determined by network.
+         // mainnet: 9332, testnet: 19332, signet: 39332, regtest: 19443
          port: port ?? 0, // 0 means use network default
        );
 
@@ -1606,15 +1596,15 @@ extension BinaryPaths on Binary {
     return switch (type) {
       BinaryType.BINARY_TYPE_BITCOIND => () {
         final network = GetIt.I.get<BitcoinConfProvider>().network;
-        // For mainnet, use standard Bitcoin datadir; otherwise use Drivechain datadir (respects custom datadir)
+        // For mainnet, use the standard Litecoin datadir; otherwise use LitWindow's Litecoin datadir.
         final confDir = network == BitcoinNetwork.BITCOIN_NETWORK_MAINNET
-            ? path.join(BitcoinCore().appdir(), 'Bitcoin')
+            ? path.join(BitcoinCore().appdir(), 'Litecoin')
             : BitcoinCore().datadir();
 
-        // Always check for bitcoin.conf first - user config takes priority
-        final bitcoinConfPath = path.join(confDir, 'bitcoin.conf');
-        if (File(bitcoinConfPath).existsSync()) {
-          return bitcoinConfPath;
+        // Always check for litecoin.conf first - user config takes priority
+        final litecoinConfPath = path.join(confDir, 'litecoin.conf');
+        if (File(litecoinConfPath).existsSync()) {
+          return litecoinConfPath;
         }
 
         // Use master config file in BitWindow directory (source of truth)
