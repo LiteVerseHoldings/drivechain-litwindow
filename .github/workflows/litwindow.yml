@@ -1,0 +1,45 @@
+name: LitWindow CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  flutter:
+    name: Flutter analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.6"
+          channel: stable
+
+      - name: Install Flutter dependencies
+        working-directory: litwindow
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: litwindow
+        run: flutter analyze
+
+      - name: Test
+        working-directory: litwindow
+        run: flutter test
+
+  server:
+    name: Go server tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: litwindow/server/go.mod
+
+      - name: Test
+        working-directory: litwindow/server
+        run: go test ./...

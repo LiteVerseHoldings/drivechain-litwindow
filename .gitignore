@@ -57,8 +57,8 @@ mycert.pfx
 mycert.pem
 ed25519
 ed25519.priv
-vendor/
+/vendor/
 
 # Build artifacts
-sidechain-orchestrator/orchestratorctl
-sidechain-orchestrator/orchestratord
+litwindow/vendor/sidechain-orchestrator/orchestratorctl
+litwindow/vendor/sidechain-orchestrator/orchestratord

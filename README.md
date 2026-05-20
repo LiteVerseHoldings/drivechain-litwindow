@@ -1,19 +1,7 @@
-A collection of various Drivechain-related applications.
+# LitWindow
 
-- [Bitwindow frontend](bitwindow/README.md)
+LitWindow is the Drivechain frontend previously maintained as BitWindow.
 
-- [Truthcoin](truthcoin/README.md)
-
-- [Photon](photon/README.md)
-
-- [BitAssets](bitassets/README.md)
-
-- [BitNames](bitnames/README.md)
-
-- [Thunder](thunder/README.md)
-
-- [ZSide](zside/README.md)
-
-- [Coinshift](coinshift/README.md)
-
-- [Faucet](faucet/README.md)
+The application lives in [`litwindow/`](litwindow/README.md). Shared code that
+LitWindow still needs is kept under `litwindow/vendor/` so this repository can be
+worked on as a LitWindow-only checkout.
