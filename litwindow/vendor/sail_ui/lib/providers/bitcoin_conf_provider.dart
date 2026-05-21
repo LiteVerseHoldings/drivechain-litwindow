@@ -21,7 +21,7 @@ class MissingDatadirException implements Exception {
   String toString() => 'datadir not configured for $network';
 }
 
-/// Bitcoin Core configuration provider backed by orchestrator's BitcoinConfService.
+/// Litecoin Core configuration provider backed by orchestrator's BitcoinConfService.
 /// All reads/writes go through the backend — no local file access.
 class BitcoinConfProvider extends ChangeNotifier {
   final Logger log = GetIt.I.get<Logger>();
@@ -42,7 +42,7 @@ class BitcoinConfProvider extends ChangeNotifier {
 
   /// Returns the datadir recorded for [n]'s datadir group, or null if
   /// none is configured. Forknet has its own group; everything else shares
-  /// the default group (Bitcoin Core auto-partitions via chain subdirs).
+  /// the default group (Litecoin Core auto-partitions via chain subdirs).
   String? dataDirFor(BitcoinNetwork n) {
     if (n == BitcoinNetwork.BITCOIN_NETWORK_FORKNET) {
       return forknetDatadir;

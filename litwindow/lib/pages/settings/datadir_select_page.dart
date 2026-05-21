@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-/// Full-page picker for the Bitcoin Core data directory. Pushed when a
+/// Full-page picker for the Litecoin Core data directory. Pushed when a
 /// network switch needs a datadir but none is configured.
 class DataDirSelectPage extends StatefulWidget {
   final BitcoinNetwork? network;
@@ -43,18 +43,18 @@ class _DataDirSelectPageState extends State<DataDirSelectPage> {
   String _subtitle() {
     switch (widget.network) {
       case BitcoinNetwork.BITCOIN_NETWORK_MAINNET:
-        return 'Mainnet needs a Bitcoin Core data directory with the blockchain data (2.5TB+). Pick a directory that contains the blocks folder.';
+        return 'Mainnet needs a Litecoin Core data directory with the blockchain data (2.5TB+). Pick a directory that contains the blocks folder.';
       case BitcoinNetwork.BITCOIN_NETWORK_FORKNET:
         return 'Forknet needs a data directory to store the chain. Pick an empty directory or one already used for forknet.';
       default:
-        return 'Pick a directory for Bitcoin Core to store its data.';
+        return 'Pick a directory for Litecoin Core to store its data.';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = SailTheme.of(context);
-    final networkName = widget.network?.toDisplayName() ?? 'Bitcoin Core';
+    final networkName = widget.network?.toDisplayName() ?? 'Litecoin Core';
 
     return Scaffold(
       backgroundColor: theme.colors.background,

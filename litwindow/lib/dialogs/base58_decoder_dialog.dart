@@ -296,7 +296,7 @@ class _DecodeTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 SailText.secondary12(
-                  'Enter a Base58Check encoded string (Bitcoin address or WIF private key)',
+                  'Enter a Base58Check encoded string (Litecoin address or WIF private key)',
                 ),
                 const SizedBox(height: 16),
                 TextField(

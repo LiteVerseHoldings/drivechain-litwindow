@@ -73,7 +73,7 @@ func TestDeriveAndCheckAddressesIntegration(t *testing.T) {
 	// The actual implementation uses first 8 chars of wallet ID
 	expectedCoreWalletName := "wallet_80CEBA21"
 
-	// Mock all Bitcoin Core wallet management calls
+	// Mock all Litecoin Core wallet management calls
 	mockBitcoind.EXPECT().
 		ListWallets(gomock.Any(), gomock.Any()).
 		Return(&connect.Response[corepb.ListWalletsResponse]{

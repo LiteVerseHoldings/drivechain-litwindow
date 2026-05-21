@@ -93,7 +93,7 @@ class _WithdrawalFormState extends State<_WithdrawalForm> {
         spacing: SailStyleValues.padding16,
         children: [
           SailTextField(
-            label: 'Withdraw amount (BTC)',
+            label: 'Withdraw amount (LTC)',
             controller: amountController,
             hintText: 'How much do you want to withdraw?',
             textFieldType: TextFieldType.bitcoin,

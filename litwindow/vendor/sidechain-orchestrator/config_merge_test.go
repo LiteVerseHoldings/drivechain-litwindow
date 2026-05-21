@@ -20,7 +20,7 @@ func TestMergeWithEmbedded_FillsInMissingFields(t *testing.T) {
 		"version": 1,
 		"binaries": {
 			"bitcoincore": {
-				"name": "Bitcoin Core",
+				"name": "Litecoin Core",
 				"port": 0,
 				"hashes": {"macos": {"sha256": "user-customized"}}
 			}

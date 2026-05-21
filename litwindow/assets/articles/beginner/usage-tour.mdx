@@ -15,9 +15,9 @@ Here I present a visual guide. It assumes only very basic computer knowledge.
 
 In this guide, we will:
 
-- Send BTC from the mainchain to a sidechain.
-- Use the sidechain (send BTC from ourselves to ourselves).
-- Send the sidechain-BTC back to the mainchain.
+- Send LTC from the mainchain to a sidechain.
+- Use the sidechain (send LTC from ourselves to ourselves).
+- Send the sidechain-LTC back to the mainchain.
 
 Follow along, and expand each image if you get lost. Or [download all the images](/media/dc-release-images.zip) at once and scroll through them as an album.
 
@@ -52,7 +52,7 @@ sidechain-5-0.16.99-i686-pc-linux-gnu.tar.gz
 5D1E458318FA4C799B81CE92313E7F3E162367AB1F45A77B673A73781711E24E
 ```
 
-### B. Drivenet-BTC vs Drivenet-Blank
+### B. Drivenet-LTC vs Drivenet-Blank
 
 If you want to join the same network as CryptAxe and I, you'll need to download our UTXO set (2.0 GiB).
 
@@ -66,11 +66,11 @@ loaded_coins.dat
 0a5ddf44ec2620d7103111da3b7412cbe3f3385edd1a9c9f0eb9292f01e4840f
 ```
 
-It's the July 30th UTXO set from the BTC network at [block 534,444](https://www.blockchain.com/btc/block/00000000000000000012ff6b14f186d7b7c41d8e585a40d79f1164dcd92f8b36). Uncompressed, it is 4.8 GB.
+It's the July 30th UTXO set from the LTC network at [block 534,444](https://www.blockchain.com/ltc/block/00000000000000000012ff6b14f186d7b7c41d8e585a40d79f1164dcd92f8b36). Uncompressed, it is 4.8 GB.
 
 Alternatively, you can just join the Blank Network. It doesn't load any UTXOs, so it is is more like a testnet or fresh new altcoin.
 
-In the near future, we plan to release a "Drivenet-BCH" that has the Bitcoin Cash UTXO set.
+In the near future, we plan to release a "Drivenet-BCH" that has the Litecoin Cash UTXO set.
 
 ## 3. The Step-by-Step Tour
 
@@ -106,7 +106,7 @@ While we are waiting for that, we can at least start up the sidechain.
 
 ### C. Starting up 'Sidechain One'
 
-To start up 'Sidechain One', go into the sidechain folder ("/bitcoin-0.16.99/" in these images, in later versions the folder is named "/sidechain-N-0.16.99/"). And enter the /bin/ directory.
+To start up 'Sidechain One', go into the sidechain folder ("/litecoin-0.16.99/" in these images, in later versions the folder is named "/sidechain-N-0.16.99/"). And enter the /bin/ directory.
 
 Open a second terminal, the same way as before.
 
@@ -114,32 +114,32 @@ Run './sidechain-qt'.
 
 It's online!
 
-### D. Sending BTC Main-to-Side
+### D. Sending LTC Main-to-Side
 
 Below, I have arranged the mainchain on the left (in blue) and the sidechain "Sidechain One" on the right (in red).
 
-#### i. Getting drivenet-BTC
+#### i. Getting drivenet-LTC
 
-First, in order to send some BTC, you'll need some BTC to send!
+First, in order to send some LTC, you'll need some LTC to send!
 
 You can get some by:
 
 - Using our [Faucet for free coins](https://drivenet-faucet.herokuapp.com).
 - Mining some ( Help > Debug window > Console > "setgenerate true").
 - Asking me for some [in our new telegram group](https://t.me/joinchat/C-POgRCPpB_-ki-csUGE9g).
-- NOT RECOMMENDED claiming a UTXO that you own on the BTC network by importing your private key ( Help > Debug window > Console > "import <KEY>") NOT RECOMMENDED
+- NOT RECOMMENDED claiming a UTXO that you own on the LTC network by importing your private key ( Help > Debug window > Console > "import <KEY>") NOT RECOMMENDED
 
-The last method is not recommended, because *you should never type your private key into software, unless you've checked that software very carefully*. Which, at this point, you have not. Furthermore, if you misunderstand how we have implemented replay protection, you may destroy your regular (non-drivenet) BTC funds.
+The last method is not recommended, because *you should never type your private key into software, unless you've checked that software very carefully*. Which, at this point, you have not. Furthermore, if you misunderstand how we have implemented replay protection, you may destroy your regular (non-drivenet) LTC funds.
 
-Don't worry about asking me for BTC. For testing purposes, CryptAxe and I modded the UTXO set to give ourselves 100,000 each. We're loaded! Plus these are useless testnet coins.
+Don't worry about asking me for LTC. For testing purposes, CryptAxe and I modded the UTXO set to give ourselves 100,000 each. We're loaded! Plus these are useless testnet coins.
 
 Mining should be easy, at first. Although if you do mine, you may be unwilling or unable [to set up blind merged mining](https://github.com/DriveNetTESTDRIVE/docs/blob/master/BMM.md) and so your presence may be somewhat chaotic for other users.
 
 But that's what testing is for, I suppose!
 
-In this guide, I will assume you have asked for some BTC. You'd do this, of course, by using the "Receive" tab > "Request Payment" > "Copy Address".
+In this guide, I will assume you have asked for some LTC. You'd do this, of course, by using the "Receive" tab > "Request Payment" > "Copy Address".
 
-And then I assume you've received 21 BTC.
+And then I assume you've received 21 LTC.
 
 #### ii. Depositing to a Sidechain
 
@@ -155,25 +155,25 @@ Enter an amount, and click Deposit.
 
 Go back to the sidechain "Overview" tab, to wait for your money to arrive.
 
-It should show up, as "Immature". Since the coins were created out of nothing, the software classifies these BTC as "mined". We are going to change that to something drivechain-specific soon.
+It should show up, as "Immature". Since the coins were created out of nothing, the software classifies these LTC as "mined". We are going to change that to something drivechain-specific soon.
 
 ### E. Using the Sidechain
 
-We've now got 15.9999,0880 BTC on "Sidechain One".
+We've now got 15.9999,0880 LTC on "Sidechain One".
 
 Let's send it to ourselves, to simulate the act of paying a merchant for a good or service.
 
 Get a new address.
 
-Send 11 BTC (of our 15.9999,0880) to it.
+Send 11 LTC (of our 15.9999,0880) to it.
 
 Click "Send", our balance decreases very slightly, to 15.9998,6380, as we paid a transaction fee. See the bottom right corner.
 
-Using the "Coin Control" > "Inputs" button, we can see the new 11 BTC UTXO that we paid to the "merchant" (aka ourselves).
+Using the "Coin Control" > "Inputs" button, we can see the new 11 LTC UTXO that we paid to the "merchant" (aka ourselves).
 
-### F. Sending BTC Side-to-Main
+### F. Sending LTC Side-to-Main
 
-Now, let us imagine that our hypothetical merchant wants to move his BTC from the sidechain back to the mainchain.
+Now, let us imagine that our hypothetical merchant wants to move his LTC from the sidechain back to the mainchain.
 
 On the sidechain, click on the "Parent Chain" tab…
 
@@ -209,7 +209,7 @@ You can see it has moved from 2 up to 7 here.
 
 Now you'll need to waste some serious time. So hit up Reddit and see if there's anything good (or whatever).
 
-Looks like I've been reading bitcoin-dev long enough, we now have 143 ACKs. The "Approved" field has switched to "true". This WT^ container transaction can now be included in a mainchain block.
+Looks like I've been reading litecoin-dev long enough, we now have 143 ACKs. The "Approved" field has switched to "true". This WT^ container transaction can now be included in a mainchain block.
 
 My mainchain balance has increased by about 10. It rose from ~5 to about ~15.
 
@@ -217,9 +217,9 @@ Let's investigate more carefully using the "Coin Control" > "Inputs" window.
 
 We have two UTXOs:
 
-- 5 BTC – Change from when we sent 16 of our 21 starting BTC to the sidechain.
-- 9.98996640 BTC – the 10 BTC side-to-main transfer, minus various sidechain and mainchain fees.
+- 5 LTC – Change from when we sent 16 of our 21 starting LTC to the sidechain.
+- 9.98996640 LTC – the 10 LTC side-to-main transfer, minus various sidechain and mainchain fees.
 
 ## Conclusion
 
-The tour is complete! We demonstrated sending BTC to a different piece of software. Then we sent that BTC back to the mainchain.
+The tour is complete! We demonstrated sending LTC to a different piece of software. Then we sent that LTC back to the mainchain.

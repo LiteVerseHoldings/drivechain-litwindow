@@ -147,8 +147,8 @@ class _InformationTabState extends State<InformationTab> {
               details: {
                 'Transaction Count': _mempoolInfo?.size.toString() ?? 'Loading...',
                 'Memory Usage': '${_mempoolInfo?.usage ?? 0} bytes',
-                'Total Fee': '${_mempoolInfo?.totalFee ?? 0} BTC',
-                'Min Relay Fee': '${_mempoolInfo?.minRelayTxFee ?? 0} BTC',
+                'Total Fee': '${_mempoolInfo?.totalFee ?? 0} LTC',
+                'Min Relay Fee': '${_mempoolInfo?.minRelayTxFee ?? 0} LTC',
               },
             ),
           ],
@@ -233,7 +233,7 @@ class _NetworkTabState extends State<NetworkTab> {
     if (_isLoading) {
       return const SailCard(
         title: 'Network Statistics',
-        subtitle: 'Bitcoin network and node statistics',
+        subtitle: 'Litecoin network and node statistics',
         child: Center(child: CircularProgressIndicator()),
       );
     }
@@ -241,7 +241,7 @@ class _NetworkTabState extends State<NetworkTab> {
     if (_networkStats == null) {
       return SailCard(
         title: 'Network Statistics',
-        subtitle: 'Bitcoin network and node statistics',
+        subtitle: 'Litecoin network and node statistics',
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -260,7 +260,7 @@ class _NetworkTabState extends State<NetworkTab> {
 
     return SailCard(
       title: 'Network Statistics',
-      subtitle: 'Bitcoin network and node statistics',
+      subtitle: 'Litecoin network and node statistics',
       child: SingleChildScrollView(
         child: SailColumn(
           spacing: SailStyleValues.padding25,
@@ -302,7 +302,7 @@ class _NetworkTabState extends State<NetworkTab> {
             ),
             if (_networkStats!.hasBitcoindBandwidth())
               InfoSection(
-                title: 'Bitcoind Process (PID ${_networkStats!.bitcoindBandwidth.pid})',
+                title: 'Litecoind Process (PID ${_networkStats!.bitcoindBandwidth.pid})',
                 details: {
                   'RX Rate': '${(_networkStats!.bitcoindBandwidth.rxBytesPerSec / 1024).toStringAsFixed(2)} KB/s',
                   'TX Rate': '${(_networkStats!.bitcoindBandwidth.txBytesPerSec / 1024).toStringAsFixed(2)} KB/s',

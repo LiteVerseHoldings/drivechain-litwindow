@@ -477,7 +477,7 @@ func statusToProto(s orchestrator.BinaryStatus) *pb.BinaryStatusMsg {
 	}
 }
 
-// ─── Bitcoin Core typed extensions ─────────────────────────────────────────
+// ─── Litecoin Core typed extensions ─────────────────────────────────────────
 //
 // Direct JSON-RPC to bitcoind for methods btc-buf doesn't type
 // (getmempoolinfo, finalizepsbt, descriptorprocesspsbt, …). Credentials come

@@ -45,7 +45,7 @@ void main() {
     if (!foundElement) {
       final fallbackFinders = [
         find.text('BitWindow'),
-        find.textContaining('Bitcoin'),
+        find.textContaining('Litecoin'),
         find.textContaining('Balance'),
         find.textContaining('Address'),
       ];

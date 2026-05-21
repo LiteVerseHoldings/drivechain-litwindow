@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-/// Merkle Tree Visualizer Dialog - Calculate and visualize Bitcoin Merkle trees
+/// Merkle Tree Visualizer Dialog - Calculate and visualize Litecoin Merkle trees
 ///
 /// Qt equivalent: merkletreedialog.ui (size: 1213x780)
 /// Tabs: Merkle Tree, Witness Merkle Tree, Help
@@ -589,7 +589,7 @@ class _HelpTab extends StatelessWidget {
             SelectableText(
               'Computers sometimes have a crazy way of reading from their computer memory, '
               'related to something called "endianness".\n\n'
-              'For whatever reason, Bitcoin merkle root hash calculations run like this:\n\n'
+              'For whatever reason, Litecoin merkle root hash calculations run like this:\n\n'
               'Hashes:          ... | hash01 hash02 | ...\n'
               'Reversed Bytes:  ... | 01shha 02shha | ...\n'
               'Next Level:      ... | Sha256D("01shha02shha") | ...\n\n'
@@ -610,7 +610,7 @@ class _HelpTab extends StatelessWidget {
             SailText.primary15('Further Reading', bold: true),
             const SizedBox(height: 12),
             SelectableText(
-              '• https://en.bitcoinwiki.org/wiki/Merkle_tree\n'
+              '• https://en.litecoinwiki.org/wiki/Merkle_tree\n'
               '• https://www.investopedia.com/terms/m/merkle-tree.asp\n'
               '• https://www.geeksforgeeks.org/introduction-to-merkle-tree/',
               style: TextStyle(

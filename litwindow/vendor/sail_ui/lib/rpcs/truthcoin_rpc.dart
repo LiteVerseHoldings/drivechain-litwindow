@@ -19,7 +19,7 @@ import 'package:sail_ui/widgets/components/core_transaction.dart';
 abstract class TruthcoinRPC extends SidechainRPC {
   TruthcoinRPC({required super.binaryType});
 
-  /// Get total sidechain wealth in BTC
+  /// Get total sidechain wealth in coin units.
   Future<double> getSidechainWealth();
 
   /// Create a deposit transaction

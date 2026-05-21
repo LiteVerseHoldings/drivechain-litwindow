@@ -2,7 +2,7 @@
 // bitcoinCore wallets: per-payment address derivation and notification
 // transaction assembly. ECDH blinding requires the private key of the
 // designated input, which the orchestrator derives locally from the wallet
-// seed (stored in WalletData.Master.SeedHex) — Bitcoin Core never reveals it.
+// seed (stored in WalletData.Master.SeedHex) — Litecoin Core never reveals it.
 package bip47send
 
 import (

@@ -15,7 +15,7 @@ Cheque _mkCheck({required int id, String address = 'tb1qabc'}) => Cheque(
 void main() {
   group('applyFundingResponse — polling state machine', () {
     test('empty fundedTxids leaves the list untouched', () {
-      // First poll after the user taps Fund Check: bitcoind hasn't seen the
+      // First poll after the user taps Fund Check: litecoind hasn't seen the
       // broadcast yet, so the server returns an empty response. The local
       // state must NOT be wiped — that would lose the existing cheque row.
       final checks = [_mkCheck(id: 1)];
@@ -29,7 +29,7 @@ void main() {
     });
 
     test('non-empty fundedTxids flips the cheque to funded and persists txid', () {
-      // Second poll: bitcoind now sees the broadcast and the server reports
+      // Second poll: litecoind now sees the broadcast and the server reports
       // the funding. The local row must be replaced so the UI flips from
       // "Unfunded" to "Funded" and `View Details` shows the txid.
       final checks = [_mkCheck(id: 1)];

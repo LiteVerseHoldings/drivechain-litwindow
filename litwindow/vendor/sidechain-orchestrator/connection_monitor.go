@@ -104,7 +104,7 @@ type StartupLogLine struct {
 	Message   string
 }
 
-// Bitcoin Core startup messages that indicate "still booting, not an error".
+// Litecoin Core startup messages that indicate "still booting, not an error".
 // Dart: mainchain_rpc.dart L243-264
 var bitcoindStartupPatterns = []string{
 	"Loading block index",

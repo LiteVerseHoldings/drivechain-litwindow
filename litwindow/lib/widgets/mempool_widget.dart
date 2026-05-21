@@ -100,7 +100,7 @@ class MempoolStatsRow extends StatelessWidget {
         ),
         _StatCard(
           label: 'Total Fees',
-          value: '${(stats.totalFees / 100000000).toStringAsFixed(4)} BTC',
+          value: '${(stats.totalFees / 100000000).toStringAsFixed(4)} LTC',
           icon: SailSVGAsset.iconWallet,
           theme: theme,
         ),

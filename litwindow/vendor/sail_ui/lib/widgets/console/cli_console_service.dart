@@ -9,7 +9,7 @@ import 'package:sail_ui/sail_ui.dart';
 
 /// Console view backed by the on-disk CLI binaries (bitcoin-cli, …) plus
 /// a synthetic enforcer-cli powered by the bitwindowd JSON bridge. The real
-/// `bitcoin-cli` is shipped alongside `bitcoind` in the Bitcoin Core archive
+/// `bitcoin-cli` is shipped alongside `bitcoind` in the Litecoin Core archive
 /// and discovered on disk; the enforcer ships no CLI of its own, hence the
 /// JSON-bridge wrapper.
 class CLIConsoleView extends StatefulWidget {
@@ -49,7 +49,7 @@ class CLIConsole {
   static const _commandTimeout = Duration(minutes: 5);
 
   /// Real CLI binaries we discover on disk and exec. Every binary downloaded
-  /// by the orchestrator lands in LitWindow's `assets/bin/` (the Bitcoin Core
+  /// by the orchestrator lands in LitWindow's `assets/bin/` (the Litecoin Core
   /// archive ships `bitcoin-cli`, `bitcoin-util`, etc. alongside `bitcoind`).
   /// The enforcer is intentionally absent — it has no native CLI; we expose
   /// it via the synthetic [_buildEnforcerService] instead.

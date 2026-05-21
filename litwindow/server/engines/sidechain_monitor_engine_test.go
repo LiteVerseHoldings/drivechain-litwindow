@@ -37,7 +37,7 @@ func TestSidechainMonitorEngine_RegisterPendingFastWithdrawal(t *testing.T) {
 		Hash:           "test-hash-123456789abcdef",
 		Sidechain:      "thunder",
 		ServerAddress:  "thunder1test456",
-		ExpectedAmount: 105000, // 1.05 BTC in sats
+		ExpectedAmount: 105000, // 1.05 LTC in sats
 		ServerURL:      "https://fw1.drivechain.info",
 		CreatedAt:      time.Now(),
 	}
@@ -126,7 +126,7 @@ func TestSidechainMonitorEngine_StoreWithdrawal(t *testing.T) {
 	withdrawal := DetectedWithdrawal{
 		Txid:        "detected-txid-123",
 		Sidechain:   "thunder",
-		Amount:      100000000, // 1 BTC in sats
+		Amount:      100000000, // 1 LTC in sats
 		Destination: "bc1qtest789",
 		DetectedAt:  time.Now(),
 	}

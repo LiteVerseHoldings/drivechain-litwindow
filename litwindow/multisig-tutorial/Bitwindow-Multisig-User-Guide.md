@@ -2,7 +2,7 @@
 
 ## Overview
 
-Bitwindow's Multisig Tool enables secure Bitcoin multisignature wallet
+Bitwindow's Multisig Tool enables secure Litecoin multisignature wallet
 management with an intuitive interface. This guide walks you through each modal
 and workflow step-by-step.
 
@@ -72,7 +72,7 @@ Group"**.
 
 The system will:
 
-- Generate Bitcoin descriptors
+- Generate Litecoin descriptors
 - Create watch-only wallet
 - Save group configuration
 - Display in your groups list
@@ -117,7 +117,7 @@ The modal displays:
 **Funding Process:**
 
 1. Copy the address
-2. Send Bitcoin from your regular wallet or exchange
+2. Send Litecoin from your regular wallet or exchange
 3. Wait for confirmation (1-6 confirmations recommended)
 4. Balance updates automatically in the groups table
 
@@ -132,8 +132,8 @@ Click **"Create Transaction"** to open the transaction creation modal.
 Configure transaction details:
 
 - **Group Selection**: Choose funded group (if multiple available)
-- **Destination Address**: Recipient Bitcoin address
-- **Amount**: BTC amount to send (or click "MAX" for maximum)
+- **Destination Address**: Recipient Litecoin address
+- **Amount**: LTC amount to send (or click "MAX" for maximum)
 - **Fee**: Automatically calculated and deducted from amount
 
 Click **"Create Transaction"** to generate the initial PSBT. The transaction
@@ -253,7 +253,7 @@ Transactions progress through these states:
 - **Awaiting Signed PSBTs**: Some signatures collected but not enough
 - **Ready to Combine**: Sufficient signatures collected, needs PSBT combining
 - **Ready for Broadcast**: PSBT finalized and ready to send
-- **Broadcasted**: Sent to Bitcoin network, awaiting confirmations
+- **Broadcasted**: Sent to Litecoin network, awaiting confirmations
 - **Confirmed**: Has at least 1 confirmation in blockchain
 - **Completed**: Fully processed transaction
 - **Voided**: Transaction cancelled or failed

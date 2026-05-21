@@ -9,7 +9,7 @@ service SidechainConfService {
   // Write sidechain configuration content.
   rpc WriteSidechainConfig(WriteSidechainConfigRequest) returns (WriteSidechainConfigResponse);
 
-  // Sync network from Bitcoin Core config.
+  // Sync network from Litecoin Core config.
   rpc SyncSidechainNetworkFromBitcoinConf(SyncSidechainNetworkFromBitcoinConfRequest) returns (SyncSidechainNetworkFromBitcoinConfResponse);
 }
 

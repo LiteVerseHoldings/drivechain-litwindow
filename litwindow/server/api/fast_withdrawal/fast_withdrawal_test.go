@@ -82,7 +82,7 @@ func TestInitiateSidechainWithdrawal_Success(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, "bc1qtest123", req["withdrawal_destination"])
-		assert.Equal(t, 0.001, req["withdrawal_amount"]) // 100000 sats = 0.001 BTC
+		assert.Equal(t, 0.001, req["withdrawal_amount"]) // 100000 sats = 0.001 LTC
 		assert.Equal(t, "thunder", req["layer_2_chain_name"])
 
 		// Return mock success response

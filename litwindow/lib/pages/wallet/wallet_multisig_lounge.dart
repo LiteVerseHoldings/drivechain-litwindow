@@ -365,7 +365,7 @@ class _MultisigGroupsTableState extends State<MultisigGroupsTable> {
             SailTableHeaderCell(name: 'Name', onSort: () => onSort('name')),
             const SailTableHeaderCell(name: 'ID'),
             SailTableHeaderCell(
-              name: 'Balance (BTC)',
+              name: 'Balance (LTC)',
               onSort: () => onSort('balance'),
             ),
             SailTableHeaderCell(name: 'UTXOs', onSort: () => onSort('utxos')),
@@ -432,7 +432,7 @@ class _MultisigGroupsTableState extends State<MultisigGroupsTable> {
         SailTableHeaderCell(name: 'Name', onSort: () => onSort('name')),
         const SailTableHeaderCell(name: 'ID'),
         SailTableHeaderCell(
-          name: 'Balance (BTC)',
+          name: 'Balance (LTC)',
           onSort: () => onSort('balance'),
         ),
         SailTableHeaderCell(name: 'UTXOs', onSort: () => onSort('utxos')),
@@ -656,7 +656,7 @@ class _MultisigTransactionsTableState extends State<MultisigTransactionsTable> {
             SailTableHeaderCell(name: 'Group', onSort: () => onSort('group')),
             const SailTableHeaderCell(name: 'MuSIG ID'),
             SailTableHeaderCell(
-              name: 'Amount (BTC)',
+              name: 'Amount (LTC)',
               onSort: () => onSort('amount'),
             ),
             SailTableHeaderCell(
@@ -734,7 +734,7 @@ class _MultisigTransactionsTableState extends State<MultisigTransactionsTable> {
         SailTableHeaderCell(name: 'Group', onSort: () => onSort('group')),
         const SailTableHeaderCell(name: 'MuSIG ID'),
         SailTableHeaderCell(
-          name: 'Amount (BTC)',
+          name: 'Amount (LTC)',
           onSort: () => onSort('amount'),
         ),
         SailTableHeaderCell(
@@ -1262,11 +1262,11 @@ class MultisigLoungeViewModel extends BaseViewModel {
                   DetailRow(label: 'Group:', value: group.name),
                   DetailRow(
                     label: 'Amount:',
-                    value: '${transaction.amount.toStringAsFixed(8)} BTC',
+                    value: '${transaction.amount.toStringAsFixed(8)} LTC',
                   ),
                   DetailRow(
                     label: 'Fee:',
-                    value: '${transaction.fee.toStringAsFixed(8)} BTC',
+                    value: '${transaction.fee.toStringAsFixed(8)} LTC',
                   ),
                   DetailRow(label: 'Destination:', value: transaction.destination),
                   DetailRow(

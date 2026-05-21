@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Descriptor checksum implementation based on Bitcoin Core's algorithm
+// Descriptor checksum implementation based on Litecoin Core's algorithm
 // https://github.com/bitcoin/bitcoin/blob/master/src/script/descriptor.cpp
 
 const inputCharset = "0123456789()[],'/*abcdefgh@:$%{}IJKLMNOPQRSTUVWXYZ&+-.;<=>?!^_|~ijklmnopqrstuvwxyzABCDEFGH`#\"\\ "
@@ -34,7 +34,7 @@ func polymod(c uint64, val uint64) uint64 {
 }
 
 // DescriptorChecksum computes the checksum for a descriptor string
-// Implementation based on Bitcoin Core's algorithm:
+// Implementation based on Litecoin Core's algorithm:
 // https://github.com/bitcoin/bitcoin/blob/master/src/script/descriptor.cpp
 func DescriptorChecksum(desc string) (string, error) {
 	c := uint64(1)

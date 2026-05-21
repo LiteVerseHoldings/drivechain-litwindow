@@ -3,16 +3,16 @@ syntax = "proto3";
 package orchestrator.v1;
 
 service BitcoinConfService {
-  // Get current Bitcoin Core configuration state.
+  // Get current Litecoin Core configuration state.
   rpc GetBitcoinConfig(GetBitcoinConfigRequest) returns (GetBitcoinConfigResponse);
 
-  // Set the Bitcoin Core network (signet, mainnet, forknet, testnet, regtest).
+  // Set the Litecoin Core network (signet, mainnet, forknet, testnet, regtest).
   rpc SetBitcoinConfigNetwork(SetBitcoinConfigNetworkRequest) returns (SetBitcoinConfigNetworkResponse);
 
-  // Set the Bitcoin Core datadir for a specific network.
+  // Set the Litecoin Core datadir for a specific network.
   rpc SetBitcoinConfigDataDir(SetBitcoinConfigDataDirRequest) returns (SetBitcoinConfigDataDirResponse);
 
-  // Write raw Bitcoin Core configuration content.
+  // Write raw Litecoin Core configuration content.
   rpc WriteBitcoinConfig(WriteBitcoinConfigRequest) returns (WriteBitcoinConfigResponse);
 }
 

@@ -38,7 +38,7 @@ type Service struct {
 	// Dart: restartEnforcer (WalletWriterProvider L115) — called after wallet generation
 	OnWalletGenerated func()
 	// Called when a non-enforcer (bitcoinCore) wallet is created.
-	// The orchestrator wires this to create the wallet in Bitcoin Core via RPC.
+	// The orchestrator wires this to create the wallet in Litecoin Core via RPC.
 	// Receives walletName and the master seedHex for BIP84 descriptor derivation.
 	OnCreateCoreWallet func(walletName string, seedHex string) error
 	// Dart: deleteAllWallets stops all binaries before wiping (L560-575)
@@ -46,7 +46,7 @@ type Service struct {
 	// Dart: deleteAllWallets deletes per-binary wallet paths (L600-608)
 	// Returns list of wallet file paths for all managed binaries
 	GetBinaryWalletPaths func() []string
-	// Dart: _deleteCoreMultisigWallets (L534) — path to Bitcoin Core datadir
+	// Dart: _deleteCoreMultisigWallets (L534) — path to Litecoin Core datadir
 	CoreDataDir string
 
 	// File watcher
@@ -503,7 +503,7 @@ func (s *Service) LoadMasterStarter() map[string]interface{} {
 	}
 }
 
-// DeleteCoreMultisigWallets deletes multisig_* directories from Bitcoin Core datadir.
+// DeleteCoreMultisigWallets deletes multisig_* directories from Litecoin Core datadir.
 // Dart: WalletWriterProvider._deleteCoreMultisigWallets (L533-552)
 // DeleteCoreMultisigWallets is retained for backwards compatibility but is
 // now a soft-delete: each `multisig_*` directory is moved to
@@ -541,7 +541,7 @@ func (s *Service) softDeleteCoreMultisigWallets() {
 	DeleteCoreMultisigWallets(s.CoreDataDir, s.log)
 }
 
-// CreateBitcoinCoreWallet creates a new Bitcoin Core wallet (subsequent, not first enforcer).
+// CreateBitcoinCoreWallet creates a new Litecoin Core wallet (subsequent, not first enforcer).
 // Dart: WalletWriterProvider.createBitcoinCoreWallet (L134-153)
 func (s *Service) CreateBitcoinCoreWallet(name string, gradientJSON json.RawMessage, slots []SidechainSlot) error {
 	wallet, err := s.GenerateWallet(name, "", "", slots)
@@ -634,7 +634,7 @@ func (s *Service) GenerateWallet(name, customMnemonic, passphrase string, slots 
 		Msg("generating wallet")
 
 	// Determine wallet type: first wallet is enforcer, subsequent are bitcoinCore.
-	// Constraint: AT MOST 1 enforcer wallet. All extra wallets go through Bitcoin Core.
+	// Constraint: AT MOST 1 enforcer wallet. All extra wallets go through Litecoin Core.
 	walletType := "bitcoinCore"
 	if len(s.wallets) == 0 {
 		walletType = "enforcer"
@@ -687,7 +687,7 @@ func (s *Service) GenerateWallet(name, customMnemonic, passphrase string, slots 
 		Str("file", s.walletFilePath()).
 		Msg("wallet generated and saved successfully")
 
-	// For bitcoinCore wallets, create the wallet in Bitcoin Core via RPC
+	// For bitcoinCore wallets, create the wallet in Litecoin Core via RPC
 	if walletType == "bitcoinCore" && s.OnCreateCoreWallet != nil {
 		if err := s.OnCreateCoreWallet(name, wallet.Master.SeedHex); err != nil {
 			// Roll back: remove the wallet we just saved since Core creation failed
@@ -700,9 +700,9 @@ func (s *Service) GenerateWallet(name, customMnemonic, passphrase string, slots 
 				}
 			}
 			_ = s.saveWalletFile()
-			return nil, fmt.Errorf("create wallet in Bitcoin Core: %w", err)
+			return nil, fmt.Errorf("create wallet in Litecoin Core: %w", err)
 		}
-		s.log.Info().Str("name", name).Msg("created wallet in Bitcoin Core")
+		s.log.Info().Str("name", name).Msg("created wallet in Litecoin Core")
 	}
 
 	// Dart L88-89: restart enforcer to pick up the new wallet

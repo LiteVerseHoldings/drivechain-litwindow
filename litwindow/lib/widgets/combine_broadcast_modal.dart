@@ -302,7 +302,7 @@ class _CombineBroadcastModalState extends State<CombineBroadcastModal> {
                                           children: [
                                             SailText.primary13('${tx.id} (${group.name})'),
                                             SailText.secondary12(
-                                              '${tx.signatureCount}/${group.m} signatures • ${tx.amount.toStringAsFixed(8)} BTC',
+                                              '${tx.signatureCount}/${group.m} signatures • ${tx.amount.toStringAsFixed(8)} LTC',
                                             ),
                                             SailText.secondary12('To: ${tx.destination}'),
                                           ],
@@ -375,7 +375,7 @@ class _TransactionDetails extends StatelessWidget {
           SailText.primary12('Transaction Details:'),
           SailText.secondary12('ID: ${transaction.id}'),
           SailText.secondary12('Group: ${group.name} (${group.m} of ${group.n})'),
-          SailText.secondary12('Amount: ${transaction.amount.toStringAsFixed(8)} BTC'),
+          SailText.secondary12('Amount: ${transaction.amount.toStringAsFixed(8)} LTC'),
           SailText.secondary12('Destination: ${transaction.destination}'),
           SailText.secondary12('Signatures: ${transaction.signatureCount}/${group.m} required'),
           SailText.secondary12('Status: ${transaction.status.displayName}'),

@@ -30,7 +30,7 @@ const (
 type BinaryConfig struct {
 	// Core identity — Dart: Binary constructor params (L61-72)
 	Name        string // Dart: Binary.name (internal identifier, e.g. "bitcoind", "thunder")
-	DisplayName string // Dart: Binary.name in subclass (e.g. "Bitcoin Core (Patched)")
+	DisplayName string // Dart: Binary.name in subclass (e.g. "Litecoin Core (Patched)")
 	BinaryName  string // Dart: Binary.binary (executable name, from metadata.downloadConfig.binary)
 	Version     string // Dart: Binary.version
 	Description string // Dart: Binary.description
@@ -138,7 +138,7 @@ func (c BinaryConfig) AltBaseURL(network string) string {
 	return ""
 }
 
-// CoreVariantSpec describes a single Bitcoin Core build variant.
+// CoreVariantSpec describes a single Litecoin Core build variant.
 type CoreVariantSpec struct {
 	ID                string
 	Subfolder         string
@@ -175,7 +175,7 @@ func BinDir(dataDir string) string {
 	return filepath.Join(dataDir, "assets", "bin")
 }
 
-// CoreBinaryPath returns the on-disk path for the active Bitcoin Core
+// CoreBinaryPath returns the on-disk path for the active Litecoin Core
 // daemon. All variants share a single `bin/bitcoind` location — switching
 // variants re-downloads and overwrites whatever was there.
 func CoreBinaryPath(dataDir string, _ CoreVariantSpec, binaryName string) string {

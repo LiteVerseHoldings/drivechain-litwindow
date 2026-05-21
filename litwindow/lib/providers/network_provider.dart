@@ -42,7 +42,7 @@ class NetworkProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       final errStr = e.toString();
-      // Bitcoin Core warmup ("-28: Loading block index") and connection-refused
+      // Litecoin Core warmup ("-28: Loading block index") and connection-refused
       // chatter during boot are expected — silently swallow them.
       if (!isExpectedBootError(e) && !_isBitcoinCoreStartupError(errStr)) {
         log.e('fetch network stats: $e');
@@ -101,7 +101,7 @@ class NetworkProvider extends ChangeNotifier {
     return bandwidthHistory.last.txBytesPerSec;
   }
 
-  /// Check if error is a Bitcoin Core startup message (e.g., "-28: Loading block index")
+  /// Check if error is a Litecoin Core startup message (e.g., "-28: Loading block index")
   bool _isBitcoinCoreStartupError(String error) {
     const startupPatterns = [
       '-28:',

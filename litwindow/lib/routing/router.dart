@@ -118,7 +118,7 @@ class AppRouter extends RootStackRouter {
       page: UnlockWalletRoute.page,
     ),
     AutoRoute(
-      path: '/bitcoin-config',
+      path: '/litecoin-config',
       page: BitcoinConfEditorRoute.page,
     ),
     AutoRoute(

@@ -493,7 +493,7 @@ func (s *Server) GetSyncInfo(ctx context.Context, req *connect.Request[emptypb.E
 
 	tip, err := bitcoind.GetBlockchainInfo(ctx, connect.NewRequest(&corepb.GetBlockchainInfoRequest{}))
 	if err != nil {
-		// Bitcoin Core returns -28 from every RPC while it's still loading the
+		// Litecoin Core returns -28 from every RPC while it's still loading the
 		// block index, verifying blocks, or rescanning the wallet. Treat that
 		// as "still booting" and surface the message so the UI can render
 		// "Verifying blocks…" instead of a misleading "0 / 0 blocks" state.
@@ -892,10 +892,10 @@ func (s *Server) getCoinbaseAddress(ctx context.Context) (string, error) {
 
 	case engines.WalletTypeBitcoinCore:
 
-		// Get address from Bitcoin Core wallet
+		// Get address from Litecoin Core wallet
 		walletName, err := s.walletEngine.GetBitcoinCoreWalletName(ctx, activeWallet.ID)
 		if err != nil {
-			return "", fmt.Errorf("get bitcoin core wallet name: %w", err)
+			return "", fmt.Errorf("get Litecoin Core wallet name: %w", err)
 		}
 		addr, err := bitcoind.GetNewAddress(ctx, connect.NewRequest(&corepb.GetNewAddressRequest{
 			Wallet: walletName,
@@ -930,7 +930,7 @@ func (s *Server) MineBlocks(ctx context.Context, req *connect.Request[emptypb.Em
 		return err
 	}
 
-	// Verify we're actually able to connect to Bitcoin Core
+	// Verify we're actually able to connect to Litecoin Core
 	info, err := bitcoind.GetBlockchainInfo(
 		ctx, connect.NewRequest(&corepb.GetBlockchainInfoRequest{}),
 	)
@@ -1431,7 +1431,7 @@ func (s *Server) checkEnforcerUTXO(ctx context.Context, txid string, vout uint32
 	return false, nil
 }
 
-// checkBitcoinCoreUTXO checks if a UTXO exists in a Bitcoin Core wallet
+// checkBitcoinCoreUTXO checks if a UTXO exists in a Litecoin Core wallet
 func (s *Server) checkBitcoinCoreUTXO(ctx context.Context, walletID string, txid string, vout uint32) (bool, error) {
 	bitcoind, err := s.bitcoind.Get(ctx)
 	if err != nil {
@@ -1447,7 +1447,7 @@ func (s *Server) checkBitcoinCoreUTXO(ctx context.Context, walletID string, txid
 		Wallet: walletName,
 	}))
 	if err != nil {
-		return false, fmt.Errorf("list bitcoin core utxos: %w", err)
+		return false, fmt.Errorf("list Litecoin Core utxos: %w", err)
 	}
 
 	for _, utxo := range utxos.Msg.Unspent {

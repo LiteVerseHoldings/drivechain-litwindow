@@ -38,7 +38,7 @@ service WalletManagerService {
   // Seed access for cheque engine
   rpc GetWalletSeed(GetWalletSeedRequest) returns (GetWalletSeedResponse);
 
-  // Bitcoin Core variant selection (untouched / touched / knots).
+  // Litecoin Core variant selection (untouched / touched / knots).
   rpc ListCoreVariants(ListCoreVariantsRequest) returns (ListCoreVariantsResponse);
   rpc GetCoreVariant(GetCoreVariantRequest) returns (GetCoreVariantResponse);
   rpc SetCoreVariant(SetCoreVariantRequest) returns (SetCoreVariantResponse);
@@ -201,7 +201,7 @@ message CreateBitcoinCoreWalletRequest {
 }
 
 message CreateBitcoinCoreWalletResponse {
-  string core_wallet_name = 1;  // Bitcoin Core wallet name
+  string core_wallet_name = 1;  // Litecoin Core wallet name
 }
 
 message EnsureCoreWalletsRequest {}

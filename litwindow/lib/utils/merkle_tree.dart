@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
-/// Merkle Tree calculation utilities for Bitcoin blocks
+/// Merkle Tree calculation utilities for Litecoin blocks
 class MerkleTree {
   /// Calculate Merkle tree from transaction IDs
   /// Returns a list of levels, where each level contains hashes

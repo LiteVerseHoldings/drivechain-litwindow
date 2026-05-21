@@ -565,7 +565,7 @@ abstract class Binary {
     return paths;
   }
 
-  /// Get Bitcoin Core wallet paths (wallets directory and named wallets)
+  /// Get Litecoin Core wallet paths (wallets directory and named wallets)
   Future<List<String>> _getBitcoinCoreWalletPaths(String networkDir) async {
     final paths = <String>[];
     final walletsDir = Directory(path.join(networkDir, 'wallets'));

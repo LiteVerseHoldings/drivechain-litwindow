@@ -43,7 +43,7 @@ class PSBTCoordinatorModal extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SailText.primary13(
-                    'Available Balance: ${group!.balance.toStringAsFixed(8)} BTC (${group!.utxos} UTXOs)',
+                    'Available Balance: ${group!.balance.toStringAsFixed(8)} LTC (${group!.utxos} UTXOs)',
                   ),
                   SailTextField(
                     label: 'Destination Address',
@@ -52,7 +52,7 @@ class PSBTCoordinatorModal extends StatelessWidget {
                     size: TextFieldSize.small,
                   ),
                   NumericField(
-                    label: 'Amount (BTC)',
+                    label: 'Amount (LTC)',
                     controller: viewModel.amountController,
                     suffixWidget: SailButton(
                       label: 'MAX',
@@ -140,7 +140,7 @@ class _GroupSelectionModal extends StatelessWidget {
                                 children: [
                                   SailText.primary13(group.name),
                                   SailText.secondary12('${group.m} of ${group.n} multisig'),
-                                  SailText.secondary12('Balance: ${group.balance.toStringAsFixed(8)} BTC'),
+                                  SailText.secondary12('Balance: ${group.balance.toStringAsFixed(8)} LTC'),
                                   SailText.secondary12('UTXOs: ${group.utxos}'),
                                 ],
                               ),

@@ -48,7 +48,7 @@ class _CreateCheckPageState extends State<CreateCheckPage> {
                   SailTextField(
                     controller: _amountController,
                     hintText: '0.00000000',
-                    suffix: 'BTC',
+                    suffix: 'LTC',
                     textFieldType: TextFieldType.bitcoin,
                   ),
                   SailRow(

@@ -131,7 +131,7 @@ func startBitwindowd(t *testing.T, binPath string, node *orchestratorOnlyNode, a
 	require.NoError(t, err)
 
 	// bitcoincore.* flags were removed when bitwindowd started sourcing
-	// Bitcoin Core config from the orchestrator (see commit caff0cb0). The
+	// Litecoin Core config from the orchestrator (see commit caff0cb0). The
 	// orchestrator owns bitcoin.conf; bitwindowd looks it up via the
 	// orchestrator gRPC connection.
 	cmd := exec.Command(

@@ -50,7 +50,7 @@ func TestPreferenceLess_KnotsAlwaysLast(t *testing.T) {
 }
 
 // TestEmbeddedConfig_SignetFallbackPicksPatched closes the loop end-to-end:
-// parse the embedded chains_config.json, filter Bitcoin Core variants for
+// parse the embedded chains_config.json, filter Litecoin Core variants for
 // signet, sort with the preference rule, and assert the result is the
 // drivechain-patched variant — not knots. If a future config edit drops
 // the patched variant or removes signet from its available_networks, this
@@ -69,7 +69,7 @@ func TestEmbeddedConfig_SignetFallbackPicksPatched(t *testing.T) {
 		}
 	}
 	if core == nil {
-		t.Fatal("no Bitcoin Core binary in embedded config")
+		t.Fatal("no Litecoin Core binary in embedded config")
 	}
 
 	available := FilterVariantsForNetwork(core.Variants, "signet")

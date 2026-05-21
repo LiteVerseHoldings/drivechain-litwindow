@@ -43,7 +43,7 @@ class InsufficientFundsException implements Exception {
   String toString() => message;
 }
 
-/// Coin selection algorithm for building Bitcoin transactions
+/// Coin selection algorithm for building Litecoin transactions
 class CoinSelector {
   // P2WPKH input ~68 vbytes, output ~31 vbytes, overhead ~10 vbytes
   static const int inputVbytes = 68;

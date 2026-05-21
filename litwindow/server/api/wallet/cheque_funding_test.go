@@ -103,7 +103,7 @@ func TestCheckChequeFunding_DetectsUnconfirmedTx(t *testing.T) {
 			Txid:          fundingTxid,
 			Vout:          0,
 			Address:       chequeAddr,
-			Amount:        1.0, // 1 BTC
+			Amount:        1.0, // 1 LTC
 			Confirmations: 0,   // unconfirmed!
 		},
 	})
@@ -283,7 +283,7 @@ func TestCheckChequeFunding_PartialFunding(t *testing.T) {
 			Msg: &bitcoindv1alpha.ListWalletsResponse{Wallets: []string{"cheque_watch"}},
 		}, nil).AnyTimes()
 
-	// UTXO with only 0.5 BTC but cheque expects 1 BTC
+	// UTXO with only 0.5 LTC but cheque expects 1 LTC
 	expectChequeListUnspent(mockBitcoind, chequeAddr, []*bitcoindv1alpha.UnspentOutput{
 		{
 			Txid:          "partial0partial0partial0partial0partial0partial0partial0partial0",
@@ -298,7 +298,7 @@ func TestCheckChequeFunding_PartialFunding(t *testing.T) {
 		apitests.API(t, db, apitests.WithBitcoind(mockBitcoind)),
 	)
 
-	// Cheque expects 1 BTC
+	// Cheque expects 1 LTC
 	chequeID, err := cheques.Create(context.Background(), db, testWalletID, 0, 100_000_000, chequeAddr)
 	require.NoError(t, err)
 

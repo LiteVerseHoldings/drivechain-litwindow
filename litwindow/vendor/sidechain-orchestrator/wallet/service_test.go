@@ -346,7 +346,7 @@ func TestServiceWalletJSONFormat(t *testing.T) {
 	assert.NotEmpty(t, wallet.Master.BIP39ChecksumHex)
 	assert.Equal(t, "Master", wallet.Master.Name)
 	assert.NotEmpty(t, wallet.L1.Mnemonic)
-	assert.Equal(t, "Bitcoin Core (Patched)", wallet.L1.Name)
+	assert.Equal(t, "Litecoin Core (Patched)", wallet.L1.Name)
 	assert.Len(t, wallet.Sidechains, 2)
 	assert.Equal(t, "enforcer", wallet.WalletType)
 	assert.NotEmpty(t, wallet.ID)

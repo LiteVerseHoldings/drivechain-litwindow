@@ -7,7 +7,7 @@ import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-/// Paper Wallet Dialog - Generate offline Bitcoin addresses with QR codes
+/// Paper Wallet Dialog - Generate offline Litecoin addresses with QR codes
 ///
 /// Qt equivalent: paperwalletdialog.ui (very minimal in mainchain-deprecated)
 /// Size from Qt: 1847x931 (but we'll make it more reasonable)
@@ -68,7 +68,7 @@ class _PaperWalletDialogState extends State<PaperWalletDialog> {
               children: [
                 // Title
                 pw.Text(
-                  'BITCOIN PAPER WALLET',
+                  'LITECOIN PAPER WALLET',
                   style: pw.TextStyle(
                     fontSize: 32,
                     fontWeight: pw.FontWeight.bold,
@@ -107,7 +107,7 @@ class _PaperWalletDialogState extends State<PaperWalletDialog> {
                               ),
                               pw.SizedBox(height: 5),
                               pw.Text(
-                                'Public Bitcoin Address',
+                                'Public Litecoin Address',
                                 style: const pw.TextStyle(fontSize: 14),
                               ),
                               pw.SizedBox(height: 20),
@@ -131,7 +131,7 @@ class _PaperWalletDialogState extends State<PaperWalletDialog> {
                               ),
                               pw.SizedBox(height: 15),
                               pw.Text(
-                                'Share this address to receive Bitcoin',
+                                'Share this address to receive Litecoin',
                                 style: const pw.TextStyle(fontSize: 10),
                                 textAlign: pw.TextAlign.center,
                               ),
@@ -192,7 +192,7 @@ class _PaperWalletDialogState extends State<PaperWalletDialog> {
                                   borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
                                 ),
                                 child: pw.Text(
-                                  'KEEP SECRET: Anyone with this private key can spend your Bitcoin',
+                                  'KEEP SECRET: Anyone with this private key can spend your Litecoin',
                                   style: pw.TextStyle(
                                     fontSize: 10,
                                     fontWeight: pw.FontWeight.bold,
@@ -233,7 +233,7 @@ class _PaperWalletDialogState extends State<PaperWalletDialog> {
 
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'bitcoin_paper_wallet_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      name: 'litecoin_paper_wallet_${DateTime.now().millisecondsSinceEpoch}.pdf',
     );
   }
 
@@ -430,7 +430,7 @@ class _AddressPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SailText.secondary12(
-            'Public Bitcoin Address',
+            'Public Litecoin Address',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -479,7 +479,7 @@ class _AddressPanel extends StatelessWidget {
 
           // Instructions
           SailText.secondary12(
-            'Share this address to receive Bitcoin',
+            'Share this address to receive Litecoin',
             textAlign: TextAlign.center,
             color: theme.colors.textSecondary,
           ),
@@ -609,7 +609,7 @@ class _PrivateKeyPanel extends StatelessWidget {
               border: Border.all(color: theme.colors.error),
             ),
             child: SailText.secondary12(
-              'KEEP SECRET: Anyone with this private key can spend your Bitcoin',
+              'KEEP SECRET: Anyone with this private key can spend your Litecoin',
               color: theme.colors.error,
               textAlign: TextAlign.center,
             ),

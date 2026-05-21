@@ -29,7 +29,7 @@ class HomepageWidgetCatalog {
     'fireplace_stats': HomepageWidgetInfo(
       id: 'fireplace_stats',
       name: 'Dashboard Stats',
-      description: 'Bitcoin price and network statistics',
+      description: 'Litecoin price and network statistics',
       size: WidgetSize.full,
       icon: SailSVGAsset.iconSuccess,
       builder: (_) => const FireplaceStats(),
@@ -381,8 +381,8 @@ class RecentActionsViewModel extends BaseViewModel {
 
   String _getValueForAction(dynamic action) {
     return switch (action.actionType) {
-      'deposit' => '+ ${_formatBTC(action.amountSatoshi)} BTC',
-      'withdrawal' => '- ${_formatBTC(action.amountSatoshi)} BTC',
+      'deposit' => '+ ${_formatBTC(action.amountSatoshi)} LTC',
+      'withdrawal' => '- ${_formatBTC(action.amountSatoshi)} LTC',
       'withdrawal_ack' => '${_formatNumber(action.ackCount)} / ${_formatNumber(action.ackTotal)} acks',
       'sidechain_proposal' => '${action.ackCount}/${action.ackTotal} acks',
       'sidechain_ack' => action.extraInfo,

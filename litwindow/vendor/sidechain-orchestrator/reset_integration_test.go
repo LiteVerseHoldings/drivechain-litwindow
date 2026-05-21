@@ -46,11 +46,11 @@ func appRoot(home string) string {
 	}
 }
 
-// linuxHome returns the literal home dir for Bitcoin Core, which Dart
+// linuxHome returns the literal home dir for Litecoin Core, which Dart
 // and the Go port treat as special on Linux (no .local/share prefix).
 func linuxHome(home string) string { return home }
 
-// bitcoindRoot returns the Bitcoin Core datadir root under the
+// bitcoindRoot returns the Litecoin Core datadir root under the
 // redirected home, matching RootDirNetwork on non-mainnet.
 func bitcoindRoot(home string) string {
 	if runtime.GOOS == "linux" {

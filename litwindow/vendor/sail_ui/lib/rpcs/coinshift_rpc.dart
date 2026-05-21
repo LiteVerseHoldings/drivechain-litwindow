@@ -19,7 +19,7 @@ import 'package:sail_ui/widgets/components/core_transaction.dart';
 abstract class CoinShiftRPC extends SidechainRPC {
   CoinShiftRPC({required super.binaryType});
 
-  /// Get total sidechain wealth in BTC
+  /// Get total sidechain wealth in coin units.
   Future<double> getSidechainWealth();
 
   /// Create a deposit transaction
@@ -465,7 +465,7 @@ enum ParentChainType {
   ;
 
   String get value => switch (this) {
-    ParentChainType.btc => 'BTC',
+    ParentChainType.btc => 'LTC',
     ParentChainType.bch => 'BCH',
     ParentChainType.ltc => 'LTC',
     ParentChainType.signet => 'Signet',

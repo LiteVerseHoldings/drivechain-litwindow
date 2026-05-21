@@ -363,7 +363,7 @@ func isBitcoinCoreStartupError(errMsg string) bool {
 		return true
 	}
 	for _, p := range []string{
-		"unable to connect to Bitcoin Core",
+		"unable to connect to Litecoin Core",
 		"does not accept connections",
 		"connection refused",
 	} {

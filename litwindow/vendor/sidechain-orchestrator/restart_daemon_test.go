@@ -20,7 +20,7 @@ func TestRestartDaemon_UnknownBinary(t *testing.T) {
 
 // TestRestartDaemon_EnforcerLeavesBitcoindMonitorUntouched is the regression
 // guard for the "restart enforcer surfaces 'bitcoind is already running' on
-// Bitcoin Core's card" bug.
+// Litecoin Core's card" bug.
 //
 // Before the fix, every restart went through StartWithL1's full L1 chain.
 // If coreMon briefly reported not connected (transient RPC blip after a
@@ -28,7 +28,7 @@ func TestRestartDaemon_UnknownBinary(t *testing.T) {
 // process.Start("bitcoind", ...). With pm.processes already holding bitcoind,
 // that returned "bitcoind is already running" — failBoot then surfaced the
 // error on the bitcoind monitor as a phantom connection error visible on
-// Bitcoin Core's card, even though the user had only clicked Restart on
+// Litecoin Core's card, even though the user had only clicked Restart on
 // the enforcer.
 //
 // With the dedicated RestartDaemon path, restarting "enforcer" must never
@@ -66,7 +66,7 @@ func TestRestartDaemon_EnforcerLeavesBitcoindMonitorUntouched(t *testing.T) {
 	}
 
 	// The phantom error string from process.go's "%s is already running"
-	// must never reach Bitcoin Core's monitor on a sibling-daemon restart.
+	// must never reach Litecoin Core's monitor on a sibling-daemon restart.
 	got := coreMon.ConnectionError()
 	if strings.Contains(got, "already running") {
 		t.Errorf("bitcoind monitor.ConnectionError = %q after RestartDaemon(\"enforcer\"); restart enforcer must not surface 'already running' phantom errors on bitcoind", got)

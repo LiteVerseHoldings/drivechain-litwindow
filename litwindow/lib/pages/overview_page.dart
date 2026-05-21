@@ -742,7 +742,7 @@ class NewGraffitiViewModel extends BaseViewModel {
       final address = (await _orchestratorWallet.getNewAddress(walletId)).address;
       final txid = (await _orchestratorWallet.sendTransaction(
         walletId: walletId,
-        destinations: {address: 10000}, // 0.0001 BTC
+        destinations: {address: 10000}, // 0.0001 LTC
         opReturnMessage: messageController.text,
         feeRateSatPerVbyte: 1,
       )).txid;

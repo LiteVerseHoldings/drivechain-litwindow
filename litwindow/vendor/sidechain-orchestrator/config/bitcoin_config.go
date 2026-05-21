@@ -18,7 +18,7 @@ const bitcoinConfVersionCommentPrefix = "# bitwindow-bitcoin-conf-version="
 // authoritative for the orchestrator on the next group swap.
 const datadirSlotCommentPrefix = "# bitwindow-datadir-"
 
-// BitcoinConfig represents a parsed Bitcoin Core configuration file.
+// BitcoinConfig represents a parsed Litecoin Core configuration file.
 //
 // Order matters: the conf editor and the user expect the on-disk order to be
 // preserved across read/write round-trips. Go maps don't preserve insertion

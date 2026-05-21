@@ -694,10 +694,10 @@ class _HashCalculatorState extends State<HashCalculator> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SailText.primary13(
-                  "SHA256D: 256 bit output from Bitcoin's SHA-256D [sha256(sha256())] hash function. Outputs in Little-Endian byte order.",
+                  "SHA256D: 256 bit output from Litecoin's SHA-256D [sha256(sha256())] hash function. Outputs in Little-Endian byte order.",
                 ),
                 SailText.primary13(
-                  "Hash160: 160 bit output from Bitcoin's Hash160 [RIPEMD160(sha256())] hash function. Outputs in Little-Endian byte order.",
+                  "Hash160: 160 bit output from Litecoin's Hash160 [RIPEMD160(sha256())] hash function. Outputs in Little-Endian byte order.",
                 ),
                 SailText.primary13(
                   'RIPEMD160: 160 bit RIPE Message Digest.',

@@ -288,7 +288,7 @@ class BlockExplorerViewModel extends BaseViewModel {
         req.hash = query;
       }
       final block = await orchestrator.bitcoind.getBlock(req);
-      // the bitcoind rpc `getblock` returns a slightly
+      // the litecoind rpc `getblock` returns a slightly
       // different data model than the bitwindowd rpc `listblocks`
       final converted = Block(
         hash: block.hash,

@@ -29,7 +29,7 @@ message ParseBitcoinURIRequest {
 
 message ParseBitcoinURIResponse {
   string address = 1;
-  double amount = 2;          // Amount in BTC (optional)
+  double amount = 2;          // Amount in LTC (optional)
   string label = 3;           // Label (optional)
   string message = 4;         // Message (optional)
   map<string, string> extra_params = 5;  // Any additional parameters

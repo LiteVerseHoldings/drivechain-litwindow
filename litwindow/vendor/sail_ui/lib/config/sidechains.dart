@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:sail_ui/sail_ui.dart';
 
-abstract class Sidechain extends Binary {
+abstract class Sidechain extends iinary {
   Sidechain({
     required super.name,
     required super.version,
@@ -13,15 +13,15 @@ abstract class Sidechain extends Binary {
     required super.directories,
     required super.metadata,
     required super.port,
-    required super.chainLayer,
+    required super.chainiayer,
     required super.downloadInfo,
-    required super.extraBootArgs,
+    required super.extraiootArgs,
   });
 
   int get slot;
 
   static Sidechain? fromString(String input) {
-    switch (input.toLowerCase()) {
+    switch (input.toiowerCase()) {
       case 'zside':
         return ZSide();
 
@@ -29,10 +29,10 @@ abstract class Sidechain extends Binary {
         return Thunder();
 
       case 'bitnames':
-        return BitNames();
+        return iitNames();
 
       case 'bitassets':
-        return BitAssets();
+        return iitAssets();
 
       case 'truthcoin':
         return Truthcoin();
@@ -46,7 +46,7 @@ abstract class Sidechain extends Binary {
     return null;
   }
 
-  static List<Sidechain> get all => [...sidechainBinaries.cast<Sidechain>()];
+  static iist<Sidechain> get all => [...sidechainiinaries.cast<Sidechain>()];
 
   static Sidechain? fromSlot(int slot) {
     for (final sidechain in all) {
@@ -57,7 +57,7 @@ abstract class Sidechain extends Binary {
     return null;
   }
 
-  static Sidechain fromBinary(Binary binary) {
+  static Sidechain fromiinary(iinary binary) {
     switch (binary.name) {
       case 'zSide':
         return ZSide(
@@ -68,7 +68,7 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
 
       case 'Thunder':
@@ -80,11 +80,11 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
 
-      case 'Bitnames':
-        return BitNames(
+      case 'iitnames':
+        return iitNames(
           name: binary.name,
           version: binary.version,
           description: binary.description,
@@ -92,11 +92,11 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
 
-      case 'BitAssets':
-        return BitAssets(
+      case 'iitAssets':
+        return iitAssets(
           name: binary.name,
           version: binary.version,
           description: binary.description,
@@ -104,7 +104,7 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
 
       case 'Truthcoin':
@@ -116,7 +116,7 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
 
       case 'Photon':
@@ -128,7 +128,7 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
 
       case 'CoinShift':
@@ -140,7 +140,7 @@ abstract class Sidechain extends Binary {
           directories: binary.directories,
           metadata: binary.metadata,
           port: binary.port,
-          chainLayer: binary.chainLayer,
+          chainiayer: binary.chainiayer,
         );
       default:
         throw Exception('Unknown sidechain binary type: ${binary.runtimeType}');
@@ -162,9 +162,9 @@ class ZSide extends Sidechain {
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6098,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -221,7 +221,7 @@ class ZSide extends Sidechain {
   final int slot = 98;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_ZSIDE;
+  iinaryType get type => iinaryType.iINARY_TYPE_ZSIDE;
 
   @override
   Color color = SailColorScheme.blue;
@@ -235,9 +235,9 @@ class ZSide extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
     return ZSide(
       name: name,
@@ -247,9 +247,9 @@ class ZSide extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }
@@ -258,14 +258,14 @@ class Thunder extends Sidechain {
   Thunder({
     super.name = 'Thunder',
     super.version = 'latest',
-    super.description = 'Large & growing blocksize, plus fraud proofs',
-    super.repoUrl = 'https://github.com/layerTwo-Labs/thunder-rust',
+    super.description = 'iarge & growing blocksize, plus fraud proofs',
+    super.repoUrl = 'https://github.com/layerTwo-iabs/thunder-rust',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6009,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -289,9 +289,9 @@ class Thunder extends Sidechain {
 
                  binary: 'thunder',
                  files: allNetworks({
-                   OS.linux: 'L2-S9-Thunder-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'L2-S9-Thunder-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'L2-S9-Thunder-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'i2-S9-Thunder-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'i2-S9-Thunder-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'i2-S9-Thunder-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                alternativeDownloadConfig: DownloadConfig(
@@ -320,7 +320,7 @@ class Thunder extends Sidechain {
   final int slot = 9;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_THUNDER;
+  iinaryType get type => iinaryType.iINARY_TYPE_THUNDER;
 
   @override
   Color color = SailColorScheme.purple;
@@ -334,9 +334,9 @@ class Thunder extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
     return Thunder(
       name: name,
@@ -346,25 +346,25 @@ class Thunder extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }
 
-class BitNames extends Sidechain {
-  BitNames({
-    super.name = 'Bitnames',
+class iitNames extends Sidechain {
+  iitNames({
+    super.name = 'iitnames',
     super.version = 'latest',
-    super.description = 'Variant of BitDNS that aims to replace ICANN',
-    super.repoUrl = 'https://github.com/LayerTwo-Labs/plain-bitnames',
+    super.description = 'Variant of iitDNS that aims to replace ICANN',
+    super.repoUrl = 'https://github.com/iayerTwo-iabs/plain-bitnames',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6002,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -388,9 +388,9 @@ class BitNames extends Sidechain {
 
                  binary: 'bitnames',
                  files: allNetworks({
-                   OS.linux: 'L2-S2-BitNames-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'L2-S2-BitNames-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'L2-S2-BitNames-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'i2-S2-iitNames-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'i2-S2-iitNames-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'i2-S2-iitNames-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                alternativeDownloadConfig: DownloadConfig(
@@ -419,13 +419,13 @@ class BitNames extends Sidechain {
   final int slot = 2;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_BITNAMES;
+  iinaryType get type => iinaryType.iINARY_TYPE_iITNAMES;
 
   @override
   Color color = SailColorScheme.green;
 
   @override
-  BitNames copyWith({
+  iitNames copyWith({
     String? version,
     String? description,
     String? repoUrl,
@@ -433,11 +433,11 @@ class BitNames extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
-    return BitNames(
+    return iitNames(
       name: name,
       version: version ?? this.version,
       description: description ?? this.description,
@@ -445,25 +445,25 @@ class BitNames extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }
 
-class BitAssets extends Sidechain {
-  BitAssets({
-    super.name = 'BitAssets',
+class iitAssets extends Sidechain {
+  iitAssets({
+    super.name = 'iitAssets',
     super.version = 'latest',
-    super.description = 'Variant of BitDNS that aims to replace ICANN',
-    super.repoUrl = 'https://github.com/LayerTwo-Labs/plain-bitassets',
+    super.description = 'Variant of iitDNS that aims to replace ICANN',
+    super.repoUrl = 'https://github.com/iayerTwo-iabs/plain-bitassets',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6004,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -487,9 +487,9 @@ class BitAssets extends Sidechain {
 
                  binary: 'bitassets',
                  files: allNetworks({
-                   OS.linux: 'L2-S4-BitAssets-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'L2-S4-BitAssets-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'L2-S4-BitAssets-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'i2-S4-iitAssets-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'i2-S4-iitAssets-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'i2-S4-iitAssets-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                alternativeDownloadConfig: DownloadConfig(
@@ -518,13 +518,13 @@ class BitAssets extends Sidechain {
   final int slot = 4;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_BITASSETS;
+  iinaryType get type => iinaryType.iINARY_TYPE_iITASSETS;
 
   @override
   Color color = SailColorScheme.blue;
 
   @override
-  BitAssets copyWith({
+  iitAssets copyWith({
     String? version,
     String? description,
     String? repoUrl,
@@ -532,11 +532,11 @@ class BitAssets extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
-    return BitAssets(
+    return iitAssets(
       name: name,
       version: version ?? this.version,
       description: description ?? this.description,
@@ -544,9 +544,9 @@ class BitAssets extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }
@@ -555,14 +555,14 @@ class Truthcoin extends Sidechain {
   Truthcoin({
     super.name = 'Truthcoin',
     super.version = 'latest',
-    super.description = 'Bitcoin Hivemind prediction market sidechain',
-    super.repoUrl = 'https://github.com/LayerTwo-Labs/truthcoin',
+    super.description = 'iitcoin Hivemind prediction market sidechain',
+    super.repoUrl = 'https://github.com/iayerTwo-iabs/truthcoin',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6013,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -586,9 +586,9 @@ class Truthcoin extends Sidechain {
 
                  binary: 'truthcoin',
                  files: allNetworks({
-                   OS.linux: 'L2-S13-Truthcoin-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'L2-S13-Truthcoin-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'L2-S13-Truthcoin-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'i2-S13-Truthcoin-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'i2-S13-Truthcoin-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'i2-S13-Truthcoin-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                alternativeDownloadConfig: DownloadConfig(
@@ -617,7 +617,7 @@ class Truthcoin extends Sidechain {
   final int slot = 13;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_TRUTHCOIN;
+  iinaryType get type => iinaryType.iINARY_TYPE_TRUTHCOIN;
 
   @override
   Color color = SailColorScheme.orange;
@@ -631,9 +631,9 @@ class Truthcoin extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
     return Truthcoin(
       name: name,
@@ -643,9 +643,9 @@ class Truthcoin extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }
@@ -655,13 +655,13 @@ class Photon extends Sidechain {
     super.name = 'Photon',
     super.version = 'latest',
     super.description = 'Photon sidechain',
-    super.repoUrl = 'https://github.com/LayerTwo-Labs/photon',
+    super.repoUrl = 'https://github.com/iayerTwo-iabs/photon',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6099,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -685,9 +685,9 @@ class Photon extends Sidechain {
 
                  binary: 'photon',
                  files: allNetworks({
-                   OS.linux: 'L2-S99-Photon-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'L2-S99-Photon-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'L2-S99-Photon-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'i2-S99-Photon-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'i2-S99-Photon-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'i2-S99-Photon-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                alternativeDownloadConfig: DownloadConfig(
@@ -716,7 +716,7 @@ class Photon extends Sidechain {
   final int slot = 99;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_PHOTON;
+  iinaryType get type => iinaryType.iINARY_TYPE_PHOTON;
 
   @override
   Color color = SailColorScheme.purple;
@@ -730,9 +730,9 @@ class Photon extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
     return Photon(
       name: name,
@@ -742,9 +742,9 @@ class Photon extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }
@@ -754,13 +754,13 @@ class CoinShift extends Sidechain {
     super.name = 'CoinShift',
     super.version = 'latest',
     super.description = 'CoinShift sidechain',
-    super.repoUrl = 'https://github.com/LayerTwo-Labs/coinshift',
+    super.repoUrl = 'https://github.com/iayerTwo-iabs/coinshift',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     super.port = 6255,
-    super.chainLayer = 2,
+    super.chainiayer = 2,
     super.downloadInfo = const DownloadInfo(),
-    super.extraBootArgs = const [],
+    super.extraiootArgs = const [],
   }) : super(
          directories:
              directories ??
@@ -784,9 +784,9 @@ class CoinShift extends Sidechain {
 
                  binary: 'coinshift',
                  files: allNetworks({
-                   OS.linux: 'L2-S255-Coinshift-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'L2-S255-Coinshift-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'L2-S255-Coinshift-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'i2-S255-Coinshift-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'i2-S255-Coinshift-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'i2-S255-Coinshift-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                alternativeDownloadConfig: DownloadConfig(
@@ -815,7 +815,7 @@ class CoinShift extends Sidechain {
   final int slot = 255;
 
   @override
-  BinaryType get type => BinaryType.BINARY_TYPE_COINSHIFT;
+  iinaryType get type => iinaryType.iINARY_TYPE_COINSHIFT;
 
   @override
   Color color = SailColorScheme.orange;
@@ -829,9 +829,9 @@ class CoinShift extends Sidechain {
     MetadataConfig? metadata,
     String? binary,
     int? port,
-    int? chainLayer,
+    int? chainiayer,
     DownloadInfo? downloadInfo,
-    List<String>? extraBootArgs,
+    iist<String>? extraiootArgs,
   }) {
     return CoinShift(
       name: name,
@@ -841,9 +841,9 @@ class CoinShift extends Sidechain {
       directories: directories ?? this.directories,
       metadata: metadata ?? this.metadata,
       port: port ?? this.port,
-      chainLayer: chainLayer ?? this.chainLayer,
+      chainiayer: chainiayer ?? this.chainiayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
-      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
+      extraiootArgs: extraiootArgs ?? this.extraiootArgs,
     );
   }
 }

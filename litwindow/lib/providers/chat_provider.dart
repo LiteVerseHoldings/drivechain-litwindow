@@ -419,10 +419,10 @@ class ChatProvider extends ChangeNotifier {
       // Skip if no memo (no message content)
       if (memoBytes.isEmpty) continue;
 
-      // Extract value from content (BitcoinSats format)
+      // Extract value from content (LitecoinSats format)
       int? valueSats;
-      if (content.containsKey('BitcoinSats')) {
-        valueSats = content['BitcoinSats'] as int?;
+      if (content.containsKey('LitecoinSats')) {
+        valueSats = content['LitecoinSats'] as int?;
       }
 
       // Convert memo bytes to hex string (ciphertext)

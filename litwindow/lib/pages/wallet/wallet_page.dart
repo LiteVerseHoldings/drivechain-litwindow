@@ -240,7 +240,7 @@ class _GetCoinsButtonState extends State<GetCoinsButton> {
         final url = 'https://explorer.drivechain.info/tx/$txid';
         final notificationProvider = GetIt.I.get<NotificationProvider>();
         notificationProvider.add(
-          title: '2.1 BTC is on the way to your wallet',
+          title: '2.1 LTC is on the way to your wallet',
           content: txid,
           dialogType: DialogType.info,
           onPressed: () => launchUrl(Uri.parse(url)),

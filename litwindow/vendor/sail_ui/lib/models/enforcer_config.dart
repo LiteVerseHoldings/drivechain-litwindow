@@ -2,7 +2,7 @@
 const String kEnforcerConfVersionCommentPrefix = '# bitwindow-enforcer-conf-version=';
 
 /// Configuration model for the Enforcer daemon.
-/// Unlike Bitcoin Core, the Enforcer doesn't read from a conf file directly -
+/// Unlike Litecoin Core, the Enforcer doesn't read from a conf file directly -
 /// it only accepts CLI arguments. We store settings in a file and convert them
 /// to CLI args at launch time.
 class EnforcerConfig {

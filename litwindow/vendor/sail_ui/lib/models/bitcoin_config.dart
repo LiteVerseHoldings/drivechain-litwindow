@@ -3,7 +3,7 @@ const String kBitcoinConfVersionCommentPrefix = '# bitwindow-bitcoin-conf-versio
 
 class BitcoinConfig {
   Map<String, String> globalSettings = {};
-  // Network sections - only valid Bitcoin Core sections
+  // Network sections - only valid Litecoin Core sections
   // Note: forknet uses 'main' section since it runs on mainnet params
   Map<String, Map<String, String>> networkSettings = {
     'main': {},
@@ -96,7 +96,7 @@ class BitcoinConfig {
       buffer.writeln();
     }
 
-    // Write network-specific settings (only valid Bitcoin Core sections)
+    // Write network-specific settings (only valid Litecoin Core sections)
     final sectionNames = {
       'main': '[main]',
       'test': '[test]',

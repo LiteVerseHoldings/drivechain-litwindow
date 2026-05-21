@@ -10,11 +10,11 @@ enum BitcoinUnit {
   sats
   ;
 
-  String get symbol => this == BitcoinUnit.btc ? 'BTC' : 'sats';
-  String get label => this == BitcoinUnit.btc ? 'BTC' : 'Satoshis';
+  String get symbol => this == BitcoinUnit.btc ? 'LTC' : 'sats';
+  String get label => this == BitcoinUnit.btc ? 'LTC' : 'Satoshis';
 }
 
-/// Utility class for Bitcoin amount formatting based on user's unit preference
+/// Utility class for Litecoin amount formatting based on user's unit preference
 /// Use this directly in views instead of going through ViewModels
 class BitcoinFormatting {
   /// Format satoshis according to the current user preference
@@ -23,7 +23,7 @@ class BitcoinFormatting {
     return formatBitcoinWithUnit(satoshiToBTC(sats), settings.bitcoinUnit);
   }
 
-  /// Format BTC according to the current user preference
+  /// Format LTC according to the current user preference
   static String formatBTCWithUnit(BuildContext context, double btc) {
     final settings = GetIt.I<SettingsProvider>();
     return formatBitcoinWithUnit(btc, settings.bitcoinUnit);
@@ -46,7 +46,7 @@ int btcToSatoshi(double btc) {
   return (btc * satoshiPerBitcoin).toInt();
 }
 
-String formatBitcoin(num? number, {String symbol = 'BTC'}) {
+String formatBitcoin(num? number, {String symbol = 'LTC'}) {
   if (number == null || number.isNaN || number.isInfinite) {
     return '0.0000,0000${symbol.isEmpty ? '' : ' $symbol'}';
   }

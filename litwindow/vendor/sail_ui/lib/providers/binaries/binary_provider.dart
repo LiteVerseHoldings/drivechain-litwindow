@@ -93,7 +93,7 @@ class BinaryProvider extends ChangeNotifier {
   /// the orchestrator's full L1 boot chain (Core -> Enforcer -> target),
   /// this stops + starts only the named binary. Restarting the enforcer
   /// never tries to spawn or adopt bitcoind — fixes the "bitcoind is already
-  /// running" phantom error that surfaced on Bitcoin Core's card whenever a
+  /// running" phantom error that surfaced on Litecoin Core's card whenever a
   /// user clicked Restart on a sibling daemon.
   ///
   /// Use this for the per-daemon Restart buttons in daemon status cards,

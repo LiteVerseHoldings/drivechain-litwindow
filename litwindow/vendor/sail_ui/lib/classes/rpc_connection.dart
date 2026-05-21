@@ -178,7 +178,7 @@ bool isExpectedBootError(Object error) {
       s.contains('http/2 connection is finishing') ||
       // ConnectRPC / gRPC error codes surfaced when daemons are down
       s.contains('[unavailable]') ||
-      s.contains('unable to connect to bitcoin core') ||
+      s.contains('unable to connect to Litecoin Core') ||
       s.contains('unable to connect to enforcer') ||
       s.contains('dial tcp') ||
       // bitcoind / Core warmup RPC errors during cold start

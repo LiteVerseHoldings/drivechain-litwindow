@@ -18,9 +18,9 @@ import (
 // Test seed for reproducible testing (DO NOT USE IN PRODUCTION)
 const testSeedHex = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 
-// TestDescriptorImportIntegration tests descriptor import against a real Bitcoin Core instance
+// TestDescriptorImportIntegration tests descriptor import against a real Litecoin Core instance
 // This test requires:
-// - Bitcoin Core running on localhost:38332 (signet by default)
+// - Litecoin Core running on localhost:39332 (signet by default)
 // - RPC credentials: user=user, pass=password
 // - Or set BITCOIND_URL environment variable
 //
@@ -35,10 +35,10 @@ func TestDescriptorImportIntegration(t *testing.T) {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	ctx := logger.WithContext(context.Background())
 
-	// Get Bitcoin Core connection params from env or use defaults
+	// Get Litecoin Core connection params from env or use defaults
 	host := os.Getenv("BITCOIND_HOST")
 	if host == "" {
-		host = "localhost:38332"
+		host = "localhost:39332"
 	}
 	rpcUser := os.Getenv("BITCOIND_USER")
 	if rpcUser == "" {
@@ -49,9 +49,9 @@ func TestDescriptorImportIntegration(t *testing.T) {
 		rpcPass = "password"
 	}
 
-	t.Logf("Connecting to Bitcoin Core at %s", host)
+	t.Logf("Connecting to Litecoin Core at %s", host)
 
-	// Create Bitcoin Core client using coreproxy
+	// Create Litecoin Core client using coreproxy
 	bitcoindClient, err := coreproxy.NewBitcoind(
 		ctx,
 		host,
@@ -112,7 +112,7 @@ func TestDescriptorImportIntegration(t *testing.T) {
 	}()
 
 	// Create blank descriptor wallet
-	t.Log("Creating blank descriptor wallet in Bitcoin Core...")
+	t.Log("Creating blank descriptor wallet in Litecoin Core...")
 	_, err = bitcoindClient.CreateWallet(ctx, connect.NewRequest(&corepb.CreateWalletRequest{
 		Name:               testWalletName,
 		DisablePrivateKeys: false,

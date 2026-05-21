@@ -796,7 +796,7 @@ var walletWatchOnlyCreateCommand = &cli.Command{
 
 var walletCoreCreateCommand = &cli.Command{
 	Name:      "core-create",
-	Usage:     "Materialise a wallet.json entry as a Bitcoin Core descriptor wallet",
+	Usage:     "Materialise a wallet.json entry as a Litecoin Core descriptor wallet",
 	ArgsUsage: "[wallet-id]",
 	Action: func(cctx *cli.Context) error {
 		client := newWalletClient(cctx)
@@ -817,7 +817,7 @@ var walletCoreCreateCommand = &cli.Command{
 
 var walletEnsureCoreCommand = &cli.Command{
 	Name:  "ensure-core",
-	Usage: "Create missing Bitcoin Core wallets for every entry in wallet.json",
+	Usage: "Create missing Litecoin Core wallets for every entry in wallet.json",
 	Action: func(cctx *cli.Context) error {
 		client := newWalletClient(cctx)
 		resp, err := client.EnsureCoreWallets(cctx.Context, connect.NewRequest(&pb.EnsureCoreWalletsRequest{}))

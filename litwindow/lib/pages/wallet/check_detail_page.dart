@@ -238,7 +238,7 @@ class CheckDetailPage extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: SailTheme.of(context).colors.background,
             foregroundColor: SailTheme.of(context).colors.text,
-            title: SailText.primary20('Check for $amountBTC BTC'),
+            title: SailText.primary20('Check for $amountLTC LTC'),
           ),
           body: Builder(
             builder: (context) {
@@ -382,7 +382,7 @@ class CheckDetailPage extends StatelessWidget {
                                     ],
                                   ),
                                   SailText.secondary12(
-                                    'Share this private key with the recipient. They can import it into most Bitcoin wallets to access the funds.',
+                                    'Share this private key with the recipient. They can import it into most Litecoin wallets to access the funds.',
                                   ),
                                   SailRow(
                                     spacing: SailStyleValues.padding08,

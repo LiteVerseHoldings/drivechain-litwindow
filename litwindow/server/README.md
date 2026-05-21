@@ -13,10 +13,10 @@ Building and running:
 $ just build
 
 # This assumes you're running drivechaind in signet mode.
-# A modified version of bitcoin core where the only change
+# A modified version of litecoin core where the only change
 # is 60 second blocktimes. You can also start this with:
 # $ docker compose up mainchain
-# Or download directly from https://github.com/barebitcoin/bitcoin-patched
+# Or download directly from https://github.com/barelitecoin/litecoin-patched
 #
 $ drivechaind \
   -rpcuser=user \
@@ -32,7 +32,7 @@ $ drivechaind \
 $ ./enforcer/bin/bip300301-enforcer \
   --node-rpc-password=password \
   --node-rpc-user=user \
-  --node-rpc-port=38332
+  --node-rpc-port=39332
 
 # Finally, start the server.
 # We're connecting to a public Electrum server, running
@@ -43,9 +43,9 @@ $ ./enforcer/bin/bip300301-enforcer \
 $ ./bin/bitwindowd \
   --electrum.host=drivechain.live:50001 \
   --electrum.no-ssl \
-  --bitcoincore.rpcuser=user \
-  --bitcoincore.rpcpassword=password \
-  --bitcoincore.url=localhost:8332
+  --litecoincore.rpcuser=user \
+  --litecoincore.rpcpassword=password \
+  --litecoincore.url=localhost:39332
 ```
 
 # Architecture
@@ -55,12 +55,12 @@ graph TD;
     A[Flutter-based Frontend] -->|Connect/gRPC| B[Go Server];
     B -->|Unspecified Protocol| C[CUSF Enforcer];
     C -->|`invalidateblock` RPC|D;
-    B -->|Connect/gRPC via btc-buf proxy, \nZMQ via either raw conn or btc-buf| D[Bitcoin Core Node];
+    B -->|Connect/gRPC bridge, \nZMQ via either raw conn or bridge| D[Litecoin Core Node];
     B -.->|Shells out to| E[bdk-cli];
 ```
 
 - All wallet functionality is handled by `bdk-cli`
-- Bitcoin Core is strictly used for reading chain data. Wallet is entirely
+- Litecoin Core is strictly used for reading chain data. Wallet is entirely
   untouched
 
 Pros:
@@ -68,8 +68,7 @@ Pros:
 - Devs are way more proficient in Go than Rust
 - Availability of [Connect](https://github.com/connectrpc/connect-go/) for Go.
   Makes it _really_ simple to spin up a server that supports both gRPC and REST.
-- Availability of strongly typed Bitcoin Core RPC-system through
-  [`btc-buf`](https://github.com/barebitcoin/btc-buf)
+- Availability of a strongly typed Litecoin Core RPC bridge.
 
 Cons:
 
@@ -90,8 +89,8 @@ Further validations that need to happen before we're confident that this works:
    around to it.~~
 1. Verify we're able to connect to our own signet network (this needs to be
    created!). Will `bdk-cli` crash if the signet network has other parameters?
-1. ~~Verify we're able to modify `btc-buf` to run in-memory. Should be easy
-   enough. If not, we'll just use `rpcclient` from `btcd`.~~
+1. ~~Verify we're able to run the RPC bridge in-memory. Should be easy enough.
+   If not, we'll just use `rpcclient` from `ltcd`.~~
 
 # Other alternatives considered
 
@@ -108,7 +107,7 @@ Cons:
 ```mermaid
 graph TD;
     A[Flutter-based Frontend] -->|Connect/gRPC| B["Server (Rust with BDK)"];
-    B -->|JSON-RPC + ZMQ| C[Bitcoin Core Node];
+    B -->|JSON-RPC + ZMQ| C[Litecoin Core Node];
     B -->|Unspecified Protocol| D[CUSF Enforcer];
 ```
 

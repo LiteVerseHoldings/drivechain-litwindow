@@ -65,7 +65,7 @@ class DepositWithdrawHelp extends StatelessWidget {
       children: [
         const QuestionTitle('What are deposits and withdrawals?'),
         QuestionText(
-          'You are currently connected to two blockchains. Bitcoin Core with BIP 300+301, and a sidechain called ${_rpc.chain.name}.',
+          'You are currently connected to two blockchains. Litecoin Core with BIP 300+301, and a sidechain called ${_rpc.chain.name}.',
         ),
         const QuestionText(
           'Deposits and withdrawals move bitcoin from one chain to the other. A deposit adds bitcoin to the sidechain, and a withdrawal removes bitcoin from the sidechain.',

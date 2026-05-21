@@ -190,7 +190,7 @@ func GenerateFullWallet(name string, customMnemonic string, passphrase string, s
 	}
 	l1 := L1Wallet{
 		Mnemonic: l1Mnemonic,
-		Name:     "Bitcoin Core (Patched)",
+		Name:     "Litecoin Core (Patched)",
 	}
 
 	// Derive sidechain starters

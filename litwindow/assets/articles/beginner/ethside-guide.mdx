@@ -9,14 +9,14 @@ authorImage: paul-sztorc.png
 
 ## In This Guide
 
-We show how to use Eth's software stack, but with BTC. (Ie, without buying Ether). This requires Bip300, but we can still demonstrate via DriveNet (a version of Bitcoin Core with Bip300 activated).
+We show how to use Eth's software stack, but with LTC. (Ie, without buying Ether). This requires Bip300, but we can still demonstrate via DriveNet (a version of Litecoin Core with Bip300 activated).
 
 Specifically, we do 5 steps:
 
 1. Open Linux, open three terminal windows, and make a project folder.
 2. Use the first terminal window to: download the mainchain full node software, run it in regtest mode, force it to find 1 block every 5 seconds (for our convenience), and activate the ethereum sidechain on it.
 3. Use the second terminal window to download, build, run, and connect "ethSide" (our ethereum sidechain clone). Via blind merged mining, it will also find a block every 5 seconds.
-4. Use the third terminal window to play with ethereum – make accounts, use Eth functions, and especially: deposit 10 BTC from the mainchain to the Eth Sidechain.
+4. Use the third terminal window to play with ethereum – make accounts, use Eth functions, and especially: deposit 10 LTC from the mainchain to the Eth Sidechain.
 5. Finally, we will go to remix.ethereum.org and plug our sidechain seamlessly into ETH's infrastructure. There we can run contracts.
 
 ## Step 1: Set Up
@@ -131,7 +131,7 @@ eth.deposit(eth.accounts[0], web3.toSatoshi(10), web3.toSatoshi(0.0001))
 eth.getBalance(eth.accounts[0])
 ```
 
-That command will take 10 of your BTC from the mainchain (since you've been mining this whole time), and sends them over to the ETH sidechain.
+That command will take 10 of your LTC from the mainchain (since you've been mining this whole time), and sends them over to the ETH sidechain.
 
 (Coin divisibility is different in ETH-world, so instead of getting 10,0000,0000 "sats", you instead get 10000000000000000000 aka 10 quintillion units 10,0000,0000,,00,0000,0000 of "side-gwei" (kind of like sats-squared). Isn't Ethereum fun!?)
 
@@ -161,6 +161,6 @@ The walkthrough we did is very similar to the one advocated for on [this site](h
 
 ## In Conclusion
 
-We ran an ETH contract… on top of BTC. We didn't buy any Ether! And we left Layer1 alone – our layer1 Bitcoin mainchain full node, knew nothing of Ethereum's rules.
+We ran an ETH contract… on top of LTC. We didn't buy any Ether! And we left Layer1 alone – our layer1 Litecoin mainchain full node, knew nothing of Ethereum's rules.
 
 This guide didn't cover withdrawals (ie: when coins move from sidechain to mainchain). But that's only because Bip300 withdrawals have already been covered to death.

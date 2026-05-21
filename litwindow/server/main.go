@@ -255,7 +255,7 @@ func initLogger(logFile *os.File, logLevel zerolog.Level) {
 			if strings.Contains(msg, "Established connection to RPC server") {
 				e.Discard()
 			}
-			// Filter out Bitcoin Core startup messages that appear during connection attempts
+			// Filter out Litecoin Core startup messages that appear during connection attempts
 			if isNoisyStartupMessage(msg) {
 				e.Discard()
 			}
@@ -264,7 +264,7 @@ func initLogger(logFile *os.File, logLevel zerolog.Level) {
 	zerolog.DefaultContextLogger = &logger
 }
 
-// isNoisyStartupMessage returns true for Bitcoin Core startup messages that
+// isNoisyStartupMessage returns true for Litecoin Core startup messages that
 // should be filtered from logs during initialization.
 func isNoisyStartupMessage(msg string) bool {
 	noisyPatterns := []string{

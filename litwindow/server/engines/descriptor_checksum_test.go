@@ -10,17 +10,17 @@ func TestDescriptorChecksum(t *testing.T) {
 		expectedChecksum string
 	}{
 		{
-			// From Bitcoin Core getdescriptorinfo
+			// From Litecoin Core getdescriptorinfo
 			desc:             "wpkh(tpubDDH1ndozCcuGXjVaXnB4NHUWbKfMTYfxH3wuU1GFvCXtEZZqsMY6NxBdgdaebExgDAVicckGNJDU8wVfRUWWMaov5jX4zPaDorqe75QwjAC/0/*)",
 			expectedChecksum: "v39n29tr",
 		},
 		{
-			// Another example from Bitcoin Core
+			// Another example from Litecoin Core
 			desc:             "wpkh(tpubDDH1ndozCcuGXjVaXnB4NHUWbKfMTYfxH3wuU1GFvCXtEZZqsMY6NxBdgdaebExgDAVicckGNJDU8wVfRUWWMaov5jX4zPaDorqe75QwjAC/1/*)",
 			expectedChecksum: "a9qjhsmm",
 		},
 		{
-			// Test with xprv - expected checksum from Bitcoin Core error message
+			// Test with xprv - expected checksum from Litecoin Core error message
 			desc:             "wpkh(tprv8gayeDmk4FDbeGTne8WTxspQ2J9RJDV3hkM8BVDxVvjVQ5K5ExiWCTZmWXypiXyFhDMoCWKac4U8FMXkc5wvjFYQwiGYFdqmKAqdgPAL8pw/0/*)",
 			expectedChecksum: "4zyy5snq",
 		},

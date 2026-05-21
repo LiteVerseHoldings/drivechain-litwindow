@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:get_it/get_it.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-/// Connection-state holder for Bitcoin Core. Owns the standard
+/// Connection-state holder for Litecoin Core. Owns the standard
 /// [RPCConnection] flags (connected, startupError, ...) that the
 /// daemon-status card binds against, plus [binaryArgs] for the
 /// chain-settings-modal launch path.

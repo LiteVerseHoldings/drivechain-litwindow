@@ -43,7 +43,7 @@ class SidechainsPage extends StatelessWidget {
                         border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.3)),
                       ),
                       child: const Text(
-                        'THIS COULD BE BITCOIN',
+                        'THIS COULD BE LITECOIN',
                         style: TextStyle(
                           color: Color(0xFFD97706),
                           fontSize: 10,
@@ -207,8 +207,8 @@ class SidechainsList extends ViewModelWidget<SidechainsViewModel> {
               SailText.primary15('What are Sidechains?'),
               const SailSpacing(SailStyleValues.padding08),
               SailText.secondary13(
-                'Sidechains allow you to move your Bitcoin to separate blockchains with different features, '
-                'while maintaining the security and scarcity of Bitcoin. Think of them as Bitcoin-backed '
+                'Sidechains allow you to move your Litecoin to separate blockchains with different features, '
+                'while maintaining the security and scarcity of Litecoin. Think of them as Litecoin-backed '
                 'altcoins that you can freely move between.',
               ),
               const SailSpacing(SailStyleValues.padding20),
@@ -225,7 +225,7 @@ class SidechainsList extends ViewModelWidget<SidechainsViewModel> {
               const SailSpacing(SailStyleValues.padding08),
               SailText.secondary13(
                 'BIP300 (Hashrate Escrows) and BIP301 (Blind Merged Mining) enable true sidechain functionality. '
-                'Visit drivechain.info to learn more about how Drivechain works and why it matters for Bitcoin.',
+                'Visit drivechain.info to learn more about how Drivechain works and why it matters for Litecoin.',
               ),
             ],
           ),
@@ -843,7 +843,7 @@ class SidechainsViewModel extends BaseViewModel with ChangeTrackingMixin {
       return null;
     }
 
-    // Disable all interactions when using Bitcoin Core wallet
+    // Disable all interactions when using Litecoin Core wallet
     if (isUsingBitcoinCoreWallet) {
       return SailButton(
         key: ValueKey('disabled_slot_${sidechain.slot}_${sidechain.name}'),
@@ -1381,7 +1381,7 @@ class MakeDepositsView extends ViewModelWidget<SidechainsViewModel> {
                   ),
                 ),
                 UnitDropdown(
-                  value: Unit.BTC,
+                  value: Unit.LTC,
                   onChanged: (_) => {},
                   enabled: false,
                 ),
@@ -1764,7 +1764,7 @@ class _DepositModalState extends State<DepositModal> {
                     ),
                   ),
                   UnitDropdown(
-                    value: Unit.BTC,
+                    value: Unit.LTC,
                     onChanged: (_) {},
                     enabled: false,
                   ),

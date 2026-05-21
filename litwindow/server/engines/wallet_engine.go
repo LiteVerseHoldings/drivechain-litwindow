@@ -55,7 +55,7 @@ type WalletInfo struct {
 	} `json:"watch_only,omitempty"`
 }
 
-// WalletEngine handles wallet unlock/lock, backend routing, and Bitcoin Core sync.
+// WalletEngine handles wallet unlock/lock, backend routing, and Litecoin Core sync.
 // When an orchestrator client is set, core wallet operations are delegated to
 // the orchestrator's WalletManagerService.
 type WalletEngine struct {
@@ -74,7 +74,7 @@ type WalletEngine struct {
 	isUnlocked     bool
 	unlockCond     *sync.Cond
 
-	// Maps walletId -> Bitcoin Core wallet name (cache)
+	// Maps walletId -> Litecoin Core wallet name (cache)
 	coreWallets map[string]string
 
 	// Coalesces concurrent EnsureBitcoinCoreWallet calls for the same
@@ -459,10 +459,10 @@ func (e *WalletEngine) GetWalletBackendType(ctx context.Context, walletId string
 }
 
 // ============================================================================
-// Bitcoin Core Wallet Management
+// Litecoin Core Wallet Management
 // ============================================================================
 
-// EnsureBitcoinCoreWallet ensures a Bitcoin Core wallet exists for the given walletId
+// EnsureBitcoinCoreWallet ensures a Litecoin Core wallet exists for the given walletId
 // Creates it from the seed if it doesn't exist (lazy loading).
 //
 // Concurrent callers for the same walletId are coalesced via singleflight so
@@ -526,7 +526,7 @@ func (e *WalletEngine) ensureBitcoinCoreWalletLocked(ctx context.Context, wallet
 	}
 
 	if wallet.WalletType != WalletTypeBitcoinCore {
-		return "", fmt.Errorf("wallet %s is not a Bitcoin Core wallet", walletId)
+		return "", fmt.Errorf("wallet %s is not a Litecoin Core wallet", walletId)
 	}
 
 	// Generate wallet name from wallet ID
@@ -538,22 +538,22 @@ func (e *WalletEngine) ensureBitcoinCoreWalletLocked(ctx context.Context, wallet
 		return "", fmt.Errorf("get bitcoind client: %w", err)
 	}
 
-	// Check if wallet already exists in Bitcoin Core
+	// Check if wallet already exists in Litecoin Core
 	listResp, err := bitcoindClient.ListWallets(ctx, connect.NewRequest(&emptypb.Empty{}))
 	if err != nil {
-		return "", fmt.Errorf("list Bitcoin Core wallets: %w", err)
+		return "", fmt.Errorf("list Litecoin Core wallets: %w", err)
 	}
 
 	walletExists := lo.Contains(listResp.Msg.Wallets, walletName)
 	if !walletExists {
 		// Create wallet from seed
 		if err := e.CreateBitcoinCoreWalletFromSeed(ctx, walletName, wallet.Master.SeedHex); err != nil {
-			return "", fmt.Errorf("create Bitcoin Core wallet: %w", err)
+			return "", fmt.Errorf("create Litecoin Core wallet: %w", err)
 		}
 		zerolog.Ctx(ctx).Info().
 			Str("wallet_id", walletId).
 			Str("wallet_name", walletName).
-			Msg("created Bitcoin Core wallet from seed")
+			Msg("created Litecoin Core wallet from seed")
 	}
 
 	// Cache the mapping
@@ -561,7 +561,7 @@ func (e *WalletEngine) ensureBitcoinCoreWalletLocked(ctx context.Context, wallet
 	return walletName, nil
 }
 
-// CreateBitcoinCoreWalletFromSeed creates a Bitcoin Core wallet and imports the seed
+// CreateBitcoinCoreWalletFromSeed creates a Litecoin Core wallet and imports the seed
 func (e *WalletEngine) CreateBitcoinCoreWalletFromSeed(
 	ctx context.Context,
 	walletName string,
@@ -618,7 +618,7 @@ func (e *WalletEngine) CreateBitcoinCoreWalletFromSeed(
 		return fmt.Errorf("get bitcoind client: %w", err)
 	}
 
-	// Create descriptor wallet in Bitcoin Core
+	// Create descriptor wallet in Litecoin Core
 	_, err = bitcoindClient.CreateWallet(ctx, connect.NewRequest(&corepb.CreateWalletRequest{
 		Name:               walletName,
 		DisablePrivateKeys: false,
@@ -631,17 +631,17 @@ func (e *WalletEngine) CreateBitcoinCoreWalletFromSeed(
 		if strings.Contains(err.Error(), "Database already exists") {
 			zerolog.Ctx(ctx).Info().
 				Str("wallet_name", walletName).
-				Msg("Bitcoin Core wallet already exists on disk, loading it")
+				Msg("Litecoin Core wallet already exists on disk, loading it")
 
 			_, err = bitcoindClient.LoadWallet(ctx, connect.NewRequest(&corepb.LoadWalletRequest{
 				Filename:      walletName,
 				LoadOnStartup: true,
 			}))
 			if err != nil {
-				return fmt.Errorf("load Bitcoin Core wallet: %w", err)
+				return fmt.Errorf("load Litecoin Core wallet: %w", err)
 			}
 		} else {
-			return fmt.Errorf("create Bitcoin Core wallet: %w", err)
+			return fmt.Errorf("create Litecoin Core wallet: %w", err)
 		}
 	}
 
@@ -692,12 +692,12 @@ func (e *WalletEngine) CreateBitcoinCoreWalletFromSeed(
 	return nil
 }
 
-// GetBitcoinCoreWalletName returns the Bitcoin Core wallet name for a walletId
+// GetBitcoinCoreWalletName returns the Litecoin Core wallet name for a walletId
 func (e *WalletEngine) GetBitcoinCoreWalletName(ctx context.Context, walletId string) (string, error) {
 	return e.EnsureBitcoinCoreWallet(ctx, walletId)
 }
 
-// EnsureWatchOnlyWallet ensures a watch-only wallet exists in Bitcoin Core
+// EnsureWatchOnlyWallet ensures a watch-only wallet exists in Litecoin Core
 func (e *WalletEngine) EnsureWatchOnlyWallet(ctx context.Context, walletId string) (string, error) {
 	// Try orchestrator first (it handles both bitcoinCore and watchOnly)
 	if e.orchClient != nil {
@@ -744,10 +744,10 @@ func (e *WalletEngine) EnsureWatchOnlyWallet(ctx context.Context, walletId strin
 		return "", fmt.Errorf("get bitcoind client: %w", err)
 	}
 
-	// Check if wallet already exists in Bitcoin Core
+	// Check if wallet already exists in Litecoin Core
 	listResp, err := bitcoindClient.ListWallets(ctx, connect.NewRequest(&emptypb.Empty{}))
 	if err != nil {
-		return "", fmt.Errorf("list Bitcoin Core wallets: %w", err)
+		return "", fmt.Errorf("list Litecoin Core wallets: %w", err)
 	}
 
 	walletExists := lo.Contains(listResp.Msg.Wallets, walletName)
@@ -759,7 +759,7 @@ func (e *WalletEngine) EnsureWatchOnlyWallet(ctx context.Context, walletId strin
 		zerolog.Ctx(ctx).Info().
 			Str("wallet_id", walletId).
 			Str("wallet_name", walletName).
-			Msg("created watch-only Bitcoin Core wallet")
+			Msg("created watch-only Litecoin Core wallet")
 	}
 
 	// Cache the mapping
@@ -767,7 +767,7 @@ func (e *WalletEngine) EnsureWatchOnlyWallet(ctx context.Context, walletId strin
 	return walletName, nil
 }
 
-// createWatchOnlyWallet creates a watch-only Bitcoin Core wallet
+// createWatchOnlyWallet creates a watch-only Litecoin Core wallet
 func (e *WalletEngine) createWatchOnlyWallet(
 	ctx context.Context,
 	walletName string,
@@ -779,7 +779,7 @@ func (e *WalletEngine) createWatchOnlyWallet(
 		return fmt.Errorf("get bitcoind client: %w", err)
 	}
 
-	// Create descriptor wallet in Bitcoin Core (watch-only)
+	// Create descriptor wallet in Litecoin Core (watch-only)
 	_, err = bitcoindClient.CreateWallet(ctx, connect.NewRequest(&corepb.CreateWalletRequest{
 		Name:               walletName,
 		DisablePrivateKeys: true,
@@ -792,17 +792,17 @@ func (e *WalletEngine) createWatchOnlyWallet(
 		if strings.Contains(err.Error(), "Database already exists") {
 			zerolog.Ctx(ctx).Info().
 				Str("wallet_name", walletName).
-				Msg("Bitcoin Core watch-only wallet already exists on disk, loading it")
+				Msg("Litecoin Core watch-only wallet already exists on disk, loading it")
 
 			_, err = bitcoindClient.LoadWallet(ctx, connect.NewRequest(&corepb.LoadWalletRequest{
 				Filename:      walletName,
 				LoadOnStartup: false,
 			}))
 			if err != nil {
-				return fmt.Errorf("load Bitcoin Core wallet: %w", err)
+				return fmt.Errorf("load Litecoin Core wallet: %w", err)
 			}
 		} else {
-			return fmt.Errorf("create Bitcoin Core wallet: %w", err)
+			return fmt.Errorf("create Litecoin Core wallet: %w", err)
 		}
 	}
 
@@ -831,7 +831,7 @@ func (e *WalletEngine) createWatchOnlyWallet(
 	return nil
 }
 
-// importDescriptorToWallet imports a descriptor into a Bitcoin Core wallet
+// importDescriptorToWallet imports a descriptor into a Litecoin Core wallet
 func (e *WalletEngine) importDescriptorToWallet(
 	ctx context.Context,
 	bitcoindClient corerpc.BitcoinServiceClient,
@@ -873,7 +873,7 @@ func (e *WalletEngine) importDescriptorToWallet(
 		Requests: requests,
 	}))
 	if err != nil {
-		return fmt.Errorf("bitcoin core importdescriptors: %w", err)
+		return fmt.Errorf("Litecoin Core importdescriptors: %w", err)
 	}
 
 	// Check results
@@ -894,8 +894,8 @@ func (e *WalletEngine) importDescriptorToWallet(
 // Wallet Sync (from WalletSyncer)
 // ============================================================================
 
-// SyncWallets syncs Bitcoin Core wallets from wallet.json to Bitcoin Core
-// This is called after wallet unlock to ensure all Bitcoin Core wallets exist
+// SyncWallets syncs Litecoin Core wallets from wallet.json to Litecoin Core
+// This is called after wallet unlock to ensure all Litecoin Core wallets exist
 func (e *WalletEngine) SyncWallets(ctx context.Context) error {
 	log := zerolog.Ctx(ctx)
 
@@ -931,7 +931,7 @@ func (e *WalletEngine) SyncWallets(ctx context.Context) error {
 		return nil
 	}
 
-	// Ensure Bitcoin Core wallets exist
+	// Ensure Litecoin Core wallets exist
 	if err := e.ensureBitcoinCoreWallets(ctx, wallets); err != nil {
 		log.Error().Err(err).Msg("wallet sync: failed")
 	}
@@ -988,7 +988,7 @@ func (e *WalletEngine) GetAllWallets(ctx context.Context) ([]WalletInfo, error) 
 func (e *WalletEngine) ensureBitcoinCoreWallets(ctx context.Context, wallets []WalletInfo) error {
 	log := zerolog.Ctx(ctx)
 
-	// Find all Bitcoin Core wallets
+	// Find all Litecoin Core wallets
 	coreWallets := lo.Filter(wallets, func(w WalletInfo, _ int) bool {
 		return w.WalletType == WalletTypeBitcoinCore
 	})
@@ -1003,10 +1003,10 @@ func (e *WalletEngine) ensureBitcoinCoreWallets(ctx context.Context, wallets []W
 		return fmt.Errorf("bitcoind not available: %w", err)
 	}
 
-	// List existing wallets in Bitcoin Core
+	// List existing wallets in Litecoin Core
 	listResp, err := bitcoindClient.ListWallets(ctx, connect.NewRequest(&emptypb.Empty{}))
 	if err != nil {
-		return fmt.Errorf("list Bitcoin Core wallets: %w", err)
+		return fmt.Errorf("list Litecoin Core wallets: %w", err)
 	}
 
 	// Check each wallet
@@ -1018,20 +1018,20 @@ func (e *WalletEngine) ensureBitcoinCoreWallets(ctx context.Context, wallets []W
 			log.Info().
 				Str("wallet_id", wallet.ID).
 				Str("wallet_name", walletName).
-				Msg("wallet sync: creating missing Bitcoin Core wallet")
+				Msg("wallet sync: creating missing Litecoin Core wallet")
 
 			if err := e.createBitcoinCoreWalletForSync(ctx, bitcoindClient, walletName, &wallet); err != nil {
 				log.Error().
 					Err(err).
 					Str("wallet_id", wallet.ID).
-					Msg("wallet sync: failed to create Bitcoin Core wallet")
+					Msg("wallet sync: failed to create Litecoin Core wallet")
 				continue
 			}
 
 			log.Info().
 				Str("wallet_id", wallet.ID).
 				Str("wallet_name", walletName).
-				Msg("wallet sync: created Bitcoin Core wallet")
+				Msg("wallet sync: created Litecoin Core wallet")
 		}
 	}
 
@@ -1093,17 +1093,17 @@ func (e *WalletEngine) createBitcoinCoreWalletForSync(
 		if strings.Contains(err.Error(), "Database already exists") {
 			zerolog.Ctx(ctx).Info().
 				Str("wallet_name", walletName).
-				Msg("Bitcoin Core wallet already exists on disk, loading it")
+				Msg("Litecoin Core wallet already exists on disk, loading it")
 
 			_, err = bitcoindClient.LoadWallet(ctx, connect.NewRequest(&corepb.LoadWalletRequest{
 				Filename:      walletName,
 				LoadOnStartup: false,
 			}))
 			if err != nil {
-				return fmt.Errorf("load Bitcoin Core wallet: %w", err)
+				return fmt.Errorf("load Litecoin Core wallet: %w", err)
 			}
 		} else {
-			return fmt.Errorf("create Bitcoin Core wallet: %w", err)
+			return fmt.Errorf("create Litecoin Core wallet: %w", err)
 		}
 	}
 

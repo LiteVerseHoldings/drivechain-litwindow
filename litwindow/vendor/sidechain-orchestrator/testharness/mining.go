@@ -92,7 +92,7 @@ func (n *Node) FundWallet(t *testing.T) string {
 }
 
 // WaitForBalance polls the wallet balance until it's > 0 or times out.
-// Bitcoin Core on some platforms (Windows) may take a moment to index new blocks.
+// Litecoin Core on some platforms (Windows) may take a moment to index new blocks.
 func (n *Node) WaitForBalance(t *testing.T) {
 	t.Helper()
 	// Use longer timeout on Windows for slower block indexing

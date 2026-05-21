@@ -46,7 +46,7 @@ class _NetworkStatisticsPageState extends State<NetworkStatisticsPage> {
 
     return SailDialog(
       title: 'Network Statistics',
-      subtitle: 'Real-time Bitcoin network metrics with bandwidth graph',
+      subtitle: 'Real-time Litecoin network metrics with bandwidth graph',
       maxWidth: 900,
       maxHeight: 700,
       child: isLoading && stats == null
@@ -148,19 +148,19 @@ class _NetworkStatisticsPageState extends State<NetworkStatisticsPage> {
                         title: 'Process Bandwidth',
                         children: [
                           if (stats!.hasBitcoindBandwidth()) ...[
-                            StatRow(label: 'bitcoind PID', value: stats!.bitcoindBandwidth.pid.toString()),
+                            StatRow(label: 'litecoind PID', value: stats!.bitcoindBandwidth.pid.toString()),
                             StatRow(
-                              label: 'bitcoind RX',
+                              label: 'litecoind RX',
                               value:
                                   '${_formatBytes(stats!.bitcoindBandwidth.totalRxBytes.toInt())} (${_formatBandwidth(stats!.bitcoindBandwidth.rxBytesPerSec)})',
                             ),
                             StatRow(
-                              label: 'bitcoind TX',
+                              label: 'litecoind TX',
                               value:
                                   '${_formatBytes(stats!.bitcoindBandwidth.totalTxBytes.toInt())} (${_formatBandwidth(stats!.bitcoindBandwidth.txBytesPerSec)})',
                             ),
                             StatRow(
-                              label: 'bitcoind Connections',
+                              label: 'litecoind Connections',
                               value: stats!.bitcoindBandwidth.connectionCount.toString(),
                             ),
                           ],

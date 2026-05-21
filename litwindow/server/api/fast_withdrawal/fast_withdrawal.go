@@ -116,7 +116,7 @@ func (s *Server) initiateSidechainWithdrawal(ctx context.Context, sidechain stri
 	// Call external fast withdrawal server (like fw1.drivechain.info)
 	withdrawalRequest := map[string]interface{}{
 		"withdrawal_destination": destination,
-		"withdrawal_amount":      float64(amount) / 100000000.0, // Convert sats to BTC
+		"withdrawal_amount":      float64(amount) / 100000000.0, // Convert sats to LTC
 		"layer_2_chain_name":     sidechain,
 	}
 

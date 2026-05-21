@@ -28,7 +28,7 @@ service BitwindowdService {
 
   rpc GetFireplaceStats(google.protobuf.Empty) returns (GetFireplaceStatsResponse);
 
-  // Non-stock Bitcoin Core RPCs
+  // Non-stock Litecoin Core RPCs
 
   // Lists the most recent transactions, both confirmed and unconfirmed.
   rpc ListRecentTransactions(ListRecentTransactionsRequest) returns (ListRecentTransactionsResponse);

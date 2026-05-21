@@ -376,7 +376,7 @@ func (e *DeniabilityEngine) sendEnforcerTransaction(
 	return sendResp.Msg.Txid.Hex.Value, nil
 }
 
-// sendBitcoinCoreTransaction sends a transaction via Bitcoin Core
+// sendBitcoinCoreTransaction sends a transaction via Litecoin Core
 func (e *DeniabilityEngine) sendBitcoinCoreTransaction(
 	ctx context.Context,
 	walletId string,
@@ -384,7 +384,7 @@ func (e *DeniabilityEngine) sendBitcoinCoreTransaction(
 ) (string, error) {
 	coreWalletName, err := e.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 	if err != nil {
-		return "", fmt.Errorf("get bitcoin core wallet name: %w", err)
+		return "", fmt.Errorf("get Litecoin Core wallet name: %w", err)
 	}
 
 	bitcoind, err := e.bitcoind.Get(ctx)
@@ -392,7 +392,7 @@ func (e *DeniabilityEngine) sendBitcoinCoreTransaction(
 		return "", fmt.Errorf("get bitcoind client: %w", err)
 	}
 
-	// Convert satoshi amounts to BTC (Bitcoin Core uses BTC, not satoshis)
+	// Convert satoshi amounts to LTC (Litecoin Core uses LTC, not satoshis)
 	btcDestinations := make(map[string]float64)
 	for addr, sats := range destinations {
 		btcDestinations[addr] = float64(sats) / 1e8
@@ -403,7 +403,7 @@ func (e *DeniabilityEngine) sendBitcoinCoreTransaction(
 		Wallet:       coreWalletName,
 	}))
 	if err != nil {
-		return "", fmt.Errorf("bitcoin core send: %w", err)
+		return "", fmt.Errorf("Litecoin Core send: %w", err)
 	}
 
 	return resp.Msg.Txid, nil
@@ -632,11 +632,11 @@ func (e *DeniabilityEngine) getEnforcerNewAddress(ctx context.Context) (string, 
 	return addr.Msg.Address, nil
 }
 
-// getBitcoinCoreNewAddress creates a new address from a Bitcoin Core wallet
+// getBitcoinCoreNewAddress creates a new address from a Litecoin Core wallet
 func (e *DeniabilityEngine) getBitcoinCoreNewAddress(ctx context.Context, walletId string) (string, error) {
 	coreWalletName, err := e.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 	if err != nil {
-		return "", fmt.Errorf("get bitcoin core wallet name: %w", err)
+		return "", fmt.Errorf("get Litecoin Core wallet name: %w", err)
 	}
 
 	bitcoind, err := e.bitcoind.Get(ctx)
@@ -649,7 +649,7 @@ func (e *DeniabilityEngine) getBitcoinCoreNewAddress(ctx context.Context, wallet
 		AddressType: "bech32",
 	}))
 	if err != nil {
-		return "", fmt.Errorf("bitcoin core get new address: %w", err)
+		return "", fmt.Errorf("Litecoin Core get new address: %w", err)
 	}
 
 	return resp.Msg.Address, nil
@@ -716,11 +716,11 @@ func (e *DeniabilityEngine) listEnforcerUTXOs(ctx context.Context) ([]*pb.ListUn
 	return resp.Msg.Outputs, nil
 }
 
-// listBitcoinCoreUTXOs lists UTXOs from a Bitcoin Core wallet
+// listBitcoinCoreUTXOs lists UTXOs from a Litecoin Core wallet
 func (e *DeniabilityEngine) listBitcoinCoreUTXOs(ctx context.Context, walletId string) ([]*pb.ListUnspentOutputsResponse_Output, error) {
 	coreWalletName, err := e.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 	if err != nil {
-		return nil, fmt.Errorf("get bitcoin core wallet name: %w", err)
+		return nil, fmt.Errorf("get Litecoin Core wallet name: %w", err)
 	}
 
 	bitcoind, err := e.bitcoind.Get(ctx)
@@ -732,10 +732,10 @@ func (e *DeniabilityEngine) listBitcoinCoreUTXOs(ctx context.Context, walletId s
 		Wallet: coreWalletName,
 	}))
 	if err != nil {
-		return nil, fmt.Errorf("bitcoin core list unspent: %w", err)
+		return nil, fmt.Errorf("Litecoin Core list unspent: %w", err)
 	}
 
-	// Convert Bitcoin Core UTXOs to the enforcer format for compatibility
+	// Convert Litecoin Core UTXOs to the enforcer format for compatibility
 	var outputs []*pb.ListUnspentOutputsResponse_Output
 	for _, utxo := range resp.Msg.Unspent {
 		valueSats := uint64(utxo.Amount * 100000000)

@@ -3,9 +3,9 @@ import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-/// Confirms a Bitcoin network change. Routes through bitwindowd's
+/// Confirms a Litecoin network change. Routes through bitwindowd's
 /// `UpdateNetwork` RPC: orchestratord rewrites the conf and restarts
-/// bitcoind on the new chain, then bitwindowd recycles its DB + engines
+/// litecoind on the new chain, then bitwindowd recycles its DB + engines
 /// in-process. The bitwindowd HTTP server stays up across the swap on
 /// the same port — no process restart, no launcher dance.
 class NetworkSwapPage extends StatefulWidget {
@@ -127,7 +127,7 @@ class _NetworkSwapPageState extends State<NetworkSwapPage> {
                                     ? 'Network Switch Complete'
                                     : _error != null
                                     ? 'Network Switch Failed'
-                                    : 'Switch Bitcoin Network',
+                                    : 'Switch Litecoin Network',
                                 bold: true,
                               ),
                             ],
@@ -140,7 +140,7 @@ class _NetworkSwapPageState extends State<NetworkSwapPage> {
                                 ? _error!
                                 : _isSwapping
                                 ? 'Switching from $fromName to $toName...'
-                                : 'LitWindow will swap bitcoind to $toName and reload its data — the app stays open. Switching from $fromName to $toName.',
+                                : 'LitWindow will swap litecoind to $toName and reload its data — the app stays open. Switching from $fromName to $toName.',
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),

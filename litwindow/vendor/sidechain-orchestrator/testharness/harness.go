@@ -1,7 +1,7 @@
 // Package testharness provides a reusable integration test harness for the
-// wallet stack. It spins up real regtest Bitcoin Core nodes and real
+// wallet stack. It spins up real regtest Litecoin Core nodes and real
 // orchestratord subprocesses so tests exercise the full pipeline: gRPC
-// client → orchestratord → Bitcoin Core.
+// client → orchestratord → Litecoin Core.
 package testharness
 
 import (

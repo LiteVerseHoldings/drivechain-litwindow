@@ -6,7 +6,7 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:sail_ui/sail_ui.dart';
 
-/// Tracks Bitcoin Core's PID by monitoring the bitcoin.pid file in its datadir,
+/// Tracks Litecoin Core's PID by monitoring the bitcoin.pid file in its datadir,
 /// and provides methods to start and stop watching the file.
 /// The PID file location is network-aware:
 /// - mainnet: {datadir}/bitcoin.pid
@@ -30,7 +30,7 @@ class BitcoinCorePidTracker {
       return;
     }
 
-    log.d('Starting Bitcoin Core PID file watcher');
+    log.d('Starting Litecoin Core PID file watcher');
     _watcher = Timer.periodic(
       const Duration(seconds: 10),
       (_) => _checkPidFile(),
@@ -45,7 +45,7 @@ class BitcoinCorePidTracker {
     _watcher?.cancel();
     _watcher = null;
     currentPid = null;
-    log.d('Stopped Bitcoin Core PID file watcher');
+    log.d('Stopped Litecoin Core PID file watcher');
   }
 
   /// Check the bitcoin.pid file and update our tracked PID
@@ -62,7 +62,7 @@ class BitcoinCorePidTracker {
 
         if (pid != null && pid != currentPid) {
           log.i(
-            'Bitcoin Core PID updated from bitcoin.pid (${pidFile.path}): $pid',
+            'Litecoin Core PID updated from bitcoin.pid (${pidFile.path}): $pid',
           );
           currentPid = pid;
         }
@@ -76,7 +76,7 @@ class BitcoinCorePidTracker {
         }
       }
     } catch (e) {
-      log.e('Error checking Bitcoin Core PID file: $e');
+      log.e('Error checking Litecoin Core PID file: $e');
     }
   }
 

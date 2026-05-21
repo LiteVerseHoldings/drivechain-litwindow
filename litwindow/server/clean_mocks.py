@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Remove legacy Bitcoin Core RPC methods from mock file."""
+"""Remove legacy Litecoin Core RPC methods from mock file."""
 
 legacy_methods = [
     "AddMultisigAddress",

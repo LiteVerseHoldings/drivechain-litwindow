@@ -144,7 +144,7 @@ Future<(Directory, File, Logger)> init(String arguments) async {
   GetIt.I.registerLazySingleton<SettingsProvider>(() => settingsProvider);
   GetIt.I.registerLazySingleton<FormatterProvider>(() => FormatterProvider(settingsProvider));
 
-  // Initialize BitcoinConfProvider eagerly to load config before UI renders
+  // Initialize the core config provider eagerly before UI renders.
   final bitcoinConfProvider = await BitcoinConfProvider.create(GetIt.I.get<AppRouter>());
   GetIt.I.registerLazySingleton<BitcoinConfProvider>(() => bitcoinConfProvider);
 
@@ -805,7 +805,7 @@ Future<void> bootBitwindowBackend(Logger log) async {
   }());
 
   // 1. Start bitwindowd — it manages orchestratord internally,
-  //    which in turn manages bitcoind, enforcer, and sidechains.
+  //    which in turn manages litecoind, enforcer, and sidechains.
   log.i('STARTUP: starting bitwindowd');
   await binaryProvider.start(bitwindow);
 
@@ -860,14 +860,14 @@ Future<void> bootBitwindowBackend(Logger log) async {
   }
 
   // 4. Stream binary logs and start watching state.
-  _streamBinaryLogs(orchestrator, 'bitcoind', BinaryType.BINARY_TYPE_BITCOIND, log);
+  _streamBinaryLogs(orchestrator, 'litecoind', BinaryType.BINARY_TYPE_BITCOIND, log);
   _streamBinaryLogs(orchestrator, 'enforcer', BinaryType.BINARY_TYPE_ENFORCER, log);
   _streamBinaryLogs(orchestrator, 'bitwindow', BinaryType.BINARY_TYPE_BITWINDOWD, log);
 
   log.i('STARTUP: starting backend state watch');
   backendState.startWatching();
 
-  // 5. Kick off the L1 stack (bitcoind → wallet → IBD → enforcer). StartWithL1
+  // 5. Kick off the L1 stack (litecoind → wallet → IBD → enforcer). StartWithL1
   //    is fire-and-forget on the server now — boot runs on a background
   //    goroutine and survives any transport blip. Download bytes come via
   //    SyncProvider's polled GetSyncStatus; connection state via

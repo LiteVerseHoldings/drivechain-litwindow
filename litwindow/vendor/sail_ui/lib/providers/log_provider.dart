@@ -59,7 +59,7 @@ class LogProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Add a startup marker entry (e.g., "--- Starting Bitcoin Core ---").
+  /// Add a startup marker entry (e.g., "--- Starting Litecoin Core ---").
   void addStartupMarker(BinaryType type, String binaryName) {
     final now = DateTime.now();
     final timeStr =
@@ -74,7 +74,7 @@ class LogProvider extends ChangeNotifier {
     addLog(entry);
   }
 
-  /// Add an exit marker entry (e.g., "--- Bitcoin Core exited (code 0) ---").
+  /// Add an exit marker entry (e.g., "--- Litecoin Core exited (code 0) ---").
   void addExitMarker(BinaryType type, String binaryName, int? exitCode) {
     final now = DateTime.now();
     final timeStr =

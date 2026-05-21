@@ -4,7 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:sail_ui/gen/walletmanager/v1/walletmanager.pb.dart' as wmpb;
 import 'package:sail_ui/rpcs/orchestrator_rpc.dart';
 
-/// Surfaces the orchestrator's Bitcoin Core variant picker.
+/// Surfaces the orchestrator's Litecoin Core variant picker.
 ///
 /// The backend filters by current network (and returns an empty list on
 /// mainnet), so the provider is intentionally dumb — it forwards calls and

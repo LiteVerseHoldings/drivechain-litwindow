@@ -34,7 +34,7 @@ class ReceiveTab extends StatelessWidget {
                 children: [
                   Expanded(
                     child: SailCard(
-                      title: 'Receive Bitcoin on L1',
+                      title: 'Receive Litecoin on L1',
                       error: model.modelError,
                       child: SailColumn(
                         spacing: SailStyleValues.padding16,

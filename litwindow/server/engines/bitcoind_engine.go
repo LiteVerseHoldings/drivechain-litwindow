@@ -74,7 +74,7 @@ func (p *Parser) Run(ctx context.Context) error {
 				Msgf("bitcoind_engine/parser: processing block tick")
 
 			if err := p.handleBlockTick(ctx); err != nil {
-				// Don't log Bitcoin Core startup errors (e.g., "-28: Loading block index")
+				// Don't log Litecoin Core startup errors (e.g., "-28: Loading block index")
 				if !isBitcoinCoreStartupError(err.Error()) {
 					zerolog.Ctx(ctx).Err(err).Msgf("unable to handle block tick")
 				}
@@ -106,7 +106,7 @@ func (p *Parser) handleBlockTick(ctx context.Context) error {
 
 	case connect.CodeOf(err) == connect.CodeUnavailable:
 		zerolog.Ctx(ctx).Debug().
-			Msgf("bitcoind_engine/parser: bitcoin core is not available, waiting for connection..")
+			Msgf("bitcoind_engine/parser: Litecoin Core is not available, waiting for connection..")
 		return nil
 
 	case err != nil:
@@ -186,7 +186,7 @@ func (p *Parser) handleBlockTick(ctx context.Context) error {
 			batchEnd = min(batchEnd, p.conf.SyncToHeight)
 		}
 
-		// Make sure to not apply any timeouts here. Bitcoin Core can hang in
+		// Make sure to not apply any timeouts here. Litecoin Core can hang in
 		// instances of Core being busy processing blocks, where RPC requests
 		// go unanswered for a little while.
 		pool := logpool.NewWithResults[lo.Tuple2[uint32, *wire.MsgBlock]](ctx, "bitcoind_engine/processBlocks").

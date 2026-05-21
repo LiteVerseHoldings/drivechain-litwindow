@@ -150,7 +150,7 @@ type HealthCheckOpts struct {
 // NewHealthChecker creates the appropriate health checker for a binary config.
 func NewHealthChecker(config BinaryConfig, opts ...HealthCheckOpts) HealthChecker {
 	timeout := 2 * time.Second
-	// Bitcoin Core holds cs_main during block validation; getblockchaininfo
+	// Litecoin Core holds cs_main during block validation; getblockchaininfo
 	// routinely takes many seconds during IBD on slow storage. A short
 	// deadline trips the connection monitor on every poll and storm-
 	// reconnects against an already-overloaded daemon. 60s is the budget
@@ -233,7 +233,7 @@ type jsonRPCResponse struct {
 	} `json:"error"`
 }
 
-// CoreStatusClient is a minimal Bitcoin Core JSON-RPC client for startup sequencing checks.
+// CoreStatusClient is a minimal Litecoin Core JSON-RPC client for startup sequencing checks.
 // It only implements the 2-3 calls needed to check wallet unlock and IBD status.
 type CoreStatusClient struct {
 	url      string
@@ -253,7 +253,7 @@ func (c *CoreStatusClient) call(ctx context.Context, method string, params ...in
 	return CallBitcoindRPC(ctx, c.url, c.user, c.password, method, params)
 }
 
-// IsHeaderSyncComplete reports whether Bitcoin Core has finished downloading
+// IsHeaderSyncComplete reports whether Litecoin Core has finished downloading
 // headers — block IBD may still be in progress. Enforcer only needs headers
 // to start validating BIP300/301 activity (it syncs blocks alongside Core),
 // so gating on IBD forces users to wait for the full chain when they don't
@@ -283,7 +283,7 @@ func (c *CoreStatusClient) IsHeaderSyncComplete(ctx context.Context) (bool, erro
 	return info.Headers >= info.Blocks, nil
 }
 
-// IsWalletLoaded checks if a wallet is loaded in Bitcoin Core.
+// IsWalletLoaded checks if a wallet is loaded in Litecoin Core.
 func (c *CoreStatusClient) IsWalletLoaded(ctx context.Context) (bool, error) {
 	result, err := c.call(ctx, "getwalletinfo")
 	if err != nil {

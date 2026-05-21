@@ -390,7 +390,7 @@ class StartersPageViewModel extends BaseViewModel {
   final TextEditingController paymentTxIdController = TextEditingController();
 
   void init() {
-    amountController.text = '1.0 BTC';
+    amountController.text = '1.0 LTC';
     // Re-render whenever the wallet stream emits — without this, opening the
     // Starters tab before the WatchWalletData stream has delivered the
     // enforcer wallet leaves the table permanently empty (the FutureBuilder

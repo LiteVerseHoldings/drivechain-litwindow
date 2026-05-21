@@ -107,7 +107,7 @@ func New(
 		}
 	}()
 
-	// Start background sync of Bitcoin Core addresses to addressbook
+	// Start background sync of Litecoin Core addresses to addressbook
 	go s.startAddressSyncLoop(ctx)
 
 	return s
@@ -125,7 +125,7 @@ type Server struct {
 }
 
 // CreateBitcoinCoreWallet implements walletv1connect.WalletServiceHandler.
-// Test endpoint to verify descriptor import to Bitcoin Core.
+// Test endpoint to verify descriptor import to Litecoin Core.
 func (s *Server) CreateBitcoinCoreWallet(ctx context.Context, c *connect.Request[pb.CreateBitcoinCoreWalletRequest]) (*connect.Response[pb.CreateBitcoinCoreWalletResponse], error) {
 	seedHex := strings.TrimSpace(c.Msg.SeedHex)
 	if seedHex == "" {
@@ -137,9 +137,9 @@ func (s *Server) CreateBitcoinCoreWallet(ctx context.Context, c *connect.Request
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("name required"))
 	}
 
-	// Directly import to Bitcoin Core - no wallet.json needed
+	// Directly import to Litecoin Core - no wallet.json needed
 	if err := s.walletEngine.CreateBitcoinCoreWalletFromSeed(ctx, coreWalletName, seedHex); err != nil {
-		zerolog.Ctx(ctx).Error().Err(err).Msg("create Bitcoin Core wallet failed")
+		zerolog.Ctx(ctx).Error().Err(err).Msg("create Litecoin Core wallet failed")
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("create wallet: %w", err))
 	}
 
@@ -159,7 +159,7 @@ func (s *Server) CreateBitcoinCoreWallet(ctx context.Context, c *connect.Request
 	zerolog.Ctx(ctx).Info().
 		Str("core_wallet_name", coreWalletName).
 		Str("first_address", addrResp.Msg.Address).
-		Msg("Created Bitcoin Core wallet from seed")
+		Msg("Created Litecoin Core wallet from seed")
 
 	return connect.NewResponse(&pb.CreateBitcoinCoreWalletResponse{
 		WalletId:       "", // Not used in test
@@ -272,10 +272,10 @@ func (s *Server) SendTransaction(ctx context.Context, c *connect.Request[pb.Send
 		}), nil
 	}
 
-	// Route to Bitcoin Core
+	// Route to Litecoin Core
 	coreWalletName, err := s.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 	if err != nil {
-		return nil, fmt.Errorf("get Bitcoin Core wallet: %w", err)
+		return nil, fmt.Errorf("get Litecoin Core wallet: %w", err)
 	}
 
 	bitcoind, err := s.bitcoind.Get(ctx)
@@ -283,7 +283,7 @@ func (s *Server) SendTransaction(ctx context.Context, c *connect.Request[pb.Send
 		return nil, fmt.Errorf("get bitcoind client: %w", err)
 	}
 
-	// Convert satoshi amounts to BTC (Bitcoin Core uses BTC, not satoshis)
+	// Convert satoshi amounts to LTC (Litecoin Core uses LTC, not satoshis)
 	destinations := make(map[string]float64)
 	for addr, sats := range c.Msg.Destinations {
 		destinations[addr] = float64(sats) / 1e8
@@ -295,7 +295,7 @@ func (s *Server) SendTransaction(ctx context.Context, c *connect.Request[pb.Send
 		if err != nil {
 			return nil, err
 		}
-		log.Info().Msgf("send tx: broadcast transaction with required inputs (Bitcoin Core): %s", txid)
+		log.Info().Msgf("send tx: broadcast transaction with required inputs (Litecoin Core): %s", txid)
 		return connect.NewResponse(&pb.SendTransactionResponse{
 			Txid: txid,
 		}), nil
@@ -306,7 +306,7 @@ func (s *Server) SendTransaction(ctx context.Context, c *connect.Request[pb.Send
 		Wallet:       coreWalletName,
 	}
 
-	// Set fee rate if provided (Bitcoin Core expects sat/vB directly)
+	// Set fee rate if provided (Litecoin Core expects sat/vB directly)
 	if c.Msg.FeeSatPerVbyte > 0 {
 		sendReq.FeeRate = float64(c.Msg.FeeSatPerVbyte)
 	}
@@ -318,7 +318,7 @@ func (s *Server) SendTransaction(ctx context.Context, c *connect.Request[pb.Send
 		return nil, err
 	}
 
-	log.Info().Msgf("send tx: broadcast transaction (Bitcoin Core): %s", resp.Msg.Txid)
+	log.Info().Msgf("send tx: broadcast transaction (Litecoin Core): %s", resp.Msg.Txid)
 
 	return connect.NewResponse(&pb.SendTransactionResponse{
 		Txid: resp.Msg.Txid,
@@ -402,7 +402,7 @@ func (s *Server) GetNewAddress(ctx context.Context, c *connect.Request[pb.GetNew
 		return nil, fmt.Errorf("get wallet type: %w", err)
 	}
 
-	// For Bitcoin Core wallets, derive addresses and find the first unused one
+	// For Litecoin Core wallets, derive addresses and find the first unused one
 	// This prevents address reuse and gaps in the derivation path
 	if walletType == engines.WalletTypeBitcoinCore || walletType == engines.WalletTypeWatchOnly {
 		unusedAddress, derivedAddresses, err := s.deriveAndCheckAddresses(ctx, walletId)
@@ -450,7 +450,7 @@ func (s *Server) GetNewAddress(ctx context.Context, c *connect.Request[pb.GetNew
 		address = resp.Msg.Address
 
 	case engines.WalletTypeBitcoinCore:
-		// Bitcoin Core path
+		// Litecoin Core path
 		address, err = s.getBitcoinCoreAddress(ctx, walletId, s.walletEngine.GetBitcoinCoreWalletName)
 		if err != nil {
 			return nil, err
@@ -479,7 +479,7 @@ func (s *Server) GetNewAddress(ctx context.Context, c *connect.Request[pb.GetNew
 
 	return connect.NewResponse(&pb.GetNewAddressResponse{
 		Address: address,
-		Index:   0, // Bitcoin Core doesn't expose index, Enforcer doesn't expose it either
+		Index:   0, // Litecoin Core doesn't expose index, Enforcer doesn't expose it either
 	}), nil
 }
 
@@ -490,7 +490,7 @@ type DerivedAddress struct {
 	Used    bool
 }
 
-// deriveAndCheckAddresses is the single source of truth for Bitcoin Core address derivation
+// deriveAndCheckAddresses is the single source of truth for Litecoin Core address derivation
 // It derives addresses from the seed and checks which have been used
 // Returns: (firstUnusedAddress, allDerivedAddresses, error)
 func (s *Server) deriveAndCheckAddresses(ctx context.Context, walletId string) (string, []DerivedAddress, error) {
@@ -622,7 +622,7 @@ func (s *Server) syncCoreAddresses(ctx context.Context) error {
 		return fmt.Errorf("get wallets: %w", err)
 	}
 
-	// Sync addresses for each Bitcoin Core wallet
+	// Sync addresses for each Litecoin Core wallet
 	for _, wallet := range wallets {
 		if wallet.WalletType != engines.WalletTypeBitcoinCore && wallet.WalletType != engines.WalletTypeWatchOnly {
 			continue
@@ -675,7 +675,7 @@ func (s *Server) startAddressSyncLoop(ctx context.Context) {
 	}
 }
 
-// getBitcoinCoreAddress is a helper to get a new address from Bitcoin Core wallets
+// getBitcoinCoreAddress is a helper to get a new address from Litecoin Core wallets
 func (s *Server) getBitcoinCoreAddress(
 	ctx context.Context,
 	walletId string,
@@ -695,7 +695,7 @@ func (s *Server) getBitcoinCoreAddress(
 		Wallet: walletName,
 	}))
 	if err != nil {
-		return "", fmt.Errorf("bitcoin core get new address: %w", err)
+		return "", fmt.Errorf("Litecoin Core get new address: %w", err)
 	}
 
 	return resp.Msg.Address, nil
@@ -730,7 +730,7 @@ func (s *Server) GetBalance(ctx context.Context, c *connect.Request[pb.GetBalanc
 	case engines.WalletTypeBitcoinCore:
 		coreWalletName, err := s.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 		if err != nil {
-			return nil, fmt.Errorf("get bitcoin core wallet: %w", err)
+			return nil, fmt.Errorf("get Litecoin Core wallet: %w", err)
 		}
 
 		bitcoindClient, err := s.bitcoind.Get(ctx)
@@ -742,7 +742,7 @@ func (s *Server) GetBalance(ctx context.Context, c *connect.Request[pb.GetBalanc
 			Wallet: coreWalletName,
 		}))
 		if err != nil {
-			return nil, fmt.Errorf("get balances from bitcoin core: %w", err)
+			return nil, fmt.Errorf("get balances from Litecoin Core: %w", err)
 		}
 
 		confirmedSats := uint64(balancesResp.Msg.Mine.Trusted * 100_000_000)
@@ -768,7 +768,7 @@ func (s *Server) GetBalance(ctx context.Context, c *connect.Request[pb.GetBalanc
 			Wallet: watchWalletName,
 		}))
 		if err != nil {
-			return nil, fmt.Errorf("get balances from bitcoin core: %w", err)
+			return nil, fmt.Errorf("get balances from Litecoin Core: %w", err)
 		}
 
 		confirmedSats := uint64(balancesResp.Msg.Watchonly.Trusted * 100_000_000)
@@ -870,10 +870,10 @@ func (s *Server) ListTransactions(ctx context.Context, c *connect.Request[pb.Lis
 		return connect.NewResponse(res), nil
 	}
 
-	// Bitcoin Core path
+	// Litecoin Core path
 	coreWalletName, err := s.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 	if err != nil {
-		return nil, fmt.Errorf("get Bitcoin Core wallet: %w", err)
+		return nil, fmt.Errorf("get Litecoin Core wallet: %w", err)
 	}
 
 	bitcoind, err := s.bitcoind.Get(ctx)
@@ -886,7 +886,7 @@ func (s *Server) ListTransactions(ctx context.Context, c *connect.Request[pb.Lis
 		Count:  1000, // Get last 1000 transactions
 	}))
 	if err != nil {
-		return nil, fmt.Errorf("bitcoin core list transactions: %w", err)
+		return nil, fmt.Errorf("Litecoin Core list transactions: %w", err)
 	}
 
 	// Fetch address book and notes
@@ -1119,12 +1119,12 @@ func (s *Server) CreateSidechainDeposit(ctx context.Context, c *connect.Request[
 
 	amount, err := btcutil.NewAmount(c.Msg.Amount)
 	if err != nil || amount < 0 {
-		return nil, fmt.Errorf("invalid amount, must be a BTC-amount greater than zero")
+		return nil, fmt.Errorf("invalid amount, must be a LTC-amount greater than zero")
 	}
 
 	fee, err := btcutil.NewAmount(c.Msg.Fee)
 	if err != nil || fee < 0 {
-		return nil, fmt.Errorf("invalid fee, must be a BTC-amount greater than zero")
+		return nil, fmt.Errorf("invalid fee, must be a LTC-amount greater than zero")
 	}
 
 	wallet, err := s.wallet.Get(ctx)
@@ -1376,7 +1376,7 @@ func (s *Server) fetchBlockTimesForUtxos(
 func (s *Server) listUnspentBitcoinCore(ctx context.Context, walletId string, getLabel func(string) string) ([]*pb.UnspentOutput, error) {
 	coreWalletName, err := s.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 	if err != nil {
-		return nil, fmt.Errorf("get Bitcoin Core wallet: %w", err)
+		return nil, fmt.Errorf("get Litecoin Core wallet: %w", err)
 	}
 
 	bitcoind, err := s.bitcoind.Get(ctx)
@@ -1393,7 +1393,7 @@ func (s *Server) listUnspentBitcoinCore(ctx context.Context, walletId string, ge
 
 	denials, err := deniability.List(ctx, s.database)
 	if err != nil {
-		return nil, fmt.Errorf("bitcoin core: could not list denials: %w", err)
+		return nil, fmt.Errorf("Litecoin Core: could not list denials: %w", err)
 	}
 
 	// Collect unique txids to fetch timestamps
@@ -1617,10 +1617,10 @@ func (s *Server) ListReceiveAddresses(ctx context.Context, c *connect.Request[pb
 	}
 
 	if walletType != engines.WalletTypeEnforcer {
-		// Bitcoin Core version
+		// Litecoin Core version
 		coreWalletName, err := s.walletEngine.GetBitcoinCoreWalletName(ctx, walletId)
 		if err != nil {
-			return nil, fmt.Errorf("get bitcoin core wallet: %w", err)
+			return nil, fmt.Errorf("get Litecoin Core wallet: %w", err)
 		}
 
 		bitcoind, err := s.bitcoind.Get(ctx)
@@ -1633,7 +1633,7 @@ func (s *Server) ListReceiveAddresses(ctx context.Context, c *connect.Request[pb
 			Wallet: coreWalletName,
 		}))
 		if err != nil {
-			return nil, fmt.Errorf("bitcoin core list unspent: %w", err)
+			return nil, fmt.Errorf("Litecoin Core list unspent: %w", err)
 		}
 
 		// Fetch address book for labels
@@ -1665,7 +1665,7 @@ func (s *Server) ListReceiveAddresses(ctx context.Context, c *connect.Request[pb
 					Address:           utxo.Address,
 					Label:             getLabel(utxo.Address),
 					CurrentBalanceSat: uint64(utxo.Amount * 100_000_000),
-					IsChange:          false, // Bitcoin Core doesn't expose this easily
+					IsChange:          false, // Litecoin Core doesn't expose this easily
 				}
 			}
 		}
@@ -1770,7 +1770,7 @@ func (s *Server) GetStats(ctx context.Context, c *connect.Request[pb.GetStatsReq
 	}
 
 	if walletType != engines.WalletTypeEnforcer {
-		// Bitcoin Core version
+		// Litecoin Core version
 		// Get UTXOs
 		utxos, err := s.ListUnspent(ctx, connect.NewRequest(&pb.ListUnspentRequest{WalletId: walletId}))
 		if err != nil {
@@ -1806,7 +1806,7 @@ func (s *Server) GetStats(ctx context.Context, c *connect.Request[pb.GetStatsReq
 			}
 		}
 
-		// Bitcoin Core wallets don't track sidechain deposits separately
+		// Litecoin Core wallets don't track sidechain deposits separately
 		return connect.NewResponse(&pb.GetStatsResponse{
 			UtxosCurrent:                      utxoCount,
 			UtxosUniqueAddresses:              uniqueAddressCount,
@@ -2139,7 +2139,7 @@ func (s *Server) CheckChequeFunding(ctx context.Context, c *connect.Request[pb.C
 			}
 		}
 
-		// Convert BTC to satoshis
+		// Convert LTC to satoshis
 		amountSats := uint64(totalAmount * 100000000)
 
 		// Always update — handles new fundings arriving after first one
@@ -2861,21 +2861,21 @@ func generateDynamicBuckets(minVal, maxVal uint64, numBuckets int) []bucketRange
 	// These are logarithmically spaced for good distribution
 	boundaries := []uint64{
 		546,            // dust limit
-		1_000,          // 0.00001 BTC
-		5_000,          // 0.00005 BTC
-		10_000,         // 0.0001 BTC
-		50_000,         // 0.0005 BTC
-		100_000,        // 0.001 BTC
-		500_000,        // 0.005 BTC
-		1_000_000,      // 0.01 BTC
-		5_000_000,      // 0.05 BTC
-		10_000_000,     // 0.1 BTC
-		50_000_000,     // 0.5 BTC
-		100_000_000,    // 1 BTC
-		500_000_000,    // 5 BTC
-		1_000_000_000,  // 10 BTC
-		5_000_000_000,  // 50 BTC
-		10_000_000_000, // 100 BTC
+		1_000,          // 0.00001 LTC
+		5_000,          // 0.00005 LTC
+		10_000,         // 0.0001 LTC
+		50_000,         // 0.0005 LTC
+		100_000,        // 0.001 LTC
+		500_000,        // 0.005 LTC
+		1_000_000,      // 0.01 LTC
+		5_000_000,      // 0.05 LTC
+		10_000_000,     // 0.1 LTC
+		50_000_000,     // 0.5 LTC
+		100_000_000,    // 1 LTC
+		500_000_000,    // 5 LTC
+		1_000_000_000,  // 10 LTC
+		5_000_000_000,  // 50 LTC
+		10_000_000_000, // 100 LTC
 	}
 
 	// Find which boundaries are relevant for this wallet's range
@@ -2942,11 +2942,11 @@ func formatBucketRange(minSats, maxSats uint64) string {
 		}
 	}
 
-	return fmt.Sprintf("%s - %s BTC", formatVal(minBTC), formatVal(maxBTC))
+	return fmt.Sprintf("%s - %s LTC", formatVal(minBTC), formatVal(maxBTC))
 }
 
 // BumpFee implements RBF (Replace-By-Fee) for unconfirmed transactions.
-// Uses Bitcoin Core's bumpfee command with automatic fee estimation.
+// Uses Litecoin Core's bumpfee command with automatic fee estimation.
 func (s *Server) BumpFee(ctx context.Context, c *connect.Request[pb.BumpFeeRequest]) (*connect.Response[pb.BumpFeeResponse], error) {
 	log := zerolog.Ctx(ctx)
 	txid := c.Msg.Txid

@@ -9,7 +9,7 @@ service ThunderConfService {
   // Write Thunder configuration content.
   rpc WriteThunderConfig(WriteThunderConfigRequest) returns (WriteThunderConfigResponse);
 
-  // Sync network from Bitcoin Core config.
+  // Sync network from Litecoin Core config.
   rpc SyncNetworkFromBitcoinConf(SyncNetworkFromBitcoinConfRequest) returns (SyncNetworkFromBitcoinConfResponse);
 }
 

@@ -185,7 +185,7 @@ class MempoolProvider extends ChangeNotifier {
             EstimateSmartFeeRequest()..confTarget = Int64(target),
           );
           if (estimate.feeRate > 0) {
-            // Convert BTC/kB to sat/vB
+            // Convert LTC/kB to sat/vB
             final satPerVb = (estimate.feeRate * 100000000 / 1000).toDouble();
             feeEstimates.add(FeeEstimate(blocks: target, feeRate: satPerVb));
           }

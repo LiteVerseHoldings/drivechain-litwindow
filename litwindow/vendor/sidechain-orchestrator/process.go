@@ -155,7 +155,7 @@ type ProcessManager struct {
 	pidManager *PidFileManager
 	log        zerolog.Logger
 
-	// CoreVariant resolves the binary path for Bitcoin Core when set. If nil
+	// CoreVariant resolves the binary path for Litecoin Core when set. If nil
 	// (or it returns ok=false), the default flat BinaryPath is used.
 	CoreVariant func(config BinaryConfig) (CoreVariantSpec, bool)
 

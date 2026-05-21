@@ -26,7 +26,7 @@ class PidFileManager {
     _bitcoinCorePidTracker.startWatching();
   }
 
-  /// Current Bitcoin Core PID from its native bitcoind.pid file
+  /// Current Litecoin Core PID from its native bitcoind.pid file
   int? get bitcoinCorePid => _bitcoinCorePidTracker.currentPid;
 
   /// Dispose of resources
@@ -56,7 +56,7 @@ class PidFileManager {
   }
 
   /// Read PID from file (returns null if file doesn't exist or is invalid).
-  /// For Bitcoin Core, also checks the native bitcoind.pid as a fallback.
+  /// For Litecoin Core, also checks the native bitcoind.pid as a fallback.
   Future<int?> readPidFile(Binary binary) async {
     try {
       final file = _pidFile(binary);
@@ -73,11 +73,11 @@ class PidFileManager {
         }
       }
 
-      // Fallback: check Bitcoin Core's native PID file
+      // Fallback: check Litecoin Core's native PID file
       if (binary is BitcoinCore) {
         final nativePid = _bitcoinCorePidTracker.currentPid;
         if (nativePid != null) {
-          log.i('Found Bitcoin Core PID $nativePid from native bitcoind.pid');
+          log.i('Found Litecoin Core PID $nativePid from native bitcoind.pid');
           return nativePid;
         }
       }

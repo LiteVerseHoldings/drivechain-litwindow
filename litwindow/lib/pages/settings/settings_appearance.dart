@@ -85,14 +85,14 @@ class _SettingsAppearanceState extends State<SettingsAppearance> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SailText.primary15('Bitcoin Unit'),
+            SailText.primary15('Litecoin Unit'),
             const SailSpacing(SailStyleValues.padding08),
             SailDropdownButton<BitcoinUnit>(
               value: _settingsProvider.bitcoinUnit,
               items: [
                 SailDropdownItem<BitcoinUnit>(
                   value: BitcoinUnit.btc,
-                  label: 'BTC',
+                  label: 'LTC',
                 ),
                 SailDropdownItem<BitcoinUnit>(
                   value: BitcoinUnit.sats,
@@ -106,7 +106,7 @@ class _SettingsAppearanceState extends State<SettingsAppearance> {
               },
             ),
             const SailSpacing(4),
-            SailText.secondary12('Choose how Bitcoin amounts are displayed'),
+            SailText.secondary12('Choose how Litecoin amounts are displayed'),
           ],
         ),
         SailSpacing(SailStyleValues.padding64),

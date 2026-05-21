@@ -13,7 +13,7 @@ import (
 const bitwindowBitcoinConfFilename = "litwindow-litecoin.conf"
 const legacyBitwindowBitcoinConfFilename = "bitwindow-bitcoin.conf"
 
-// BitcoinConfManager manages Bitcoin Core configuration files.
+// BitcoinConfManager manages Litecoin Core configuration files.
 // Port of the data/config logic from sail_ui/lib/providers/bitcoin_conf_provider.dart.
 // UI-specific logic (file watching, navigation, restart) is omitted.
 type BitcoinConfManager struct {
@@ -125,7 +125,7 @@ func (m *BitcoinConfManager) GetDefaultConfig() string {
 	switch m.Network {
 	case NetworkForknet:
 		// Forknet runs as chain=main, so fallbackfee belongs here (not in
-		// the common block) — Bitcoin Core rejects fallbackfee on real
+		// the common block) — Litecoin Core rejects fallbackfee on real
 		// mainnet but accepts it on this drivechain testnet.
 		mainSection = `# Forknet-specific settings (drivechain testnet on mainnet params)
 [main]
@@ -146,7 +146,7 @@ fallbackfee=0.00021
 	}
 
 	// Pin datadir explicitly so bitcoind doesn't silently fall back to
-	// ~/.bitcoin/Bitcoin/etc. Mainnet → Bitcoin Core's standard datadir;
+	// ~/.bitcoin/Bitcoin/etc. Mainnet → Litecoin Core's standard datadir;
 	// every other network → Drivechain dir.
 	datadir := m.rootDirNetwork(m.Network)
 
@@ -213,7 +213,7 @@ func (m *BitcoinConfManager) SaveConfig() error {
 // UpdateNetwork writes the new network to the config file. On a cross-group
 // swap (default ↔ forknet) it first snapshots the live `datadir=` value into
 // the leaving group's slot, then materializes the entering group's slot into
-// `datadir=`. Within a group, datadir is left untouched (Bitcoin Core's chain
+// `datadir=`. Within a group, datadir is left untouched (Litecoin Core's chain
 // subdirs partition the four default networks under the same folder).
 // 1:1 port of Dart updateNetwork (frontend_bitcoin_conf_provider.dart L290).
 func (m *BitcoinConfManager) UpdateNetwork(n Network) error {

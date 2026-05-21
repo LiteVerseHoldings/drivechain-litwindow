@@ -148,7 +148,7 @@ func TestGetDefaultConfigMainnetMatchesEnforcerExpectations(t *testing.T) {
 	}
 }
 
-// Bitcoin Core rejects a non-zero fallbackfee on real mainnet. The setting
+// Litecoin Core rejects a non-zero fallbackfee on real mainnet. The setting
 // can still appear in [signet]/[test]/[regtest] sections (bitcoind only
 // applies the matching section), but must NOT be in the global block or
 // [main] section.
@@ -263,7 +263,7 @@ func TestHasDatadirForNetwork(t *testing.T) {
 		t.Error("mainnet should accept top-level datadir without slot")
 	}
 
-	// Section-scoped datadir is ignored — Bitcoin Core only honours the
+	// Section-scoped datadir is ignored — Litecoin Core only honours the
 	// top-level value.
 	m3 := newTestManager(tmpDir)
 	m3.Config = NewBitcoinConfig()
@@ -384,7 +384,7 @@ func TestSwapAdoptsManuallyEditedDatadirIntoSlot(t *testing.T) {
 }
 
 // Within-group swap (mainnet ↔ signet) leaves datadir= alone and writes no
-// slot — Bitcoin Core's chain subdirs partition the four default networks
+// slot — Litecoin Core's chain subdirs partition the four default networks
 // under the same folder.
 func TestUpdateNetworkWithinDefaultGroupKeepsDatadir(t *testing.T) {
 	tmpDir := t.TempDir()

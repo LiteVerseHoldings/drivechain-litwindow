@@ -1296,18 +1296,18 @@ class _AppearanceSettingsContentState extends State<_AppearanceSettingsContent> 
           ],
         ),
 
-        // Bitcoin Unit Selection
+        // Litecoin Unit Selection
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SailText.primary15('Bitcoin Unit'),
+            SailText.primary15('Litecoin Unit'),
             const SailSpacing(SailStyleValues.padding08),
             SailDropdownButton<BitcoinUnit>(
               value: _settingsProvider.bitcoinUnit,
               items: [
                 SailDropdownItem<BitcoinUnit>(
                   value: BitcoinUnit.btc,
-                  label: 'BTC',
+                  label: 'LTC',
                 ),
                 SailDropdownItem<BitcoinUnit>(
                   value: BitcoinUnit.sats,
@@ -1321,7 +1321,7 @@ class _AppearanceSettingsContentState extends State<_AppearanceSettingsContent> 
               },
             ),
             const SailSpacing(4),
-            SailText.secondary12('Choose how Bitcoin amounts are displayed'),
+            SailText.secondary12('Choose how Litecoin amounts are displayed'),
           ],
         ),
 
@@ -1533,11 +1533,11 @@ class _DataDirSelectionDialogState extends State<DataDirSelectionDialog> {
         constraints: const BoxConstraints(maxWidth: 600, maxHeight: 350),
 
         child: SailCard(
-          title: 'Select Bitcoin Data Directory',
+          title: 'Select Litecoin Data Directory',
           subtitle:
-              'Bitcoin mainnet requires substantial storage space (approximately 2.5TB). '
-              'Please select a directory with enough free space to store the Bitcoin data files.\n\n'
-              'This directory will be used for all Bitcoin data including blocks, chainstate, and wallet data',
+              'Litecoin mainnet requires substantial storage space (approximately 2.5TB). '
+              'Please select a directory with enough free space to store the Litecoin data files.\n\n'
+              'This directory will be used for all Litecoin data including blocks, chainstate, and wallet data',
           withCloseButton: true,
           child: SailColumn(
             spacing: SailStyleValues.padding16,
@@ -1778,11 +1778,11 @@ class _NetworkSwapProgressDialogState extends State<NetworkSwapProgressDialog> {
 
   void _initializeAllSteps() {
     final stepNames = [
-      'Stopping Bitcoin Core',
+      'Stopping Litecoin Core',
       'Stopping Enforcer',
       'Stopping LitWindow',
       'Waiting for processes to exit',
-      'Updating bitcoin.conf',
+      'Updating litecoin.conf',
       'Starting Core, Enforcer and LitWindow',
       'Network swap complete',
     ];

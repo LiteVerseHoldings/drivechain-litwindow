@@ -123,7 +123,7 @@ class BMMTab extends StatelessWidget {
                   SailRow(
                     spacing: SailStyleValues.padding08,
                     children: [
-                      SailText.primary12('Bid Amount (BTC):'),
+                      SailText.primary12('Bid Amount (LTC):'),
                       SizedBox(
                         width: 120,
                         child: SailTextField(

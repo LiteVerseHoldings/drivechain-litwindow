@@ -127,7 +127,7 @@ class NetworkStatsContent extends StatelessWidget {
             children: [
               Expanded(
                 child: StatItem(
-                  label: 'bitcoind',
+                  label: 'litecoind',
                   value: '${stats.bitcoindBandwidth.connectionCount} conn',
                   subtitle: 'PID ${stats.bitcoindBandwidth.pid}',
                 ),

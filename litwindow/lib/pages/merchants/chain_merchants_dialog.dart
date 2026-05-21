@@ -18,22 +18,22 @@ class ChainMerchantsDialog extends StatelessWidget {
   static const merchants = [
     ChainMerchant(
       name: 'BitRefill',
-      description: 'Buy gift cards and mobile top-ups with Bitcoin',
+      description: 'Buy gift cards and mobile top-ups with Litecoin',
       url: 'https://bitrefill.com',
     ),
     ChainMerchant(
-      name: 'Shopify via BTCPay',
-      description: 'E-commerce platform with Bitcoin payment integration',
-      url: 'https://btcpayserver.org/shopify',
+      name: 'Shopify via LTCPay',
+      description: 'E-commerce platform with Litecoin payment integration',
+      url: 'https://ltcpayserver.org/shopify',
     ),
     ChainMerchant(
-      name: 'Bare Bitcoin',
-      description: 'Buy Bitcoin, but only if you live in Norway',
-      url: 'https://barebitcoin.no',
+      name: 'Bare Litecoin',
+      description: 'Buy Litecoin, but only if you live in Norway',
+      url: 'https://barelitecoin.no',
     ),
     ChainMerchant(
       name: 'River',
-      description: 'Buy Bitcoin, but only if you live in USA',
+      description: 'Buy Litecoin, but only if you live in USA',
       url: 'https://river.com',
     ),
     // Add more merchants as needed
@@ -45,7 +45,7 @@ class ChainMerchantsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return SailDialog(
       title: 'Chain Merchants',
-      subtitle: 'Merchants and services that accept Bitcoin payments',
+      subtitle: 'Merchants and services that accept Litecoin payments',
       maxWidth: 600,
       maxHeight: 800,
       child: SizedBox(

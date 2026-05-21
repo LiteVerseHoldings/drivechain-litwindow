@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// CoreRPCClient is a Bitcoin Core JSON-RPC client that supports wallet-specific endpoints.
+// CoreRPCClient is a Litecoin Core JSON-RPC client that supports wallet-specific endpoints.
 type CoreRPCClient struct {
 	baseURL  string
 	user     string
@@ -19,7 +19,7 @@ type CoreRPCClient struct {
 	client   *http.Client
 }
 
-// NewCoreRPCClient creates a new Bitcoin Core RPC client.
+// NewCoreRPCClient creates a new Litecoin Core RPC client.
 func NewCoreRPCClient(host string, port int, user, password string) *CoreRPCClient {
 	// Use longer timeout on Windows due to slower disk I/O in CI environments
 	timeout := 30 * time.Second
@@ -52,7 +52,7 @@ type rpcError struct {
 	Message string `json:"message"`
 }
 
-// call makes a JSON-RPC call to Bitcoin Core.
+// call makes a JSON-RPC call to Litecoin Core.
 // If walletName is non-empty, routes to /wallet/<name>.
 func (c *CoreRPCClient) call(ctx context.Context, walletName, method string, params ...interface{}) (json.RawMessage, error) {
 	if params == nil {
@@ -110,13 +110,13 @@ func (c *CoreRPCClient) call(ctx context.Context, walletName, method string, par
 // Wallet management RPCs
 // ============================================================================
 
-// CreateWallet creates a new Bitcoin Core wallet.
+// CreateWallet creates a new Litecoin Core wallet.
 func (c *CoreRPCClient) CreateWallet(ctx context.Context, name string, disablePrivateKeys, blank bool) error {
 	_, err := c.call(ctx, "", "createwallet", name, disablePrivateKeys, blank)
 	return err
 }
 
-// LoadWallet loads an existing Bitcoin Core wallet.
+// LoadWallet loads an existing Litecoin Core wallet.
 func (c *CoreRPCClient) LoadWallet(ctx context.Context, name string) error {
 	_, err := c.call(ctx, "", "loadwallet", name)
 	return err
@@ -153,7 +153,7 @@ type ImportDescriptorResult struct {
 	} `json:"error,omitempty"`
 }
 
-// ImportDescriptors imports descriptors into a Bitcoin Core wallet.
+// ImportDescriptors imports descriptors into a Litecoin Core wallet.
 func (c *CoreRPCClient) ImportDescriptors(ctx context.Context, walletName string, descriptors []ImportDescriptor) ([]ImportDescriptorResult, error) {
 	result, err := c.call(ctx, walletName, "importdescriptors", descriptors)
 	if err != nil {
@@ -185,7 +185,7 @@ func (c *CoreRPCClient) GetBalance(ctx context.Context, walletName string) (floa
 
 // GetUnconfirmedBalance returns the unconfirmed balance.
 // Falls back to getbalances RPC if the deprecated getunconfirmedbalance is
-// not available (removed in Bitcoin Core v30+).
+// not available (removed in Litecoin Core v30+).
 func (c *CoreRPCClient) GetUnconfirmedBalance(ctx context.Context, walletName string) (float64, error) {
 	result, err := c.call(ctx, walletName, "getunconfirmedbalance")
 	if err == nil {

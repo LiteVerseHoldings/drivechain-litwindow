@@ -4,7 +4,7 @@ import 'package:logger/logger.dart';
 import 'package:sail_ui/sail_ui.dart';
 
 /// Restarts the L1 stack (bitcoind + enforcer) so config or datadir changes
-/// take effect. Pushed after the user confirms a Bitcoin Core data directory
+/// take effect. Pushed after the user confirms a Litecoin Core data directory
 /// or clicks Apply on the conf editor.
 class L1RestartPage extends StatefulWidget {
   final String reason;
@@ -19,7 +19,7 @@ class _L1RestartPageState extends State<L1RestartPage> {
   Logger get _log => GetIt.I.get<Logger>();
   BinaryProvider get _binaries => GetIt.I.get<BinaryProvider>();
 
-  final _step = _RestartStep('Restarting Bitcoin Core and Enforcer');
+  final _step = _RestartStep('Restarting Litecoin Core and Enforcer');
   bool _running = false;
   bool _done = false;
   String? _error;
@@ -126,11 +126,11 @@ class _L1RestartPageState extends State<L1RestartPage> {
                           const SizedBox(height: 16),
                           SailText.secondary13(
                             _done
-                                ? 'Bitcoin Core and Enforcer have been restarted.'
+                                ? 'Litecoin Core and Enforcer have been restarted.'
                                 : _error != null
                                 ? _error!
                                 : _running
-                                ? 'Stopping Enforcer and Bitcoin Core, then starting them on the new configuration...'
+                                ? 'Stopping Enforcer and Litecoin Core, then starting them on the new configuration...'
                                 : widget.reason,
                             textAlign: TextAlign.center,
                           ),

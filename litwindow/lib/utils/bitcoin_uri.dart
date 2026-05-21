@@ -13,11 +13,11 @@ class BitcoinURI {
     Map<String, String>? extraParams,
   }) : extraParams = extraParams ?? {};
 
-  /// Parses a Bitcoin URI string according to BIP-0021
+  /// Parses a Litecoin URI string according to BIP-0021
   /// Throws FormatException if URI is invalid
   static BitcoinURI parse(String uri) {
-    if (!uri.toLowerCase().startsWith('bitcoin:')) {
-      throw const FormatException('Not a bitcoin URI');
+    if (!uri.toLowerCase().startsWith('litecoin:')) {
+      throw const FormatException('Not a litecoin URI');
     }
 
     // Split the URI into address and query parts
@@ -67,7 +67,7 @@ class BitcoinURI {
     );
   }
 
-  /// Validates if a string could be a valid Bitcoin URI
+  /// Validates if a string could be a valid Litecoin URI
   static bool isValidURI(String uri) {
     try {
       parse(uri);

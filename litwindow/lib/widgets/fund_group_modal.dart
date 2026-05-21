@@ -30,7 +30,7 @@ class FundGroupModal extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: SailCard(
                   title: 'Fund ${viewModel.selectedGroup!.name}',
-                  subtitle: 'Send Bitcoin to this address to fund the multisig group',
+                  subtitle: 'Send Litecoin to this address to fund the multisig group',
                   child: SailColumn(
                     spacing: SailStyleValues.padding16,
                     children: [
@@ -84,7 +84,7 @@ class FundGroupModal extends StatelessWidget {
                                   children: [
                                     SailText.primary13(group.name),
                                     SailText.secondary12('${group.m} of ${group.n} multisig'),
-                                    SailText.secondary12('Balance: ${group.balance.toStringAsFixed(8)} BTC'),
+                                    SailText.secondary12('Balance: ${group.balance.toStringAsFixed(8)} LTC'),
                                   ],
                                 ),
                               ),

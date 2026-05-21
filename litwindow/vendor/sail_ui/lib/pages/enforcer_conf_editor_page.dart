@@ -228,13 +228,13 @@ class _NodeRpcSyncWarning extends StatelessWidget {
           const SailSpacing(SailStyleValues.padding08),
           Expanded(
             child: SailText.secondary12(
-              'Node RPC settings are out of sync with Bitcoin Core config.',
+              'Node RPC settings are out of sync with Litecoin Core config.',
               color: theme.colors.orange,
             ),
           ),
           const SailSpacing(SailStyleValues.padding12),
           SailButton(
-            label: 'Sync from Bitcoin Core',
+            label: 'Sync from Litecoin Core',
             variant: ButtonVariant.secondary,
             onPressed: () async {
               await enforcerConfProvider.syncNodeRpcFromBitcoinConf();

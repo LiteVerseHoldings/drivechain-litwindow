@@ -25,7 +25,7 @@ const (
 	// Derivation path for cheques: m/44'/0'/999'/{index}
 	chequeAccount = 999
 
-	// ChequeWalletName is the name of the watch-only Bitcoin Core wallet for cheques
+	// ChequeWalletName is the name of the watch-only Litecoin Core wallet for cheques
 	ChequeWalletName = "cheque_watch"
 )
 
@@ -213,7 +213,7 @@ func (e *ChequeEngine) ScanForFunds(ctx context.Context, walletId string, bitcoi
 				txid = utxo.Txid
 			}
 
-			// Convert BTC to satoshis
+			// Convert LTC to satoshis
 			amountSats := uint64(totalAmount * 100000000)
 
 			recoveries = append(recoveries, ChequeRecovery{
@@ -252,7 +252,7 @@ func (e *ChequeEngine) Start(ctx context.Context) <-chan struct{} {
 		}
 	}
 
-	// Import cheque descriptor into Bitcoin Core so it tracks all cheque addresses
+	// Import cheque descriptor into Litecoin Core so it tracks all cheque addresses
 	go func() {
 		defer finish()
 		e.importChequeDescriptor(ctx)
@@ -267,7 +267,7 @@ func (e *ChequeEngine) Start(ctx context.Context) <-chan struct{} {
 	return done
 }
 
-// importChequeDescriptors imports the cheque derivation path descriptors for all wallets into Bitcoin Core
+// importChequeDescriptors imports the cheque derivation path descriptors for all wallets into Litecoin Core
 func (e *ChequeEngine) importChequeDescriptor(ctx context.Context) {
 	log := zerolog.Ctx(ctx)
 
@@ -398,7 +398,7 @@ func (e *ChequeEngine) importDescriptorForWallet(ctx context.Context, bitcoind c
 	// Create wpkh descriptor without checksum first
 	descriptorWithoutChecksum := fmt.Sprintf("wpkh(%s/*)", xpub)
 
-	// Get Bitcoin Core to add the checksum for us using GetDescriptorInfo
+	// Get Litecoin Core to add the checksum for us using GetDescriptorInfo
 	descInfo, err := bitcoind.GetDescriptorInfo(ctx, connect.NewRequest(&corepb.GetDescriptorInfoRequest{
 		Descriptor_: descriptorWithoutChecksum,
 	}))
@@ -406,10 +406,10 @@ func (e *ChequeEngine) importDescriptorForWallet(ctx context.Context, bitcoind c
 		return fmt.Errorf("get descriptor info: %w", err)
 	}
 
-	// Use the descriptor with checksum from Bitcoin Core
+	// Use the descriptor with checksum from Litecoin Core
 	descriptor := descInfo.Msg.Descriptor_
 
-	// Import the descriptor into Bitcoin Core cheque wallet.
+	// Import the descriptor into Litecoin Core cheque wallet.
 	// Timestamp=epoch triggers a full rescan so cheques funded before this
 	// import (e.g. the first run after the descriptor-deadlock fix landed)
 	// get picked up. btc-buf maps nil → "now" (no rescan), which would leave
@@ -479,7 +479,7 @@ func (e *ChequeEngine) recoverChequesOnUnlock(ctx context.Context) {
 	log.Info().Msg("bitcoind connected, waiting for RPC to be reachable")
 
 	// The service may report "connected" before the RPC port accepts connections.
-	// Wait until we can actually reach Bitcoin Core.
+	// Wait until we can actually reach Litecoin Core.
 	bitcoind, err := e.bitcoind.Get(ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get bitcoind client for recovery")

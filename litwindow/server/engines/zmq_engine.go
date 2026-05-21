@@ -24,7 +24,7 @@ type ZMQ struct {
 	subscribers []chan *wire.MsgTx
 }
 
-// NewZMQ creates a new ZMQ engine for receiving Bitcoin Core raw transaction notifications
+// NewZMQ creates a new ZMQ engine for receiving Litecoin Core raw transaction notifications
 func NewZMQ(endpoint string) (*ZMQ, error) {
 	if endpoint == "" {
 		return nil, errors.New("engines/zmq: endpoint is empty")

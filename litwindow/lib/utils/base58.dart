@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 
-/// Base58Check encoding and decoding utilities for Bitcoin addresses
+/// Base58Check encoding and decoding utilities for Litecoin addresses
 class Base58Check {
   static const String _alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 

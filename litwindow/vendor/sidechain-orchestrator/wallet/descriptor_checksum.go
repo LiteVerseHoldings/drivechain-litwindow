@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Descriptor checksum implementation based on Bitcoin Core's algorithm
+// Descriptor checksum implementation based on Litecoin Core's algorithm
 // https://github.com/bitcoin/bitcoin/blob/master/src/script/descriptor.cpp
 
 const inputCharset = "0123456789()[],'/*abcdefgh@:$%{}IJKLMNOPQRSTUVWXYZ&+-.;<=>?!^_|~ijklmnopqrstuvwxyzABCDEFGH`#\"\\ "

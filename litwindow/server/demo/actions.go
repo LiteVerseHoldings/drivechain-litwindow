@@ -154,11 +154,11 @@ func GenerateRandomAction(sidechains []DemoSidechain) *DemoAction {
 
 	switch actionType {
 	case ActionDeposit:
-		// Random deposit between 0.001 and 10 BTC
+		// Random deposit between 0.001 and 10 LTC
 		action.AmountSatoshi = int64(rand.Intn(999900000) + 100000)
 
 	case ActionWithdrawal:
-		// Random withdrawal between 0.01 and 5 BTC
+		// Random withdrawal between 0.01 and 5 LTC
 		action.AmountSatoshi = int64(rand.Intn(499000000) + 1000000)
 
 	case ActionWithdrawalAck:

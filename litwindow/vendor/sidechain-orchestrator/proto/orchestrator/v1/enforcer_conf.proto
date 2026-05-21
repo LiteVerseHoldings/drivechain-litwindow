@@ -9,7 +9,7 @@ service EnforcerConfService {
   // Write Enforcer configuration content.
   rpc WriteEnforcerConfig(WriteEnforcerConfigRequest) returns (WriteEnforcerConfigResponse);
 
-  // Sync node-rpc settings from Bitcoin Core config.
+  // Sync node-rpc settings from Litecoin Core config.
   rpc SyncNodeRpcFromBitcoinConf(SyncNodeRpcFromBitcoinConfRequest) returns (SyncNodeRpcFromBitcoinConfResponse);
 }
 

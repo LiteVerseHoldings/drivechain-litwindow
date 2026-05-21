@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=BitWindow
-Comment=BitWindow - Drivechain Bitcoin Frontend
+Comment=BitWindow - Drivechain Litecoin Frontend
 Exec=bitwindow
 Icon=${SNAP}/meta/gui/bitwindow.png
 Terminal=false

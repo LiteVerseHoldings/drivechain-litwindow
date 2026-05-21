@@ -20,9 +20,9 @@ class BitDriveTab extends StatelessWidget {
       viewModelBuilder: () => BitDriveViewModel(),
       builder: (context, model, child) {
         return SailCard(
-          title: 'Store Data on Bitcoin Forever',
+          title: 'Store Data on Litecoin Forever',
           subtitle:
-              'BitDrive lets you permanently store files and text on the Bitcoin blockchain. Your data becomes part of Bitcoin history.',
+              'BitDrive lets you permanently store files and text on the Litecoin blockchain. Your data becomes part of Litecoin history.',
           bottomPadding: false,
           widgetHeaderEnd: model.bitdriveDir != null
               ? SailButton(
@@ -73,14 +73,14 @@ class _StoreTab extends StatelessWidget {
                   SailText.secondary13(
                     '1. Enter text or choose a file (max 1 MB)\n'
                     '2. Optionally encrypt with your wallet key\n'
-                    '3. Click "Store on Bitcoin" to save forever\n'
-                    '4. Data is embedded in Bitcoin transactions',
+                    '3. Click "Store on Litecoin" to save forever\n'
+                    '4. Data is embedded in Litecoin transactions',
                   ),
                   const SailSpacing(SailStyleValues.padding20),
                   SailText.primary15('Why Use BitDrive?'),
                   const SailSpacing(SailStyleValues.padding08),
                   SailText.secondary13(
-                    '• Permanent storage - data lives as long as Bitcoin\n'
+                    '• Permanent storage - data lives as long as Litecoin\n'
                     '• Censorship resistant - no one can delete it\n'
                     '• Encryption option for private data\n'
                     '• Prove you knew something at a specific time',
@@ -153,7 +153,7 @@ class _StoreTab extends StatelessWidget {
                         ),
                       ),
                       SailButton(
-                        label: 'Store on Bitcoin',
+                        label: 'Store on Litecoin',
                         variant: model.canStore ? ButtonVariant.primary : ButtonVariant.secondary,
                         disabled: !model.canStore,
                         loading: model.isBusy,
@@ -181,7 +181,7 @@ class _StoreTab extends StatelessWidget {
                               SizedBox(
                                 width: 150,
                                 child: NumericField(
-                                  label: 'Fee (BTC)',
+                                  label: 'Fee (LTC)',
                                   controller: model.feeController,
                                   hintText: '0.0001',
                                 ),
@@ -230,7 +230,7 @@ class _MyFilesTab extends StatelessWidget {
               spacing: SailStyleValues.padding04,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SailText.primary15('Your files stored on Bitcoin', bold: true),
+                SailText.primary15('Your files stored on Litecoin', bold: true),
                 SailText.secondary12(
                   '${model.downloadedFiles.length} files downloaded${model.pendingDownloadsCount > 0 ? ', ${model.pendingDownloadsCount} pending' : ''}',
                 ),
@@ -272,7 +272,7 @@ class _MyFilesTab extends StatelessWidget {
                       ),
                       SailText.secondary13('No files downloaded yet'),
                       SailText.secondary12(
-                        'Click "Scan for new" to find files stored on Bitcoin',
+                        'Click "Scan for new" to find files stored on Litecoin',
                         color: context.sailTheme.colors.textTertiary,
                       ),
                     ],
@@ -520,7 +520,7 @@ class BitDriveViewModel extends BaseViewModel {
     try {
       await provider.store();
       if (context.mounted) {
-        showSnackBar(context, 'Content stored on Bitcoin!');
+        showSnackBar(context, 'Content stored on Litecoin!');
         textController.clear();
         selectedFileName = null;
         selectedFileContent = null;

@@ -18,7 +18,7 @@ class FormatterProvider extends ChangeNotifier {
     return formatBitcoinWithUnit(satoshiToBTC(sats), currentUnit);
   }
 
-  /// Format BTC according to the current user preference
+  /// Format coin units according to the current user preference.
   String formatBTC(double btc) {
     return formatBitcoinWithUnit(btc, currentUnit);
   }

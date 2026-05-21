@@ -284,30 +284,30 @@ class BitcoinConfigOptions {
       category: 'Wallet',
       description: 'Fallback Fee Rate',
       tooltip:
-          'A fee rate (in BTC/kvB) that will be used when fee estimation has insufficient data. 0 to entirely disable the fallbackfee feature. (default: 0.00)',
+          'A fee rate (in LTC/kvB) that will be used when fee estimation has insufficient data. 0 to entirely disable the fallbackfee feature. (default: 0.00)',
       inputType: ConfigInputType.bitcoinAmount,
       isUseful: true,
       defaultValue: 0.0,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
     BitcoinConfigOption(
       key: 'paytxfee',
       category: 'Wallet',
       description: 'Transaction Fee Rate',
-      tooltip: 'Fee rate (in BTC/kvB) to add to transactions you send (default: 0.00)',
+      tooltip: 'Fee rate (in LTC/kvB) to add to transactions you send (default: 0.00)',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.0,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
     BitcoinConfigOption(
       key: 'mintxfee',
       category: 'Wallet',
       description: 'Minimum TX Fee',
       tooltip:
-          'Fee rates (in BTC/kvB) smaller than this are considered zero fee for transaction creation (default: 0.00001)',
+          'Fee rates (in LTC/kvB) smaller than this are considered zero fee for transaction creation (default: 0.00001)',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.00001,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
     BitcoinConfigOption(
       key: 'walletdir',
@@ -393,10 +393,10 @@ class BitcoinConfigOptions {
       category: 'RPC Server',
       description: 'RPC Port',
       tooltip:
-          'Listen for JSON-RPC connections on <port> (default: 8332, testnet3: 18332, testnet4: 48332, signet: 38332, regtest: 18443)',
+          'Listen for JSON-RPC connections on <port> (default: 9332, testnet: 19332, signet: 39332, regtest: 19443)',
       inputType: ConfigInputType.number,
       isUseful: true,
-      defaultValue: 8332,
+      defaultValue: 9332,
       min: 1,
       max: 65535,
     ),
@@ -496,10 +496,10 @@ class BitcoinConfigOptions {
       category: 'Node Relay',
       description: 'Min Relay TX Fee',
       tooltip:
-          'Fees (in BTC/kvB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: 0.000001)',
+          'Fees (in LTC/kvB) smaller than this are considered zero fee for relaying, mining and transaction creation (default: 0.000001)',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.000001,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
     BitcoinConfigOption(
       key: 'datacarrier',
@@ -534,10 +534,10 @@ class BitcoinConfigOptions {
       category: 'Block Creation',
       description: 'Block Min TX Fee',
       tooltip:
-          'Set lowest fee rate (in BTC/kvB) for transactions to be included in block creation. (default: 0.00000001)',
+          'Set lowest fee rate (in LTC/kvB) for transactions to be included in block creation. (default: 0.00000001)',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.00000001,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
 
     // More General Options
@@ -967,30 +967,30 @@ class BitcoinConfigOptions {
       category: 'Wallet',
       description: 'Consolidate Fee Rate',
       tooltip:
-          "The maximum feerate (in BTC/kvB) at which transaction building may use more inputs than strictly necessary so that the wallet's UTXO pool can be reduced (default: 0.0001).",
+          "The maximum feerate (in LTC/kvB) at which transaction building may use more inputs than strictly necessary so that the wallet's UTXO pool can be reduced (default: 0.0001).",
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.0001,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
     BitcoinConfigOption(
       key: 'discardfee',
       category: 'Wallet',
       description: 'Discard Fee',
       tooltip:
-          'The fee rate (in BTC/kvB) that indicates your tolerance for discarding change by adding it to the fee (default: 0.0001).',
+          'The fee rate (in LTC/kvB) that indicates your tolerance for discarding change by adding it to the fee (default: 0.0001).',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.0001,
-      unit: 'BTC/kvB',
+      unit: 'LTC/kvB',
     ),
     BitcoinConfigOption(
       key: 'maxapsfee',
       category: 'Wallet',
       description: 'Max APS Fee',
       tooltip:
-          'Spend up to this amount in additional (absolute) fees (in BTC) if it allows the use of partial spend avoidance (default: 0.00)',
+          'Spend up to this amount in additional (absolute) fees (in LTC) if it allows the use of partial spend avoidance (default: 0.00)',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.0,
-      unit: 'BTC',
+      unit: 'LTC',
     ),
     BitcoinConfigOption(
       key: 'signer',
@@ -1269,10 +1269,10 @@ class BitcoinConfigOptions {
       category: 'Debugging',
       description: 'Max TX Fee',
       tooltip:
-          'Maximum total fees (in BTC) to use in a single wallet transaction; setting this too low may abort large transactions (default: 0.10)',
+          'Maximum total fees (in LTC) to use in a single wallet transaction; setting this too low may abort large transactions (default: 0.10)',
       inputType: ConfigInputType.bitcoinAmount,
       defaultValue: 0.10,
-      unit: 'BTC',
+      unit: 'LTC',
     ),
     BitcoinConfigOption(
       key: 'uacomment',

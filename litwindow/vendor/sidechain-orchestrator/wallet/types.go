@@ -82,7 +82,7 @@ type MasterWallet struct {
 	Name             string `json:"name"`
 }
 
-// L1Wallet is the Layer 1 (Bitcoin Core) wallet.
+// L1Wallet is the Layer 1 (Litecoin Core) wallet.
 type L1Wallet struct {
 	Mnemonic string `json:"mnemonic"`
 	Name     string `json:"name"`

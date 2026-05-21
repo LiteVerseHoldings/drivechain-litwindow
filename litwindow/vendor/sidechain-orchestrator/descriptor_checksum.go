@@ -1,6 +1,6 @@
 package orchestrator
 
-// Descriptor checksum implementation based on Bitcoin Core's algorithm.
+// Descriptor checksum implementation based on Litecoin Core's algorithm.
 // Ported from bitwindow/server/engines/descriptor_checksum.go
 
 import (
@@ -32,7 +32,7 @@ func descriptorPolymod(c uint64, val uint64) uint64 {
 	return c
 }
 
-// DescriptorChecksum computes the checksum for a Bitcoin Core descriptor string.
+// DescriptorChecksum computes the checksum for a Litecoin Core descriptor string.
 func DescriptorChecksum(desc string) (string, error) {
 	c := uint64(1)
 	cls := 0

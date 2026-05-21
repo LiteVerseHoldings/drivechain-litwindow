@@ -18,7 +18,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('2009-2026 The Drivechain developers'), findsOneWidget);
-    expect(find.textContaining('2009-2026 The Bitcoin Core developers'), findsOneWidget);
+    expect(find.textContaining('2009-2026 The Litecoin Core developers'), findsOneWidget);
 
     expect(find.textContaining('Drivechain version v0.47.00.0-unk (64-bit)'), findsNothing);
     expect(find.textContaining('2009-2024'), findsNothing);

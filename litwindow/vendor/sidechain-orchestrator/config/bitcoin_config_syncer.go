@@ -101,7 +101,7 @@ var bitcoinConfMigrations = []BitcoinConfMigration{
 		// stream tx/block notifications. Previously these only lived in
 		// forknet's [main] section, which left signet/testnet/mainnet
 		// users with "unable to acquire ZMQ engine" loops and a
-		// degraded daemon link. Move them globally — Bitcoin Core happily
+		// degraded daemon link. Move them globally — Litecoin Core happily
 		// accepts the same zmqpub* lines on every network, and the
 		// per-forknet copies were just duplication.
 		Version: 8,
@@ -115,7 +115,7 @@ var bitcoinConfMigrations = []BitcoinConfMigration{
 		},
 	},
 	{
-		// Cap concurrent RPCs at 10 (down from 20). Bitcoin Core serialises
+		// Cap concurrent RPCs at 10 (down from 20). Litecoin Core serialises
 		// most work behind cs_main during IBD, so a higher thread count
 		// just lets more callers pile up against the same lock while
 		// bitwindow's poll loop and the enforcer race for slots. Ten is
@@ -191,7 +191,7 @@ func (m *BitcoinConfManager) tryLoadPrivateConfig() bool {
 // per-network backup file anymore — that mechanism kept silently wiping
 // user-set keys (notably datadir) whenever the backup happened to lack
 // them. Master's [main] is now the single source of truth and survives
-// network swaps as-is. Bitcoin Core ignores [main] when chain != main, so
+// network swaps as-is. Litecoin Core ignores [main] when chain != main, so
 // stale forknet keys leaking into master while on signet are harmless.
 func (m *BitcoinConfManager) handleNetworkChangeIfNeeded(oldNetwork Network, isFirst bool) {
 	networkChanged := !isFirst && oldNetwork != m.Network
@@ -210,7 +210,7 @@ func (m *BitcoinConfManager) handleNetworkChangeIfNeeded(oldNetwork Network, isF
 // Dart: _loadStateFromConfig (L595)
 //
 // DetectedDataDir uses GetEffectiveSetting: per-network section first, then
-// global. This matches where UpdateDataDir writes (global, since Bitcoin Core
+// global. This matches where UpdateDataDir writes (global, since Litecoin Core
 // only honours top-level datadir) and where bitcoind itself reads from. A
 // user with their own bitcoin.conf may put datadir under [main] — that still
 // wins. Empty here means "no datadir is configured anywhere".
@@ -222,7 +222,7 @@ func (m *BitcoinConfManager) loadStateFromConfig() {
 	m.Network = NetworkFromConfig(m.Config)
 	m.DetectedDataDir = m.Config.GetEffectiveSetting("datadir", CoreSectionForNetwork(m.Network))
 
-	// Ensure datadir exists — Bitcoin Core fails with a cryptic assertion error (exit code -6) if it doesn't
+	// Ensure datadir exists — Litecoin Core fails with a cryptic assertion error (exit code -6) if it doesn't
 	if m.DetectedDataDir != "" {
 		_ = os.MkdirAll(m.DetectedDataDir, 0755)
 	}
@@ -332,14 +332,14 @@ func (m *BitcoinConfManager) CommitNetworkChange(newNetwork Network) error {
 // ---------------------------------------------------------------------------
 
 // getDownstreamConfigPath returns the path where bitcoin config should be
-// copied for Bitcoin Core to find it.
+// copied for Litecoin Core to find it.
 // Dart: _getDownstreamConfigPath (L552-554)
 func (m *BitcoinConfManager) getDownstreamConfigPath() string {
 	return filepath.Join(BitcoinCoreDirs.RootDirNetwork(m.Network), bitwindowBitcoinConfFilename)
 }
 
 // CopyConfigDownstream copies the master config from the BitWindow directory
-// to the downstream location where Bitcoin Core expects it.
+// to the downstream location where Litecoin Core expects it.
 // The downstream file is read-only — any changes should be made to the master.
 func (m *BitcoinConfManager) CopyConfigDownstream() error {
 	sourcePath := m.getBitWindowConfigPath()
@@ -357,7 +357,7 @@ func (m *BitcoinConfManager) CopyConfigDownstream() error {
 #   %s
 #
 # Any changes made to this file will be OVERWRITTEN.
-# To modify Bitcoin Core settings, edit the master file above.
+# To modify Litecoin Core settings, edit the master file above.
 # ============================================================================
 
 `, sourcePath)
@@ -422,7 +422,7 @@ func (m *BitcoinConfManager) materializeDatadirForGroup(g DatadirGroup) {
 // HasDatadirForNetwork reports whether a datadir is configured for n's group.
 // Mainnet/forknet require an explicit user-chosen path because the platform
 // default sits inside ~/Library/Application Support and isn't suitable for
-// full chain data; signet/testnet/regtest accept the default (Bitcoin Core
+// full chain data; signet/testnet/regtest accept the default (Litecoin Core
 // auto-partitions them under chain subdirs).
 func (m *BitcoinConfManager) HasDatadirForNetwork(n Network) bool {
 	if m.Config == nil {

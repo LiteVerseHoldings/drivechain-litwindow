@@ -16,7 +16,7 @@ const (
 // DatadirGroup partitions networks by which folder bitcoind writes to.
 // Forknet runs on chain=main and writes to the root of datadir, colliding
 // with mainnet — so it needs its own group. The four "default" networks
-// share one datadir because Bitcoin Core auto-partitions them via chain
+// share one datadir because Litecoin Core auto-partitions them via chain
 // subdirectories (signet/, testnet3/, regtest/, blocks/ for mainnet).
 type DatadirGroup string
 
@@ -67,12 +67,12 @@ func EsploraURLForNetwork(n Network) string {
 	}
 }
 
-// CoreSection returns the Bitcoin Core config section name for this network.
+// CoreSection returns the Litecoin Core config section name for this network.
 func (n Network) CoreSection() string {
 	return CoreSectionForNetwork(n)
 }
 
-// CoreSectionForNetwork returns the Bitcoin Core config section name for a network.
+// CoreSectionForNetwork returns the Litecoin Core config section name for a network.
 // Both mainnet and forknet use "main" since forknet runs on mainnet params.
 func CoreSectionForNetwork(n Network) string {
 	switch n {

@@ -9,7 +9,7 @@ import (
 const enforcerConfVersionCommentPrefix = "# bitwindow-enforcer-conf-version="
 
 // EnforcerConfig represents parsed enforcer configuration.
-// Unlike Bitcoin Core, the enforcer doesn't read from a conf file directly -
+// Unlike Litecoin Core, the enforcer doesn't read from a conf file directly -
 // it only accepts CLI arguments. We store settings in a file and convert them
 // to CLI args at launch time.
 // 1:1 port of sail_ui/lib/models/enforcer_config.dart

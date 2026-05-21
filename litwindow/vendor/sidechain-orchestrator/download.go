@@ -65,7 +65,7 @@ type DownloadManager struct {
 	// later GetSyncStatus tick reports nothing rather than stale bytes.
 	state sync.Map
 
-	// CoreVariant returns the active Bitcoin Core variant spec to use for
+	// CoreVariant returns the active Litecoin Core variant spec to use for
 	// download/extract. It is consulted only when config.IsBitcoinCore. May
 	// be left nil — in that case the download falls back to the legacy
 	// per-network file selection (default vs. forknet).

@@ -47,8 +47,8 @@ class _BitcoinURIDialogState extends State<BitcoinURIDialog> {
     final formatter = GetIt.I<FormatterProvider>();
 
     return SailDialog(
-      title: 'Open Bitcoin URI',
-      subtitle: 'Enter a Bitcoin URI to parse',
+      title: 'Open Litecoin URI',
+      subtitle: 'Enter a Litecoin URI to parse',
       error: _error,
       maxWidth: 400,
       maxHeight: 600,
@@ -60,9 +60,9 @@ class _BitcoinURIDialogState extends State<BitcoinURIDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SailTextField(
-              label: 'Bitcoin URI',
+              label: 'Litecoin URI',
               controller: _controller,
-              hintText: 'bitcoin:<address>?amount=1.23',
+              hintText: 'litecoin:<address>?amount=1.23',
             ),
             if (_parsedURI != null) ...[
               SailText.primary13('Address: ${_parsedURI!.address}'),

@@ -155,7 +155,7 @@ func TestGenerateFullWallet(t *testing.T) {
 	assert.NotEmpty(t, wallet.Master.MasterKey)
 	assert.NotEmpty(t, wallet.Master.ChainCode)
 	assert.NotEmpty(t, wallet.L1.Mnemonic)
-	assert.Equal(t, "Bitcoin Core (Patched)", wallet.L1.Name)
+	assert.Equal(t, "Litecoin Core (Patched)", wallet.L1.Name)
 	assert.Len(t, wallet.Sidechains, 2)
 	assert.Equal(t, 9, wallet.Sidechains[0].Slot)
 	assert.Equal(t, "Thunder", wallet.Sidechains[0].Name)

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-enum Unit { BTC, mBTC, uBTC, sats }
+enum Unit { LTC, mLTC, uLTC, sats }
 
 class UnitDropdown extends StatelessWidget {
   final Unit value;
@@ -19,7 +19,7 @@ class UnitDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return SailDropdownButton(
       items: [
-        SailDropdownItem(value: Unit.BTC, label: 'BTC'),
+        SailDropdownItem(value: Unit.LTC, label: 'LTC'),
         SailDropdownItem(value: Unit.sats, label: 'SAT'),
       ],
       onChanged: (value) {

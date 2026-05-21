@@ -1,7 +1,7 @@
 package orchestrator
 
 // Core wallet management — ported from bitwindow/server/engines/wallet_engine.go.
-// Creates Bitcoin Core wallets via JSON-RPC with proper BIP84 descriptor import.
+// Creates Litecoin Core wallets via JSON-RPC with proper BIP84 descriptor import.
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"golang.org/x/crypto/ripemd160" //nolint:staticcheck // needed for Hash160
 )
 
-// CreateWallet creates a new wallet in Bitcoin Core.
+// CreateWallet creates a new wallet in Litecoin Core.
 func (c *CoreStatusClient) CreateWallet(ctx context.Context, walletName string, disablePrivateKeys, blank, descriptors bool) error {
 	_, err := c.call(ctx, "createwallet",
 		walletName,
@@ -29,13 +29,13 @@ func (c *CoreStatusClient) CreateWallet(ctx context.Context, walletName string, 
 	return err
 }
 
-// LoadWallet loads an existing wallet in Bitcoin Core.
+// LoadWallet loads an existing wallet in Litecoin Core.
 func (c *CoreStatusClient) LoadWallet(ctx context.Context, walletName string) error {
 	_, err := c.call(ctx, "loadwallet", walletName)
 	return err
 }
 
-// UnloadWallet unloads a wallet from Bitcoin Core.
+// UnloadWallet unloads a wallet from Litecoin Core.
 func (c *CoreStatusClient) UnloadWallet(ctx context.Context, walletName string) error {
 	_, err := c.call(ctx, "unloadwallet", walletName)
 	return err
@@ -71,7 +71,7 @@ func hash160(data []byte) []byte {
 	return ripe.Sum(nil)
 }
 
-// CreateBitcoinCoreWalletFromSeed creates a Bitcoin Core descriptor wallet and imports
+// CreateBitcoinCoreWalletFromSeed creates a Litecoin Core descriptor wallet and imports
 // BIP84 (wpkh) descriptors derived from the seed.
 // Ported from bitwindow/server/engines/wallet_engine.go CreateBitcoinCoreWalletFromSeed.
 func (c *CoreStatusClient) CreateBitcoinCoreWalletFromSeed(ctx context.Context, walletName, seedHex, network string) error {
@@ -119,7 +119,7 @@ func (c *CoreStatusClient) CreateBitcoinCoreWalletFromSeed(ctx context.Context, 
 		accountXprv = account.String()
 	}
 
-	// Create blank descriptor wallet in Bitcoin Core
+	// Create blank descriptor wallet in Litecoin Core
 	err = c.CreateWallet(ctx, walletName, false, true, true)
 	if err != nil {
 		// If wallet already exists, try to load it
@@ -190,7 +190,7 @@ func (c *CoreStatusClient) CreateBitcoinCoreWalletFromSeed(ctx context.Context, 
 	return nil
 }
 
-// CreateWatchOnlyWalletInCore creates a watch-only wallet in Bitcoin Core from a descriptor or xpub.
+// CreateWatchOnlyWalletInCore creates a watch-only wallet in Litecoin Core from a descriptor or xpub.
 func (c *CoreStatusClient) CreateWatchOnlyWalletInCore(ctx context.Context, walletName, descriptorOrXpub string) error {
 	// Create watch-only descriptor wallet (private keys disabled)
 	err := c.CreateWallet(ctx, walletName, true, true, true)

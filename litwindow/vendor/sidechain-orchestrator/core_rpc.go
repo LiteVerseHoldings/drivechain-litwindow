@@ -1,6 +1,6 @@
 package orchestrator
 
-// Extended Bitcoin Core JSON-RPC methods for wallet operations.
+// Extended Litecoin Core JSON-RPC methods for wallet operations.
 // Ported from bitwindow/server — uses raw JSON-RPC instead of btc-buf Connect.
 
 import (

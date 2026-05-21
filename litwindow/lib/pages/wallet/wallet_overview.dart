@@ -394,7 +394,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
         WalletTransaction(
           txid: 'dummy_tx_1',
           feeSats: Int64(1000),
-          receivedSatoshi: Int64(50000000), // 0.5 BTC
+          receivedSatoshi: Int64(50000000), // 0.5 LTC
           sentSatoshi: Int64(0),
           address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
           addressLabel: 'Main Wallet',
@@ -408,7 +408,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
           txid: 'dummy_tx_2',
           feeSats: Int64(2000),
           receivedSatoshi: Int64(0),
-          sentSatoshi: Int64(100000000), // 1 BTC
+          sentSatoshi: Int64(100000000), // 1 LTC
           address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
           addressLabel: 'Exchange',
           note: 'Sent to exchange',
@@ -420,7 +420,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
         WalletTransaction(
           txid: 'dummy_tx_3',
           feeSats: Int64(1500),
-          receivedSatoshi: Int64(25000000), // 0.25 BTC
+          receivedSatoshi: Int64(25000000), // 0.25 LTC
           sentSatoshi: Int64(0),
           address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
           addressLabel: 'Mining Pool',
@@ -626,7 +626,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
       'Type',
       'Address',
       'Label',
-      'Amount (BTC)',
+      'Amount (LTC)',
       'Amount (sats)',
       'Fee (sats)',
       'Note',
@@ -638,7 +638,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
     for (final tx in transactions) {
       final netAmount = tx.receivedSatoshi - tx.sentSatoshi;
       final type = netAmount > 0 ? 'Received' : 'Sent';
-      final amountBTC = (netAmount.toInt() / 100000000).toStringAsFixed(8);
+      final amountLTC = (netAmount.toInt() / 100000000).toStringAsFixed(8);
       final date = DateFormat('yyyy-MM-dd HH:mm:ss').format(tx.confirmationTime.timestamp.toDateTime().toLocal());
 
       rows.add([
@@ -647,7 +647,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
         type,
         tx.address,
         tx.addressLabel,
-        amountBTC,
+        amountLTC,
         netAmount.toString(),
         tx.feeSats.toString(),
         tx.note,

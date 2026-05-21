@@ -82,7 +82,7 @@ func writeTestWalletJSON(t *testing.T, walletDir, walletID, seedHex string) {
 }
 
 // importChequeDescriptor imports the cheque derivation path descriptor into the
-// cheque_watch wallet in Bitcoin Core. This is normally done by ChequeEngine.Start()
+// cheque_watch wallet in Litecoin Core. This is normally done by ChequeEngine.Start()
 // but in tests we do it explicitly.
 func importChequeDescriptor(
 	t *testing.T, ctx context.Context,
@@ -108,7 +108,7 @@ func importChequeDescriptor(
 	xpub := chequeAcct.String()
 	descriptorNoChecksum := fmt.Sprintf("wpkh(%s/*)", xpub)
 
-	// Get Bitcoin Core to add the checksum.
+	// Get Litecoin Core to add the checksum.
 	descInfo, err := bitcoind.GetDescriptorInfo(ctx, connect.NewRequest(&corepb.GetDescriptorInfoRequest{
 		Descriptor_: descriptorNoChecksum,
 	}))
@@ -222,7 +222,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 				break
 			}
 		}
-		require.True(t, foundReceive, "B should have a 0.5 BTC receive tx")
+		require.True(t, foundReceive, "B should have a 0.5 LTC receive tx")
 	})
 
 	// =========================================================================
@@ -381,7 +381,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 		)
 
 		// --- Step 1: CreateCheque ---
-		const chequeAmountSats = 1_000_000 // 0.01 BTC
+		const chequeAmountSats = 1_000_000 // 0.01 LTC
 		createResp, err := serverA.CreateCheque(ctx, connect.NewRequest(&walletpb.CreateChequeRequest{
 			WalletId:           enforcerID,
 			ExpectedAmountSats: chequeAmountSats,
@@ -422,7 +422,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 		require.NotEmpty(t, wifKey)
 		t.Logf("cheque WIF: %s...%s", wifKey[:8], wifKey[len(wifKey)-4:])
 
-		// --- Step 5: Fund the cheque by sending BTC to the cheque address ---
+		// --- Step 5: Fund the cheque by sending LTC to the cheque address ---
 		// Use orchestrator to send from node A's funded wallet.
 		// Make sure A's bitcoinCore wallet is active.
 		listWallets, err := nodeA.WalletClient.ListWallets(ctx, connect.NewRequest(&pb.ListWalletsRequest{}))
@@ -452,7 +452,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 		// The cheque_watch wallet needs the cheque descriptor imported.
 		// Import it explicitly since we don't run ChequeEngine.Start().
 
-		// First ensure the cheque_watch wallet exists in Bitcoin Core.
+		// First ensure the cheque_watch wallet exists in Litecoin Core.
 		_, err = bitcoindA.CreateWallet(ctx, connect.NewRequest(
 			&corepb.CreateWalletRequest{
 				Name:               engines.ChequeWalletName,
@@ -549,7 +549,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 			chequeEngineB, walletEngineB, walletDirB,
 		)
 
-		// Ensure the cheque_watch wallet exists on B's Bitcoin Core too.
+		// Ensure the cheque_watch wallet exists on B's Litecoin Core too.
 		_, err = bitcoindB.CreateWallet(ctx, connect.NewRequest(
 			&corepb.CreateWalletRequest{
 				Name:               engines.ChequeWalletName,
@@ -662,7 +662,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 		t.Logf("funded zero-conf cheque with tx: %s (unmined)", sendResp2.Msg.Txid)
 
 		// CheckChequeFunding → funded but unconfirmed.
-		// Poll for unconfirmed funding — Bitcoin Core may take a moment to
+		// Poll for unconfirmed funding — Litecoin Core may take a moment to
 		// index the unconfirmed UTXO in the watch wallet (especially on Windows).
 		var fundingResp3 *connect.Response[walletpb.CheckChequeFundingResponse]
 		for i := 0; i < 10; i++ {
@@ -747,7 +747,7 @@ func TestBitwindowWalletIntegration(t *testing.T) {
 		enforcerAddr := enforcerAddrResp.Msg.Address
 		t.Logf("enforcer wallet deposit address: %s", enforcerAddr)
 
-		// Send 1 BTC from the funded core wallet to the enforcer wallet.
+		// Send 1 LTC from the funded core wallet to the enforcer wallet.
 		_, err = nodeA.WalletClient.SwitchWallet(ctx, connect.NewRequest(&pb.SwitchWalletRequest{
 			WalletId: coreWalletID,
 		}))

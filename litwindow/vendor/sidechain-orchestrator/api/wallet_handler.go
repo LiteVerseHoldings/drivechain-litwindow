@@ -260,7 +260,7 @@ func (h *WalletHandler) CreateBitcoinCoreWallet(ctx context.Context, req *connec
 
 	name, err := h.engine.EnsureCoreWallet(ctx, req.Msg.WalletId)
 	if err != nil {
-		// Bitcoin Core mid-startup (-28) or already loading the wallet (-4) is
+		// Litecoin Core mid-startup (-28) or already loading the wallet (-4) is
 		// not an internal failure — it's "try again in a few seconds". Return
 		// Unavailable so the Dart logging filter quiets it and the UI doesn't
 		// flash an error toast every poll cycle.

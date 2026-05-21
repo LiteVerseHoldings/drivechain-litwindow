@@ -366,7 +366,7 @@ class _ImportPSBTModalState extends State<ImportPSBTModal> {
           constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
           child: SailCard(
             title: 'Import PSBT',
-            subtitle: 'Import a partially signed Bitcoin transaction for ${selectedGroup.name}',
+            subtitle: 'Import a partially signed Litecoin transaction for ${selectedGroup.name}',
             error: _modalError,
             child: SingleChildScrollView(
               child: SailColumn(
@@ -550,7 +550,7 @@ class _ImportPSBTModalState extends State<ImportPSBTModal> {
                                   '${group.m} of ${group.n} multisig',
                                 ),
                                 SailText.secondary12(
-                                  'Balance: ${group.balance.toStringAsFixed(8)} BTC',
+                                  'Balance: ${group.balance.toStringAsFixed(8)} LTC',
                                 ),
                               ],
                             ),

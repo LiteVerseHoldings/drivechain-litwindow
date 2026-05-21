@@ -65,7 +65,7 @@ void main() {
     final reader = GetIt.I.get<WalletReaderProvider>();
     final hd = HDWalletProvider();
 
-    // Only a Bitcoin Core wallet on the stream — no enforcer yet.
+    // Only a Litecoin Core wallet on the stream — no enforcer yet.
     reader.wallets = [
       WalletData(
         version: 1,

@@ -15,7 +15,7 @@ class PriceProvider extends ChangeNotifier {
 
   static const String _tickerUrl = 'https://api.coinbase.com/v2/prices/LTC-USD/spot';
 
-  // Kept for older callers that still use BTC-named helpers in shared UI code.
+  // Kept for older callers that still use legacy-named helpers in shared UI code.
   double? get btcusd => ltcusd;
 
   PriceProvider() {

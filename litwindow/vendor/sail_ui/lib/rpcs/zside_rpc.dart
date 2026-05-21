@@ -565,21 +565,21 @@ class ZSideBalanceBreakdown {
   /// Total pending balance in satoshis
   int get totalPendingSats => pendingShieldedSats + pendingTransparentSats;
 
-  /// Available shielded balance in BTC
+  /// Available shielded balance in coin units.
   double get availableShielded => satoshiToBTC(availableShieldedSats);
 
-  /// Available transparent balance in BTC
+  /// Available transparent balance in coin units.
   double get availableTransparent => satoshiToBTC(availableTransparentSats);
 
-  /// Total shielded balance in BTC
+  /// Total shielded balance in coin units.
   double get totalShielded => satoshiToBTC(totalShieldedSats);
 
-  /// Total transparent balance in BTC
+  /// Total transparent balance in coin units.
   double get totalTransparent => satoshiToBTC(totalTransparentSats);
 
-  /// Pending shielded balance in BTC
+  /// Pending shielded balance in coin units.
   double get pendingShielded => satoshiToBTC(pendingShieldedSats);
 
-  /// Pending transparent balance in BTC
+  /// Pending transparent balance in coin units.
   double get pendingTransparent => satoshiToBTC(pendingTransparentSats);
 }

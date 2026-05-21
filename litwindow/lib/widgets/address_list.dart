@@ -436,7 +436,7 @@ class _CreateDialogState extends State<_CreateDialog> {
               SailTextField(
                 label: 'Address',
                 controller: widget.viewModel.addressController,
-                hintText: 'Enter a Bitcoin address',
+                hintText: 'Enter a Litecoin address',
                 size: TextFieldSize.small,
               ),
               SailTextField(

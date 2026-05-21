@@ -49,12 +49,12 @@ CoreConnectionSettings readRPCConfig(
 
   // Use correct default port based on network
   final defaultPort = switch (network) {
-    BitcoinNetwork.BITCOIN_NETWORK_MAINNET => 8332, // real Bitcoin mainnet
+    BitcoinNetwork.BITCOIN_NETWORK_MAINNET => 9332, // Litecoin mainnet
     BitcoinNetwork.BITCOIN_NETWORK_FORKNET => 18301, // forknet
-    BitcoinNetwork.BITCOIN_NETWORK_TESTNET => 18332,
-    BitcoinNetwork.BITCOIN_NETWORK_SIGNET => 38332,
-    BitcoinNetwork.BITCOIN_NETWORK_REGTEST => 18443,
-    _ => 38332, // fallback to signet for unknown networks
+    BitcoinNetwork.BITCOIN_NETWORK_TESTNET => 19332,
+    BitcoinNetwork.BITCOIN_NETWORK_SIGNET => 39332,
+    BitcoinNetwork.BITCOIN_NETWORK_REGTEST => 19443,
+    _ => 39332, // fallback to signet for unknown networks
   };
 
   // Default values
@@ -178,7 +178,7 @@ List<String> bitcoinCoreBinaryArgs(CoreConnectionSettings conf) {
   return args.where((arg) => arg.isNotEmpty).toList();
 }
 
-// checks if the loaded bitcoin core config contains a specific
+// checks if the loaded Litecoin Core config contains a specific
 // key, e.g:
 // # testchain.conf
 // regtest=1
@@ -222,12 +222,12 @@ extension NetworkExtensions on BitcoinNetwork {
 
   /// Get the config section name for this network
   /// Note: Both mainnet and forknet use 'main' section since forknet runs on mainnet params
-  /// and forknet is not a valid Bitcoin Core section
+  /// and forknet is not a valid Core section
   String toCoreNetwork() {
     switch (this) {
       case BitcoinNetwork.BITCOIN_NETWORK_MAINNET:
       case BitcoinNetwork.BITCOIN_NETWORK_FORKNET:
-        return 'main'; // Forknet uses [main] section - Bitcoin doesn't recognize [forknet]
+        return 'main'; // Forknet uses [main] section - Core does not recognize [forknet]
       case BitcoinNetwork.BITCOIN_NETWORK_SIGNET:
         return 'signet';
       case BitcoinNetwork.BITCOIN_NETWORK_REGTEST:
@@ -240,8 +240,8 @@ extension NetworkExtensions on BitcoinNetwork {
     }
   }
 
-  /// Get the Bitcoin Core section name for Bitcoin Core settings (rpcport, etc.)
-  /// Both mainnet and forknet use 'main' for Bitcoin Core compatibility
+  /// Get the Core section name for Litecoin settings (rpcport, etc.)
+  /// Both mainnet and forknet use 'main' for Core compatibility
   String toCoreNetworkForBitcoinSettings() {
     switch (this) {
       case BitcoinNetwork.BITCOIN_NETWORK_MAINNET:
@@ -264,7 +264,7 @@ extension NetworkExtensions on BitcoinNetwork {
   String toDisplayName() {
     switch (this) {
       case BitcoinNetwork.BITCOIN_NETWORK_MAINNET:
-        return 'BTC Mainnet';
+        return 'LTC Mainnet';
       case BitcoinNetwork.BITCOIN_NETWORK_FORKNET:
         return 'L2L-Forknet';
       case BitcoinNetwork.BITCOIN_NETWORK_SIGNET:

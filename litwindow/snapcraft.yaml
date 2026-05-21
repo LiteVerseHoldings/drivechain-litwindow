@@ -1,10 +1,10 @@
 name: bitwindow
 base: core18
 version: "0.0.3"
-summary: BitWindow - Drivechain Bitcoin Frontend
+summary: BitWindow - Drivechain Litecoin Frontend
 description: |
-  A frontend for interacting with a Drivechain-enabled layer 1 bitcoin network.
-  BitWindow provides Bitcoin wallet functionality with HD wallet support, 
+  A frontend for interacting with a Drivechain-enabled layer 1 litecoin network.
+  BitWindow provides Litecoin wallet functionality with HD wallet support,
   drivechain sidechain management and activation, and educational content.
 
 grade: stable

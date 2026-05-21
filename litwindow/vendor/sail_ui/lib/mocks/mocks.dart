@@ -1791,7 +1791,7 @@ class MockBinary extends Binary {
 String _binaryTypeName(BinaryType type) {
   switch (type) {
     case BinaryType.BINARY_TYPE_BITCOIND:
-      return 'Bitcoin Core';
+      return 'Litecoin Core';
     case BinaryType.BINARY_TYPE_ENFORCER:
       return 'Enforcer';
     case BinaryType.BINARY_TYPE_BITWINDOWD:

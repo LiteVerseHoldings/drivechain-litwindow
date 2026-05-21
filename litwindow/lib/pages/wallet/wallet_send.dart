@@ -171,7 +171,7 @@ class _RecipientFields extends StatelessWidget {
           key: Key('recipient_address_$key'),
           label: 'Address',
           controller: recipient.addressController,
-          hintText: 'Enter a single L1 bitcoin-address (e.g. 1NS17iag...)',
+          hintText: 'Enter a single L1 litecoin-address (e.g. 1NS17iag...)',
           size: TextFieldSize.small,
           suffixWidget: SailRow(
             children: [
@@ -335,7 +335,7 @@ class PayFromAndFeeCard extends ViewModelWidget<SendPageViewModel> {
 /// - Balance/UTXOs/transactions: routed via providers (already on orchestrator)
 /// - sendTransaction: routed via orchestrator shared wallet RPC
 /// - setCoinSelectionStrategy: STAYS on bitwindowd — BW-only coin selection prefs
-/// - estimateSmartFee: STAYS on bitwindowd — bitcoind API, not wallet primitive
+/// - estimateSmartFee: STAYS on bitwindowd — litecoind API, not wallet primitive
 class SendPageViewModel extends BaseViewModel {
   Logger get log => GetIt.I<Logger>();
 
@@ -689,7 +689,7 @@ class SendPageViewModel extends BaseViewModel {
         EstimateSmartFeeRequest()..confTarget = Int64(confTarget),
       );
       if (response.hasFeeRate()) {
-        // Convert BTC/kvB to sats/byte, then estimate for a typical transaction
+        // Convert LTC/kvB to sats/byte, then estimate for a typical transaction
         final btcPerKvb = response.feeRate;
         final satsPerByte = (btcPerKvb * 100000000) / 1000;
 

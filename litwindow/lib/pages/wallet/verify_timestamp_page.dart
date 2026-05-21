@@ -88,7 +88,7 @@ class VerifyTimestampPage extends StatelessWidget {
                     spacing: SailStyleValues.padding20,
                     children: [
                       SailText.secondary13(
-                        'Select a file to check if it has been timestamped on the Bitcoin blockchain.',
+                        'Select a file to check if it has been timestamped on the Litecoin blockchain.',
                       ),
                       SailButton(
                         label: 'Choose File',

@@ -574,16 +574,16 @@ class _ConsolidateDialogState extends State<_ConsolidateDialog> {
 
   // Threshold options in satoshis
   static const List<int> _thresholdOptions = [
-    10000, // 0.0001 BTC
-    50000, // 0.0005 BTC
-    100000, // 0.001 BTC
-    500000, // 0.005 BTC
-    1000000, // 0.01 BTC
-    5000000, // 0.05 BTC
-    10000000, // 0.1 BTC
+    10000, // 0.0001 LTC
+    50000, // 0.0005 LTC
+    100000, // 0.001 LTC
+    500000, // 0.005 LTC
+    1000000, // 0.01 LTC
+    5000000, // 0.05 LTC
+    10000000, // 0.1 LTC
   ];
 
-  int _selectedThreshold = 100000; // Default 0.001 BTC
+  int _selectedThreshold = 100000; // Default 0.001 LTC
   Set<String> _selectedOutpoints = {};
   bool _isLoading = false;
 

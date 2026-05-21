@@ -234,7 +234,7 @@ class _TypeSelectionStep extends StatelessWidget {
                 children: [
                   _WalletTypeCard(
                     type: WalletCreationType.bitcoinCore,
-                    title: 'Bitcoin Core Wallet',
+                    title: 'Litecoin Core Wallet',
                     description: 'Automatically generate a seed',
                     icon: SailSVGAsset.iconWallet,
                     isSelected: selectedType == WalletCreationType.bitcoinCore,

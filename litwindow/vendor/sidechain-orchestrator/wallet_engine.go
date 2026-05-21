@@ -1,10 +1,10 @@
 package orchestrator
 
-// WalletEngine manages the mapping between wallet.json wallets and Bitcoin Core wallets.
+// WalletEngine manages the mapping between wallet.json wallets and Litecoin Core wallets.
 // Ported from bitwindow/server/engines/wallet_engine.go.
 //
 // Key responsibilities:
-//   - Lazy-create Bitcoin Core wallets when first accessed (EnsureBitcoinCoreWallet)
+//   - Lazy-create Litecoin Core wallets when first accessed (EnsureBitcoinCoreWallet)
 //   - Lazy-create watch-only wallets (EnsureWatchOnlyWallet)
 //   - Sync all wallets to Core after unlock (SyncWallets)
 //   - Route operations by wallet type (GetWalletBackendType)
@@ -30,11 +30,11 @@ const (
 	WalletBackendWatchOnly   WalletBackendType = "watchOnly"
 )
 
-// WalletEngine manages the lifecycle of Bitcoin Core wallets created from wallet.json seeds.
+// WalletEngine manages the lifecycle of Litecoin Core wallets created from wallet.json seeds.
 type WalletEngine struct {
 	mu sync.RWMutex
 
-	// Maps walletID → Bitcoin Core wallet name (cache)
+	// Maps walletID → Litecoin Core wallet name (cache)
 	coreWallets map[string]string
 
 	// Dependencies
@@ -84,7 +84,7 @@ func (e *WalletEngine) GetWalletBackendType(walletID string) (WalletBackendType,
 	}
 }
 
-// coreWalletNameForID returns the Bitcoin Core wallet name for a given walletID.
+// coreWalletNameForID returns the Litecoin Core wallet name for a given walletID.
 // Convention: "wallet_<first8hex>" matching bitwindow.
 func coreWalletNameForID(walletID string) string {
 	id := walletID
@@ -103,7 +103,7 @@ func watchWalletNameForID(walletID string) string {
 	return fmt.Sprintf("watch_%s", id)
 }
 
-// EnsureBitcoinCoreWallet ensures a Bitcoin Core wallet exists for walletID.
+// EnsureBitcoinCoreWallet ensures a Litecoin Core wallet exists for walletID.
 // Creates it from the seed if it doesn't exist (lazy loading). Returns the Core wallet name.
 func (e *WalletEngine) EnsureBitcoinCoreWallet(ctx context.Context, walletID string) (string, error) {
 	// Check cache first (read lock)
@@ -160,16 +160,16 @@ func (e *WalletEngine) EnsureBitcoinCoreWallet(ctx context.Context, walletID str
 		e.log.Info().
 			Str("wallet_id", walletID).
 			Str("core_name", coreWalletName).
-			Msg("creating missing Bitcoin Core wallet from seed")
+			Msg("creating missing Litecoin Core wallet from seed")
 
 		if err := client.CreateBitcoinCoreWalletFromSeed(ctx, coreWalletName, w.Master.SeedHex, e.network); err != nil {
-			return "", fmt.Errorf("create Bitcoin Core wallet: %w", err)
+			return "", fmt.Errorf("create Litecoin Core wallet: %w", err)
 		}
 
 		e.log.Info().
 			Str("wallet_id", walletID).
 			Str("core_name", coreWalletName).
-			Msg("created Bitcoin Core wallet from seed")
+			Msg("created Litecoin Core wallet from seed")
 	}
 
 	// Cache the mapping
@@ -248,7 +248,7 @@ func (e *WalletEngine) EnsureWatchOnlyWallet(ctx context.Context, walletID strin
 		e.log.Info().
 			Str("wallet_id", walletID).
 			Str("core_name", watchWalletName).
-			Msg("creating watch-only wallet in Bitcoin Core")
+			Msg("creating watch-only wallet in Litecoin Core")
 
 		if err := client.CreateWatchOnlyWalletInCore(ctx, watchWalletName, descriptorOrXpub); err != nil {
 			return "", fmt.Errorf("create watch-only wallet: %w", err)
@@ -257,14 +257,14 @@ func (e *WalletEngine) EnsureWatchOnlyWallet(ctx context.Context, walletID strin
 		e.log.Info().
 			Str("wallet_id", walletID).
 			Str("core_name", watchWalletName).
-			Msg("created watch-only wallet in Bitcoin Core")
+			Msg("created watch-only wallet in Litecoin Core")
 	}
 
 	e.coreWallets[walletID] = watchWalletName
 	return watchWalletName, nil
 }
 
-// GetCoreWalletName returns the Bitcoin Core wallet name for a walletID.
+// GetCoreWalletName returns the Litecoin Core wallet name for a walletID.
 // Calls EnsureBitcoinCoreWallet to lazy-create if needed.
 func (e *WalletEngine) GetCoreWalletName(ctx context.Context, walletID string) (string, error) {
 	backendType, err := e.GetWalletBackendType(walletID)
@@ -278,11 +278,11 @@ func (e *WalletEngine) GetCoreWalletName(ctx context.Context, walletID string) (
 	case WalletBackendWatchOnly:
 		return e.EnsureWatchOnlyWallet(ctx, walletID)
 	default:
-		return "", fmt.Errorf("wallet %s (type %s) does not map to a Bitcoin Core wallet", walletID, backendType)
+		return "", fmt.Errorf("wallet %s (type %s) does not map to a Litecoin Core wallet", walletID, backendType)
 	}
 }
 
-// SyncWallets ensures all bitcoinCore wallets in wallet.json exist in Bitcoin Core.
+// SyncWallets ensures all bitcoinCore wallets in wallet.json exist in Litecoin Core.
 // Called after wallet unlock. Errors are logged but do not fail the sync.
 func (e *WalletEngine) SyncWallets(ctx context.Context) error {
 	// Throttle syncs to once per 5 seconds
@@ -343,7 +343,7 @@ func (e *WalletEngine) SyncWallets(ctx context.Context) error {
 			e.log.Info().
 				Str("wallet_id", w.ID).
 				Str("core_name", coreName).
-				Msg("wallet sync: creating missing Bitcoin Core wallet")
+				Msg("wallet sync: creating missing Litecoin Core wallet")
 
 			if err := client.CreateBitcoinCoreWalletFromSeed(ctx, coreName, fullWallet.Master.SeedHex, e.network); err != nil {
 				syncErrors = append(syncErrors, fmt.Sprintf("wallet %s: %v", w.ID, err))
@@ -357,7 +357,7 @@ func (e *WalletEngine) SyncWallets(ctx context.Context) error {
 			e.log.Info().
 				Str("wallet_id", w.ID).
 				Str("core_name", coreName).
-				Msg("wallet sync: created Bitcoin Core wallet")
+				Msg("wallet sync: created Litecoin Core wallet")
 
 		case "watchOnly":
 			coreName := watchWalletNameForID(w.ID)
@@ -439,7 +439,7 @@ func (e *WalletEngine) GetBalance(ctx context.Context, walletID string) (confirm
 	}
 }
 
-// GetNewCoreAddress gets a new address from Bitcoin Core for the given wallet.
+// GetNewCoreAddress gets a new address from Litecoin Core for the given wallet.
 func (e *WalletEngine) GetNewCoreAddress(ctx context.Context, walletID string) (string, error) {
 	coreName, err := e.GetCoreWalletName(ctx, walletID)
 	if err != nil {
@@ -452,7 +452,7 @@ func (e *WalletEngine) GetNewCoreAddress(ctx context.Context, walletID string) (
 	return client.GetNewAddress(ctx, coreName)
 }
 
-// ListCoreTransactions lists transactions for a Bitcoin Core wallet.
+// ListCoreTransactions lists transactions for a Litecoin Core wallet.
 func (e *WalletEngine) ListCoreTransactions(ctx context.Context, walletID string, count int) ([]CoreTransaction, error) {
 	coreName, err := e.GetCoreWalletName(ctx, walletID)
 	if err != nil {
@@ -465,7 +465,7 @@ func (e *WalletEngine) ListCoreTransactions(ctx context.Context, walletID string
 	return client.ListTransactionsWallet(ctx, coreName, count)
 }
 
-// ListCoreUnspent lists UTXOs for a Bitcoin Core wallet.
+// ListCoreUnspent lists UTXOs for a Litecoin Core wallet.
 func (e *WalletEngine) ListCoreUnspent(ctx context.Context, walletID string) ([]CoreUnspent, error) {
 	coreName, err := e.GetCoreWalletName(ctx, walletID)
 	if err != nil {
@@ -478,7 +478,7 @@ func (e *WalletEngine) ListCoreUnspent(ctx context.Context, walletID string) ([]
 	return client.ListUnspentWallet(ctx, coreName)
 }
 
-// SendFromCoreWallet sends BTC from a Bitcoin Core wallet.
+// SendFromCoreWallet sends BTC from a Litecoin Core wallet.
 func (e *WalletEngine) SendFromCoreWallet(ctx context.Context, walletID string, destinations map[string]float64, feeRate float64) (string, error) {
 	coreName, err := e.GetCoreWalletName(ctx, walletID)
 	if err != nil {
@@ -491,7 +491,7 @@ func (e *WalletEngine) SendFromCoreWallet(ctx context.Context, walletID string, 
 	return client.Send(ctx, coreName, destinations, feeRate)
 }
 
-// BumpCoreFee bumps the fee for a transaction in a Bitcoin Core wallet.
+// BumpCoreFee bumps the fee for a transaction in a Litecoin Core wallet.
 func (e *WalletEngine) BumpCoreFee(ctx context.Context, walletID, txid string) (*BumpFeeResult, error) {
 	coreName, err := e.GetCoreWalletName(ctx, walletID)
 	if err != nil {

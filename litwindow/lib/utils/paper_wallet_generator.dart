@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
-/// Generate a new Bitcoin keypair for paper wallets
+/// Generate a new Litecoin keypair for paper wallets
 class PaperWalletGenerator {
   /// Generate a new random keypair
   static PaperWalletKeypair generate() {

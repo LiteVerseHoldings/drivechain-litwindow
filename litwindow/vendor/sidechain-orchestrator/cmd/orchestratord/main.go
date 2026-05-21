@@ -227,7 +227,7 @@ func run(cctx *cli.Context) error {
 		mux.Handle(confPath, confH)
 	}
 
-	// Bitcoin Core proxy (btc-buf BitcoinService) — single canonical route
+	// Litecoin Core proxy (btc-buf BitcoinService) — single canonical route
 	// to bitcoind. Behind a swappable shim so a network swap can rebuild
 	// the underlying proxy with fresh creds without re-registering the mux
 	// path or restarting the orchestrator. OnNetworkChanged fires after
@@ -235,7 +235,7 @@ func run(cctx *cli.Context) error {
 	if orch.BitcoinConf != nil {
 		swappable := newSwappableHandler()
 		if proxy, err := startCoreProxy(ctx, orch, log); err != nil {
-			log.Warn().Err(err).Msg("failed to start bitcoin core proxy")
+			log.Warn().Err(err).Msg("failed to start Litecoin Core proxy")
 		} else {
 			_, coreH := corerpc.NewBitcoinServiceHandler(proxy, connect.WithInterceptors())
 			swappable.swap(coreH)
@@ -243,17 +243,17 @@ func run(cctx *cli.Context) error {
 		// The path is constant; register once.
 		corePath, _ := corerpc.NewBitcoinServiceHandler(noopBitcoinService{}, connect.WithInterceptors())
 		mux.Handle(corePath, swappable)
-		log.Info().Str("service", "bitcoin.bitcoind.v1alpha.BitcoinService").Msg("registered bitcoin core proxy")
+		log.Info().Str("service", "bitcoin.bitcoind.v1alpha.BitcoinService").Msg("registered Litecoin Core proxy")
 
 		orch.BitcoinConf.OnNetworkChanged = func() {
 			rebuilt, err := startCoreProxy(ctx, orch, log)
 			if err != nil {
-				log.Error().Err(err).Msg("rebuild bitcoin core proxy after network swap")
+				log.Error().Err(err).Msg("rebuild Litecoin Core proxy after network swap")
 				return
 			}
 			_, h := corerpc.NewBitcoinServiceHandler(rebuilt, connect.WithInterceptors())
 			swappable.swap(h)
-			log.Info().Str("network", string(orch.BitcoinConf.Network)).Msg("rebuilt bitcoin core proxy for new network")
+			log.Info().Str("network", string(orch.BitcoinConf.Network)).Msg("rebuilt Litecoin Core proxy for new network")
 		}
 	}
 
@@ -433,7 +433,7 @@ func startCoreProxy(ctx context.Context, orch *orchestrator.Orchestrator, log ze
 	}
 
 	host := fmt.Sprintf("127.0.0.1:%d", port)
-	log.Info().Str("host", host).Str("user", user).Msg("starting Bitcoin Core proxy")
+	log.Info().Str("host", host).Str("user", user).Msg("starting Litecoin Core proxy")
 
 	// Quiet the proxy's connection logs — its rpcclient retries on a tight
 	// loop while bitcoind is starting and floods stdout otherwise.

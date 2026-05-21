@@ -50,7 +50,7 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Network is controlled by your bitcoin.conf file. To change network in LitWindow, delete your own bitcoin.conf file and restart.',
+              'Network is controlled by your litecoin.conf file. To change network in LitWindow, delete your own litecoin.conf file and restart.',
             ),
             backgroundColor: SailTheme.of(context).colors.info,
           ),
@@ -79,7 +79,7 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
           MaterialPageRoute(
             builder: (_) => const L1RestartPage(
               reason:
-                  'Bitcoin Core needs to restart for the new data directory to take effect. The new chain data will be written to the path you just chose.',
+                  'Litecoin Core needs to restart for the new data directory to take effect. The new chain data will be written to the path you just chose.',
             ),
           ),
         );
@@ -112,9 +112,9 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Switch Bitcoin Core variant?'),
+        title: const Text('Switch Litecoin Core variant?'),
         content: const Text(
-          'Bitcoin Core will be stopped, the new build downloaded if needed, and then restarted.',
+          'Litecoin Core will be stopped, the new build downloaded if needed, and then restarted.',
         ),
         actions: [
           TextButton(
@@ -160,14 +160,14 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SailText.primary20('Network & Node'),
-            SailText.secondary13('Configure Bitcoin network and node settings'),
+            SailText.secondary13('Configure Litecoin network and node settings'),
           ],
         ),
         if (_variantProvider.isVisible)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SailText.primary15('Bitcoin Core Variant'),
+              SailText.primary15('Litecoin Core Variant'),
               const SailSpacing(SailStyleValues.padding08),
               SailDropdownButton<String>(
                 value: _variantProvider.activeId,
@@ -184,14 +184,14 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
               ),
               const SailSpacing(4),
               SailText.secondary12(
-                'Choose which Bitcoin Core build the orchestrator runs',
+                'Choose which Litecoin Core build the orchestrator runs',
               ),
             ],
           ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SailText.primary15('Bitcoin Network'),
+            SailText.primary15('Litecoin Network'),
             const SailSpacing(SailStyleValues.padding08),
             SailDropdownButton<BitcoinNetwork>(
               value: _confProvider.network,
@@ -227,18 +227,18 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
             const SailSpacing(4),
             SailText.secondary12(
               !_confProvider.hasPrivateBitcoinConf
-                  ? 'Select the Bitcoin network to connect to'
-                  : 'Network is controlled by your bitcoin.conf file',
+                  ? 'Select the Litecoin network to connect to'
+                  : 'Network is controlled by your litecoin.conf file',
             ),
           ],
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SailText.primary15('Bitcoin Conf Configuration'),
+            SailText.primary15('Litecoin Conf Configuration'),
             const SailSpacing(SailStyleValues.padding08),
             SailButton(
-              label: 'Edit Bitcoin Core Settings',
+              label: 'Edit Litecoin Core Settings',
               onPressed: () async {
                 await Future.delayed(const Duration(milliseconds: 100));
                 final router = GetIt.I.get<AppRouter>();
@@ -247,7 +247,7 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
             ),
             const SailSpacing(4),
             SailText.secondary12(
-              'Configure your Bitcoin Core conf',
+              'Configure your Litecoin Core conf',
             ),
           ],
         ),
@@ -257,8 +257,8 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
             children: [
               SailText.primary15(
                 _confProvider.network == BitcoinNetwork.BITCOIN_NETWORK_FORKNET
-                    ? 'Bitcoin Data Directory — Forknet'
-                    : 'Bitcoin Data Directory — Default',
+                    ? 'Litecoin Data Directory — Forknet'
+                    : 'Litecoin Data Directory — Default',
               ),
               const SailSpacing(SailStyleValues.padding08),
               SailRow(
@@ -297,8 +297,8 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
               const SailSpacing(4),
               SailText.secondary12(
                 canEditDataDir
-                    ? 'Directory where Bitcoin data files are stored (2.5TB+ for mainnet)'
-                    : 'Data directory is controlled by your bitcoin.conf file',
+                    ? 'Directory where Litecoin data files are stored (2.5TB+ for mainnet)'
+                    : 'Data directory is controlled by your litecoin.conf file',
               ),
             ],
           ),

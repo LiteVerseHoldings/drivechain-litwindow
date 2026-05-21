@@ -10,7 +10,7 @@ func CoreVariantInstalled(dataDir string, v CoreVariantSpec, binaryName string) 
 	return err == nil
 }
 
-// preferenceLess orders Bitcoin Core variants by fallback priority, used
+// preferenceLess orders Litecoin Core variants by fallback priority, used
 // when the user's persisted CoreVariant isn't available on the current
 // network. Knots is always last; everything else falls back to
 // alphabetical so adding new variants doesn't surprise the operator.

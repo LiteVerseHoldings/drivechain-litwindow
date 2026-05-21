@@ -149,12 +149,12 @@ class MasterWallet {
   }
 }
 
-/// Layer 1 (Bitcoin Core) wallet
+/// Layer 1 (Litecoin Core) wallet
 class L1Wallet {
   final String mnemonic;
   final String name;
 
-  L1Wallet({required this.mnemonic, this.name = 'Bitcoin Core (Patched)'});
+  L1Wallet({required this.mnemonic, this.name = 'Litecoin Core (Patched)'});
 
   Map<String, dynamic> toJson() {
     return {'mnemonic': mnemonic, 'name': name};
@@ -163,7 +163,7 @@ class L1Wallet {
   factory L1Wallet.fromJson(Map<String, dynamic> json) {
     return L1Wallet(
       mnemonic: json['mnemonic'] as String,
-      name: json['name'] as String? ?? 'Bitcoin Core (Patched)',
+      name: json['name'] as String? ?? 'Litecoin Core (Patched)',
     );
   }
 }

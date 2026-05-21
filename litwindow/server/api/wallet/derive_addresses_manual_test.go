@@ -78,7 +78,7 @@ func TestManualAddressDerivation(t *testing.T) {
 
 }
 
-// TestDeriveMultipleWallets shows addresses for all your Bitcoin Core wallets
+// TestDeriveMultipleWallets shows addresses for all your Litecoin Core wallets
 func TestDeriveMultipleWallets(t *testing.T) {
 	wallets := []struct {
 		name string

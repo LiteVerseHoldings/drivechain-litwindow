@@ -630,7 +630,7 @@ func (o *Orchestrator) prefetchBinary(ctx context.Context, cfg BinaryConfig) <-c
 }
 
 // StartWithL1 starts a binary along with its dependency chain:
-// Bitcoin Core -> wait for wallet/IBD -> Enforcer -> target binary.
+// Litecoin Core -> wait for wallet/IBD -> Enforcer -> target binary.
 func (o *Orchestrator) StartWithL1(ctx context.Context, target string, opts StartOpts) (<-chan StartupProgress, error) {
 	config, err := o.getConfig(target)
 	if err != nil {
@@ -740,7 +740,7 @@ func (o *Orchestrator) startBitcoindOnly(ctx context.Context, opts StartOpts, ch
 
 	if coreMon.Connected() {
 		o.log.Info().Str("binary", "bitcoind").Msg("already running, not booting")
-		ch <- StartupProgress{Stage: "waiting-bitcoind", Message: "Bitcoin Core already running"}
+		ch <- StartupProgress{Stage: "waiting-bitcoind", Message: "Litecoin Core already running"}
 
 		if !o.process.IsRunning("bitcoind") {
 			pid := o.discoverPid(coreCfg)
@@ -761,7 +761,7 @@ func (o *Orchestrator) startBitcoindOnly(ctx context.Context, opts StartOpts, ch
 				logs := proc.RecentLogs(100)
 				for _, entry := range logs {
 					if strings.Contains(entry.Line, "Please restart with -reindex") {
-						o.log.Warn().Msg("Bitcoin Core needs reindex, adding -reindex flag for next boot attempt")
+						o.log.Warn().Msg("Litecoin Core needs reindex, adding -reindex flag for next boot attempt")
 						hasReindex := false
 						for _, arg := range coreArgs {
 							if arg == "-reindex" {
@@ -794,7 +794,7 @@ func (o *Orchestrator) startBitcoindOnly(ctx context.Context, opts StartOpts, ch
 		},
 	)
 
-	ch <- StartupProgress{Stage: "starting-bitcoind", Message: "starting Bitcoin Core..."}
+	ch <- StartupProgress{Stage: "starting-bitcoind", Message: "starting Litecoin Core..."}
 
 	downloadCh, err := o.download.Download(ctx, o.configs["bitcoind"], o.Network, false)
 	if err != nil {
@@ -813,7 +813,7 @@ func (o *Orchestrator) startBitcoindOnly(ctx context.Context, opts StartOpts, ch
 	// already running" and surface a phantom error on the bitcoind card.
 	if o.process.IsRunning("bitcoind") {
 		o.log.Info().Str("binary", "bitcoind").Msg("process already in tracking map, waiting for connection")
-		ch <- StartupProgress{Stage: "waiting-bitcoind", Message: "waiting for Bitcoin Core to accept connections..."}
+		ch <- StartupProgress{Stage: "waiting-bitcoind", Message: "waiting for Litecoin Core to accept connections..."}
 		if err := waitForConnectedOrExit(ctx, coreMon, o.process.Get("bitcoind")); err != nil {
 			failBoot(coreMon, ch, "wait for bitcoind", err)
 			return false
@@ -827,7 +827,7 @@ func (o *Orchestrator) startBitcoindOnly(ctx context.Context, opts StartOpts, ch
 	}
 	coreProc := o.process.Get("bitcoind")
 
-	ch <- StartupProgress{Stage: "waiting-bitcoind", Message: "waiting for Bitcoin Core to accept connections..."}
+	ch <- StartupProgress{Stage: "waiting-bitcoind", Message: "waiting for Litecoin Core to accept connections..."}
 	if err := waitForConnectedOrExit(ctx, coreMon, coreProc); err != nil {
 		failBoot(coreMon, ch, "wait for bitcoind", err)
 		return false
@@ -1474,7 +1474,7 @@ func (o *Orchestrator) ProcessManager() *ProcessManager {
 	return o.process
 }
 
-// CoreVariant returns the currently selected Bitcoin Core variant ID.
+// CoreVariant returns the currently selected Litecoin Core variant ID.
 func (o *Orchestrator) CoreVariant() string {
 	if o.Settings == nil {
 		return DefaultCoreVariantID
@@ -2307,7 +2307,7 @@ func (o *Orchestrator) explorerHTTP() *http.Client {
 	return o.explorerHTTPClient
 }
 
-// CreateCoreWallet creates a Bitcoin Core wallet from a seed via BIP84 descriptor import.
+// CreateCoreWallet creates a Litecoin Core wallet from a seed via BIP84 descriptor import.
 // Ported from bitwindow/server/engines/wallet_engine.go.
 // This is called for non-enforcer (bitcoinCore type) wallets.
 func (o *Orchestrator) CreateCoreWallet(walletName string, seedHex string) error {
@@ -2325,7 +2325,7 @@ func (o *Orchestrator) CreateCoreWallet(walletName string, seedHex string) error
 	o.log.Info().
 		Str("wallet", walletName).
 		Str("core_name", coreWalletName).
-		Msg("creating wallet in Bitcoin Core with BIP84 descriptors")
+		Msg("creating wallet in Litecoin Core with BIP84 descriptors")
 
 	if err := client.CreateBitcoinCoreWalletFromSeed(ctx, coreWalletName, seedHex, o.Network); err != nil {
 		return fmt.Errorf("create core wallet: %w", err)
@@ -2334,11 +2334,11 @@ func (o *Orchestrator) CreateCoreWallet(walletName string, seedHex string) error
 	o.log.Info().
 		Str("wallet", walletName).
 		Str("core_name", coreWalletName).
-		Msg("Bitcoin Core wallet created with BIP84 descriptors")
+		Msg("Litecoin Core wallet created with BIP84 descriptors")
 	return nil
 }
 
-// CreateCoreWatchOnlyWallet creates a watch-only wallet in Bitcoin Core.
+// CreateCoreWatchOnlyWallet creates a watch-only wallet in Litecoin Core.
 func (o *Orchestrator) CreateCoreWatchOnlyWallet(walletName string, descriptorOrXpub string) error {
 	client, err := o.CoreStatusClient()
 	if err != nil {
@@ -2353,7 +2353,7 @@ func (o *Orchestrator) CreateCoreWatchOnlyWallet(walletName string, descriptorOr
 	o.log.Info().
 		Str("wallet", walletName).
 		Str("core_name", coreWalletName).
-		Msg("creating watch-only wallet in Bitcoin Core")
+		Msg("creating watch-only wallet in Litecoin Core")
 
 	if err := client.CreateWatchOnlyWalletInCore(ctx, coreWalletName, descriptorOrXpub); err != nil {
 		return fmt.Errorf("create watch-only core wallet: %w", err)
@@ -2362,11 +2362,11 @@ func (o *Orchestrator) CreateCoreWatchOnlyWallet(walletName string, descriptorOr
 	o.log.Info().
 		Str("wallet", walletName).
 		Str("core_name", coreWalletName).
-		Msg("Bitcoin Core watch-only wallet created")
+		Msg("Litecoin Core watch-only wallet created")
 	return nil
 }
 
-// sanitizeWalletName creates a safe wallet name for Bitcoin Core.
+// sanitizeWalletName creates a safe wallet name for Litecoin Core.
 func sanitizeWalletName(name string) string {
 	// Replace spaces/special chars with underscores, truncate to 20 chars
 	var safe []byte

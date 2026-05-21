@@ -19,7 +19,7 @@ class FileOperationLock {
   }
 }
 
-// Shared helper now lives in sail_ui as `bitcoindRpcCall`.
+// Shared raw RPC helper now lives in sail_ui.
 Future<dynamic> _coreRaw(String method, [List<dynamic>? params]) => bitcoindRpcCall(method, params: params);
 
 class TransactionStatusManager {
@@ -534,7 +534,7 @@ class MultisigDescriptorBuilder {
         return result['descriptor'] as String;
       }
 
-      throw Exception('Bitcoin Core getdescriptorinfo returned invalid response: $result');
+      throw Exception('Litecoin Core getdescriptorinfo returned invalid response: $result');
     } catch (e) {
       GetIt.I.get<Logger>().e('Failed to add checksum to descriptor: $e');
       throw Exception('Failed to add checksum to descriptor: $e');

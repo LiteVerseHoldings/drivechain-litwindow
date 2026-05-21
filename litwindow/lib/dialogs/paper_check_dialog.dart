@@ -9,7 +9,7 @@ import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-/// Paper Check Dialog - Create funded Bitcoin checks with redemption keys
+/// Paper Check Dialog - Create funded Litecoin checks with redemption keys
 ///
 /// Qt equivalent: None (disabled in mainchain-deprecated: showPaperCheckDialogAction->setEnabled(false))
 /// Design follows Paper Wallet dialog structure for consistency
@@ -98,7 +98,7 @@ class _PaperCheckDialogState extends State<PaperCheckDialog> {
       final walletId = _walletReader.activeWalletId;
       if (walletId == null) throw Exception('No active wallet');
 
-      // Convert BTC to satoshis
+      // Convert LTC to satoshis
       final satoshis = (amount * 100000000).toInt();
 
       // Send funds to the generated address
@@ -176,12 +176,12 @@ class _PaperCheckDialogState extends State<PaperCheckDialog> {
             child: pw.Column(
               children: [
                 pw.Text(
-                  'BITCOIN PAPER CHECK',
+                  'LITECOIN PAPER CHECK',
                   style: pw.TextStyle(fontSize: 32, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Text(
-                  'Amount: $amount BTC',
+                  'Amount: $amount LTC',
                   style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 30),
@@ -201,7 +201,7 @@ class _PaperCheckDialogState extends State<PaperCheckDialog> {
                               style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
                             ),
                             pw.SizedBox(height: 5),
-                            pw.Text('Bitcoin Address', style: const pw.TextStyle(fontSize: 12)),
+                            pw.Text('Litecoin Address', style: const pw.TextStyle(fontSize: 12)),
                             pw.SizedBox(height: 15),
                             if (recipientQr != null)
                               pw.Image(
@@ -366,7 +366,7 @@ class _PaperCheckDialogState extends State<PaperCheckDialog> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: SailText.secondary12(
-                              'A paper check sends Bitcoin to a new address, then displays both '
+                              'A paper check sends Litecoin to a new address, then displays both '
                               'the address and private key. The recipient can import the private '
                               'key to redeem the funds.',
                             ),
@@ -378,7 +378,7 @@ class _PaperCheckDialogState extends State<PaperCheckDialog> {
 
                     // Amount input (if not yet funded)
                     if (_txid == null) ...[
-                      SailText.primary13('Check Amount (BTC):'),
+                      SailText.primary13('Check Amount (LTC):'),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _amountController,
@@ -508,7 +508,7 @@ class _PaperCheckDialogState extends State<PaperCheckDialog> {
                                     children: [
                                       SailText.secondary12('Check Amount'),
                                       const SizedBox(height: 4),
-                                      SailText.primary20('${_amountController.text} BTC', bold: true),
+                                      SailText.primary20('${_amountController.text} LTC', bold: true),
                                     ],
                                   ),
                                 ],
@@ -662,7 +662,7 @@ class _RecipientPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SailText.secondary12(
-            'Bitcoin Address',
+            'Litecoin Address',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),

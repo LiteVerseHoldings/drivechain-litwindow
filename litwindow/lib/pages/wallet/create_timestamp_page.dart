@@ -119,7 +119,7 @@ class CreateTimestampPage extends StatelessWidget {
                     spacing: SailStyleValues.padding20,
                     children: [
                       SailText.secondary13(
-                        'Upload a file (max 1MB) to timestamp on the Bitcoin blockchain. '
+                        'Upload a file (max 1MB) to timestamp on the Litecoin blockchain. '
                         'This will create a permanent, verifiable proof that the file existed at this time.',
                       ),
                       if (model.selectedFile == null)

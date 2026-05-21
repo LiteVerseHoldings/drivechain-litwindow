@@ -93,7 +93,7 @@ void main() {
 
   testWidgets('renders dropdown with installed and download labels', (tester) async {
     final variants = [
-      wmpb.CoreVariant(id: 'untouched', displayName: 'Bitcoin Core (vanilla)', installed: true),
+      wmpb.CoreVariant(id: 'untouched', displayName: 'Litecoin Core (vanilla)', installed: true),
       wmpb.CoreVariant(id: 'knots', displayName: 'Bitcoin Knots', installed: false),
     ];
     await tester.pumpWidget(
@@ -101,7 +101,7 @@ void main() {
     );
 
     expect(find.byType(SailDropdownButton<String>), findsOneWidget);
-    expect(find.text('Bitcoin Core (vanilla)'), findsWidgets);
+    expect(find.text('Litecoin Core (vanilla)'), findsWidgets);
     // Open dropdown to surface non-installed entry's "(will download)" suffix.
     await tester.tap(find.byType(SailDropdownButton<String>));
     await tester.pumpAndSettle();

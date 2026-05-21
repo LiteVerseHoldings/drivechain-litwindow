@@ -26,7 +26,7 @@ import (
 // the same way until Core is past startup.
 const walletLoadingBackoff = 5 * time.Second
 
-// WalletEngine manages Bitcoin Core wallets derived from wallet.json seeds.
+// WalletEngine manages Litecoin Core wallets derived from wallet.json seeds.
 // It handles BIP84 descriptor derivation and lazy Core wallet creation.
 type WalletEngine struct {
 	svc     *Service
@@ -67,7 +67,7 @@ func (e *WalletEngine) coinType() uint32 {
 // tprv version bytes (0x04358394) for testnet/signet/regtest extended private keys.
 var tprvVersionBytes = []byte{0x04, 0x35, 0x83, 0x94}
 
-// EnsureCoreWallet ensures a Bitcoin Core wallet exists for a wallet.json wallet.
+// EnsureCoreWallet ensures a Litecoin Core wallet exists for a wallet.json wallet.
 // Returns the Core wallet name.
 func (e *WalletEngine) EnsureCoreWallet(ctx context.Context, walletID string) (string, error) {
 	e.mu.Lock()
@@ -106,7 +106,7 @@ func (e *WalletEngine) EnsureCoreWallet(ctx context.Context, walletID string) (s
 	case "watchOnly":
 		err = e.createWatchOnlyWallet(ctx, walletName, targetWallet)
 	default:
-		return "", fmt.Errorf("wallet type %s does not use Bitcoin Core", targetWallet.WalletType)
+		return "", fmt.Errorf("wallet type %s does not use Litecoin Core", targetWallet.WalletType)
 	}
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (e *WalletEngine) EnsureCoreWallet(ctx context.Context, walletID string) (s
 	return walletName, nil
 }
 
-// createBitcoinCoreWallet creates a Bitcoin Core descriptor wallet from a seed.
+// createBitcoinCoreWallet creates a Litecoin Core descriptor wallet from a seed.
 func (e *WalletEngine) createBitcoinCoreWallet(ctx context.Context, walletName, seedHex string) error {
 	seed, err := hex.DecodeString(seedHex)
 	if err != nil {
@@ -177,7 +177,7 @@ func (e *WalletEngine) createBitcoinCoreWallet(ctx context.Context, walletName, 
 	return e.createAndImport(ctx, walletName, false, descriptors)
 }
 
-// createWatchOnlyWallet creates a watch-only Bitcoin Core wallet.
+// createWatchOnlyWallet creates a watch-only Litecoin Core wallet.
 func (e *WalletEngine) createWatchOnlyWallet(ctx context.Context, walletName string, w *WalletData) error {
 	if w.WatchOnly == nil {
 		return fmt.Errorf("watch-only wallet missing watch_only data")
@@ -271,13 +271,13 @@ func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, d
 			}
 		}
 
-		e.log.Info().Str("wallet", walletName).Msg("created Bitcoin Core wallet")
+		e.log.Info().Str("wallet", walletName).Msg("created Litecoin Core wallet")
 	}
 
 	return nil
 }
 
-// EnsureCoreWallets syncs all bitcoinCore/watchOnly wallets to Bitcoin Core.
+// EnsureCoreWallets syncs all bitcoinCore/watchOnly wallets to Litecoin Core.
 func (e *WalletEngine) EnsureCoreWallets(ctx context.Context) (int, error) {
 	wallets := e.svc.GetAllWallets()
 	synced := 0
@@ -338,7 +338,7 @@ func (e *WalletEngine) serializeKey(key *bip32.Key) string {
 
 	// key.Serialize() returns the full 82-byte payload (78 data + 4 checksum).
 	// We need to strip the existing checksum, replace version bytes, then
-	// re-encode with a fresh checksum so Bitcoin Core accepts the key.
+	// re-encode with a fresh checksum so Litecoin Core accepts the key.
 	serialized, err := key.Serialize()
 	if err != nil {
 		return key.String()

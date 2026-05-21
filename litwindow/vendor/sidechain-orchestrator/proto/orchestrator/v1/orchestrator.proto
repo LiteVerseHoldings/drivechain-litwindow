@@ -45,7 +45,7 @@ service OrchestratorService {
   // Get the current BTC/USD exchange rate.
   rpc GetBTCPrice(GetBTCPriceRequest) returns (GetBTCPriceResponse);
 
-  // Get blockchain info from Bitcoin Core (proxied via orchestrator).
+  // Get blockchain info from Litecoin Core (proxied via orchestrator).
   rpc GetMainchainBlockchainInfo(GetMainchainBlockchainInfoRequest) returns (GetMainchainBlockchainInfoResponse);
 
   // Get blockchain info from the enforcer (proxied via orchestrator).
@@ -62,7 +62,7 @@ service OrchestratorService {
   // is in flight, and dropping back to 2s when the response is empty.
   rpc GetDownloadStatus(GetDownloadStatusRequest) returns (GetDownloadStatusResponse);
 
-  // Get wallet balance from Bitcoin Core (proxied via orchestrator).
+  // Get wallet balance from Litecoin Core (proxied via orchestrator).
   rpc GetMainchainBalance(GetMainchainBalanceRequest) returns (GetMainchainBalanceResponse);
 
   // Preview what would be deleted for the given reset categories (no side effects).
@@ -71,7 +71,7 @@ service OrchestratorService {
   // Reset/delete data categories. Stops affected binaries, streams each deletion event.
   rpc StreamResetData(StreamResetDataRequest) returns (stream StreamResetDataResponse);
 
-  // ─── Bitcoin Core typed extensions ────────────────────────────────────────
+  // ─── Litecoin Core typed extensions ────────────────────────────────────────
   // Sit alongside the btc-buf BitcoinService for methods btc-buf doesn't type
   // (getmempoolinfo) plus a generic raw-call escape hatch (finalizepsbt,
   // descriptorprocesspsbt, …). Frontends prefer the typed btc-buf methods
@@ -405,7 +405,7 @@ message StreamResetDataResponse {
   int32 failed_count = 7;
 }
 
-// ─── Bitcoin Core typed extensions ────────────────────────────────────────
+// ─── Litecoin Core typed extensions ────────────────────────────────────────
 
 message GetCoreMempoolInfoRequest {}
 
