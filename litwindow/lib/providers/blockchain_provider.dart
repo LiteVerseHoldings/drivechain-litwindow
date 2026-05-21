@@ -52,8 +52,10 @@ class BlockchainProvider extends ChangeNotifier {
         recentTransactions = newTXs;
         if (blocks.isEmpty) {
           blocks = newBlocks;
-          loadedBlockHeights = newBlocks.map((b) => b.height).toSet();
+        } else {
+          blocks = _mergeLatestBlocks(newBlocks);
         }
+        loadedBlockHeights = blocks.map((b) => b.height).toSet();
         hasMoreBlocks = hasMore;
         error = null;
         notifyListeners();
@@ -83,6 +85,26 @@ class BlockchainProvider extends ChangeNotifier {
     }
 
     return false;
+  }
+
+  List<Block> _mergeLatestBlocks(List<Block> newBlocks) {
+    if (newBlocks.isEmpty) {
+      return [];
+    }
+
+    var latestHeight = newBlocks.first.height;
+    for (final block in newBlocks) {
+      if (block.height > latestHeight) {
+        latestHeight = block.height;
+      }
+    }
+
+    final refreshedHeights = newBlocks.map((b) => b.height).toSet();
+    final olderLoadedBlocks = blocks.where((block) {
+      return block.height < latestHeight && !refreshedHeights.contains(block.height);
+    });
+
+    return [...newBlocks, ...olderLoadedBlocks]..sort((a, b) => b.height.compareTo(a.height));
   }
 
   void _startFetchTimer() {

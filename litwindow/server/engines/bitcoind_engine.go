@@ -140,6 +140,18 @@ func (p *Parser) handleBlockTick(ctx context.Context) error {
 		return fmt.Errorf("fetch current height: %w", err)
 	}
 
+	if lastProcessedHeight > currentHeight {
+		zerolog.Ctx(ctx).Info().
+			Uint32("processed_tip", lastProcessedHeight).
+			Uint32("current_tip", currentHeight).
+			Msg("bitcoind_engine/parser: processed tip is ahead of Litecoin Core, reprocessing blocks")
+		if err := blocks.WipeProcessedBlocks(ctx, p.db); err != nil {
+			return fmt.Errorf("wipe processed blocks after chain reset: %w", err)
+		}
+		lastProcessedHeight = 0
+		lastProcessedHash = chainhash.Hash{}
+	}
+
 	// While Core is still doing initial block download on a *full* chain
 	// (mainnet / forknet), skip the OP_RETURN scan entirely. Each scan
 	// fans out a parallel batch of blocks and issues per-tx

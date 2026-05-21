@@ -521,9 +521,20 @@ func (s *Server) GetSyncInfo(ctx context.Context, req *connect.Request[emptypb.E
 		}), nil
 	}
 
+	if processedTip.Height > tip.Msg.Blocks {
+		return connect.NewResponse(&pb.GetSyncInfoResponse{
+			TipBlockHeight:      0,
+			TipBlockTime:        0,
+			TipBlockHash:        "",
+			TipBlockProcessedAt: &timestamppb.Timestamp{},
+			HeaderHeight:        int64(tip.Msg.Headers),
+			SyncProgress:        0,
+		}), nil
+	}
+
 	return connect.NewResponse(&pb.GetSyncInfoResponse{
 		TipBlockHeight:      int64(processedTip.Height),
-		TipBlockTime:        processedTip.ProcessedAt.Unix(),
+		TipBlockTime:        processedTip.BlockTime.Unix(),
 		TipBlockHash:        processedTip.Hash.String(),
 		TipBlockProcessedAt: timestamppb.New(processedTip.ProcessedAt),
 		SyncProgress:        float64(processedTip.Height) / float64(tip.Msg.Blocks),

@@ -2092,6 +2092,11 @@ type MainchainBlockchainInfo struct {
 	Pruned               bool    `json:"pruned"`
 }
 
+type mainchainBlockHeader struct {
+	Time       int64 `json:"time"`
+	MedianTime int64 `json:"mediantime"`
+}
+
 // MainchainBalance holds confirmed + unconfirmed balances from bitcoind.
 type MainchainBalance struct {
 	Confirmed   float64
@@ -2172,6 +2177,21 @@ func (o *Orchestrator) fetchMainchainBlockchainInfo(ctx context.Context) (*Mainc
 	var info MainchainBlockchainInfo
 	if err := json.Unmarshal(result, &info); err != nil {
 		return nil, fmt.Errorf("decode getblockchaininfo: %w", err)
+	}
+
+	if (info.Time == 0 || info.MedianTime == 0) && info.BestBlockHash != "" {
+		headerResult, err := client.call(ctx, "getblockheader", info.BestBlockHash, true)
+		if err == nil {
+			var header mainchainBlockHeader
+			if err := json.Unmarshal(headerResult, &header); err == nil {
+				if info.Time == 0 {
+					info.Time = header.Time
+				}
+				if info.MedianTime == 0 {
+					info.MedianTime = header.MedianTime
+				}
+			}
+		}
 	}
 
 	return &info, nil
