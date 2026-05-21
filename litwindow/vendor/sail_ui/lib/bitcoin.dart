@@ -48,7 +48,7 @@ int btcToSatoshi(double btc) {
 
 String formatBitcoin(num? number, {String symbol = 'LTC'}) {
   if (number == null || number.isNaN || number.isInfinite) {
-    return '0.0000,0000${symbol.isEmpty ? '' : ' $symbol'}';
+    return '0.00000000${symbol.isEmpty ? '' : ' $symbol'}';
   }
 
   // Ensure positive number and handle negatives
@@ -61,13 +61,9 @@ String formatBitcoin(num? number, {String symbol = 'LTC'}) {
 
   final integerPart = parts[0];
 
-  // Ensure decimal part is 8 digits
-  String decimalPart = (parts.length > 1 ? parts[1] : '').padRight(8, '0').substring(0, 8);
+  final decimalPart = (parts.length > 1 ? parts[1] : '').padRight(8, '0').substring(0, 8);
 
-  // Group as: 4 digits, 4 digits with comma
-  String groupedDecimal = '${decimalPart.substring(0, 4)},${decimalPart.substring(4, 8)}';
-
-  return '${isNegative ? '-' : ''}$integerPart.$groupedDecimal${symbol.isEmpty ? '' : ' $symbol'}';
+  return '${isNegative ? '-' : ''}$integerPart.$decimalPart${symbol.isEmpty ? '' : ' $symbol'}';
 }
 
 String formatDepositAddress(String address, int sidechainNum) {
