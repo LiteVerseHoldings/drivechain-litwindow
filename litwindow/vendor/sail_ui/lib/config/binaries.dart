@@ -1343,7 +1343,7 @@ class ZSided extends Binary {
 
 class Enforcer extends Binary {
   Enforcer({
-    super.name = 'BIP300301 Enforcer',
+    super.name = 'LIP 005 Enforcer',
     super.version = '0.1.0',
     super.description = 'Manages drivechain validation rules',
     super.repoUrl = 'https://github.com/LayerTwo-Labs/bip300301-enforcer',

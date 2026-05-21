@@ -127,7 +127,7 @@
     },
     "enforcer": {
       "type": "core",
-      "name": "BIP300301 Enforcer",
+      "name": "LIP 005 Enforcer",
       "version": "0.1.0",
       "description": "Manages drivechain validation rules",
       "repo_url": "https://github.com/LayerTwo-Labs/bip300301-enforcer",

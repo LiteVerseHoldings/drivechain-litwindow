@@ -45,17 +45,17 @@ class _M4ExplorerPageState extends State<M4ExplorerPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SailText.primary20('Unlock M4 Features with BIP300'),
+                  SailText.primary20('Unlock M4 Features with LIP 005'),
                   const SailSpacing(SailStyleValues.padding20),
                   SailText.secondary13(
                     'The Sidechain Withdrawal Admin (M4 Explorer) is only available on Drivechain-enabled networks '
-                    '(Forknet and Signet). These networks implement BIP300, which enables trustless two-way pegged sidechains.',
+                    '(Forknet and Signet). These networks implement LIP 005, which enables trustless two-way pegged sidechains.',
                   ),
                   const SailSpacing(SailStyleValues.padding20),
                   SailText.primary15('What is M4?'),
                   const SailSpacing(SailStyleValues.padding08),
                   SailText.secondary13(
-                    'M4 is the mechanism for handling sidechain withdrawals in BIP300. As a miner or node operator, '
+                    'M4 is the mechanism for handling sidechain withdrawals in LIP 005. As a miner or node operator, '
                     'you can vote on withdrawal bundles and help secure the sidechain-to-mainchain peg.',
                   ),
                   const SailSpacing(SailStyleValues.padding20),

@@ -497,7 +497,7 @@ func (s *Server) ListWithdrawals(
 	}), nil
 }
 
-// BIP300 withdrawal verification period (max age for a bundle)
+// LIP 005 withdrawal verification period (max age for a bundle)
 const withdrawalVerificationPeriod uint32 = 26300
 
 // processPegDataBlocks extracts withdrawal bundles from peg data blocks

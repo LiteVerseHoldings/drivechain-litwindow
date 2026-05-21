@@ -18,7 +18,7 @@ import (
 // Base58 alphabet
 const base58Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
-// BitcoinURI represents a parsed BIP-0021 Bitcoin URI
+// BitcoinURI represents a parsed Litecoin payment URI.
 type BitcoinURI struct {
 	Address     string
 	Amount      float64
@@ -27,7 +27,7 @@ type BitcoinURI struct {
 	ExtraParams map[string]string
 }
 
-// ParseBitcoinURI parses a BIP-0021 Bitcoin URI
+// ParseBitcoinURI parses a Litecoin payment URI.
 func ParseBitcoinURI(uri string) (*BitcoinURI, error) {
 	lower := strings.ToLower(uri)
 	if !strings.HasPrefix(lower, "bitcoin:") {

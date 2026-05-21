@@ -197,11 +197,11 @@ class SidechainsList extends ViewModelWidget<SidechainsViewModel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SailText.primary20('Unlock Sidechains with BIP300'),
+              SailText.primary20('Unlock Sidechains with LIP 005'),
               const SailSpacing(SailStyleValues.padding20),
               SailText.secondary13(
                 'Sidechains are only available on Drivechain-enabled networks (Forknet and Signet). '
-                'These networks implement BIP300, which enables trustless two-way pegged sidechains.',
+                'These networks implement LIP 005, which enables trustless two-way pegged sidechains.',
               ),
               const SailSpacing(SailStyleValues.padding20),
               SailText.primary15('What are Sidechains?'),
@@ -224,7 +224,7 @@ class SidechainsList extends ViewModelWidget<SidechainsViewModel> {
               SailText.primary15('Learn More'),
               const SailSpacing(SailStyleValues.padding08),
               SailText.secondary13(
-                'BIP300 (Hashrate Escrows) and BIP301 (Blind Merged Mining) enable true sidechain functionality. '
+                'LIP 005 enables true sidechain functionality. '
                 'Visit drivechain.info to learn more about how Drivechain works and why it matters for Litecoin.',
               ),
             ],

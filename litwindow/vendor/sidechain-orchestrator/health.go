@@ -255,7 +255,7 @@ func (c *CoreStatusClient) call(ctx context.Context, method string, params ...in
 
 // IsHeaderSyncComplete reports whether Litecoin Core has finished downloading
 // headers — block IBD may still be in progress. Enforcer only needs headers
-// to start validating BIP300/301 activity (it syncs blocks alongside Core),
+// to start validating LIP 005 activity (it syncs blocks alongside Core),
 // so gating on IBD forces users to wait for the full chain when they don't
 // have to. Signal: headers > 0 AND headers >= blocks AND we're past the
 // "still connecting / no chain" bootstrap phase (headers > 10).

@@ -87,7 +87,7 @@ type M3Message struct {
 	CreatedAt     time.Time
 }
 
-// Constants from BIP300
+// Constants from LIP 005
 const (
 	M3CommitmentHeader = 0xD45AA943 // M3 magic bytes (Propose Withdrawal)
 	M4CommitmentHeader = 0xD77D1776 // M4 magic bytes (ACK Withdrawal)

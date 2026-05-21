@@ -36,11 +36,11 @@ class SidechainActivationManagementPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SailText.primary20('Unlock Sidechain Activation with BIP300'),
+                  SailText.primary20('Unlock Sidechain Activation with LIP 005'),
                   const SailSpacing(SailStyleValues.padding20),
                   SailText.secondary13(
                     'Sidechain activation is only available on Drivechain-enabled networks (Forknet and Signet). '
-                    'These networks implement BIP300, which enables trustless two-way pegged sidechains.',
+                    'These networks implement LIP 005, which enables trustless two-way pegged sidechains.',
                   ),
                   const SailSpacing(SailStyleValues.padding20),
                   SailText.primary15('What is Sidechain Activation?'),

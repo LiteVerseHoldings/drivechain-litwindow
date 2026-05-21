@@ -28,7 +28,7 @@ $ drivechaind \
   -listen
 
 #
-# Then, start the bip300301-enforcer
+# Then, start the enforcer
 $ ./enforcer/bin/bip300301-enforcer \
   --node-rpc-password=password \
   --node-rpc-user=user \

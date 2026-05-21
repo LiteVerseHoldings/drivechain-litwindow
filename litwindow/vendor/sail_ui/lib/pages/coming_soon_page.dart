@@ -94,7 +94,7 @@ class _ComingSoonPageState extends State<ComingSoonPage> with TickerProviderStat
                         ],
                       ).createShader(bounds),
                       child: const Text(
-                        'THIS COULD BE BITCOIN',
+                        'THIS COULD BE LITECOIN',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 42,
@@ -126,9 +126,9 @@ class _ComingSoonPageState extends State<ComingSoonPage> with TickerProviderStat
 
                     // Description
                     Text(
-                      'Drivechain (BIP-300/301) enables sidechains on Bitcoin. '
+                      'Drivechain (LIP 005) enables sidechains on Litecoin. '
                       'This feature requires activation with a soft fork.\n\n'
-                      'Until activated, you can continue this demo and take a peak into the future by switching to Signet, where Drivechain is already active.',
+                      'Until activated, you can continue this demo and take a peek into the future by switching to Signet, where Drivechain is already active.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,

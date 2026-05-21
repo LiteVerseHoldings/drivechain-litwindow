@@ -271,7 +271,7 @@ class HomepageWidgetCatalog {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SailText.primary15('Unlock with BIP300'),
+                      SailText.primary15('Unlock with LIP 005'),
                       const SailSpacing(SailStyleValues.padding12),
                       SailText.secondary13(
                         'This feature requires Forknet or Signet network. '

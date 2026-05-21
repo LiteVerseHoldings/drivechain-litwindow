@@ -14,7 +14,7 @@ void main() {
     await tester.pumpSailPage(const AboutBitwindowDialog());
 
     expect(
-      find.textContaining('LitWindow — GUI for the BIP300/301 sidechain enforcer.'),
+      find.textContaining('LitWindow — GUI for the LIP 005 sidechain enforcer.'),
       findsOneWidget,
     );
     expect(find.textContaining('2009-2026 The Drivechain developers'), findsOneWidget);

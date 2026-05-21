@@ -2242,7 +2242,7 @@ func (o *Orchestrator) CoreStatusClient() (*CoreStatusClient, error) {
 }
 
 // enforcerHTTP returns the singleton h2c http.Client used to talk to the
-// BIP300/301 enforcer's ValidatorService. One client is shared across all
+// LIP 005 enforcer's ValidatorService. One client is shared across all
 // GetSyncStatus polls so the underlying http2.Transport's connection pool
 // survives — previously this was rebuilt per call and the new transport's
 // pool was thrown away as soon as the call returned, leaving the

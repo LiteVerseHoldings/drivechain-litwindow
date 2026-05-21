@@ -265,7 +265,7 @@ message GetSyncStatusRequest {}
 
 message GetSyncStatusResponse {
   ChainSync mainchain = 1;                   // bitcoind
-  ChainSync enforcer = 2;                    // BIP300/301 enforcer
+  ChainSync enforcer = 2;                    // LIP 005 enforcer
   // All sidechains the orchestrator knows about. Always includes every
   // configured sidechain — daemons that aren't running yet appear with
   // their `sync.error` set so the UI can render a placeholder. While a

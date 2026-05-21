@@ -1376,7 +1376,7 @@ class AboutBitwindowDialog extends StatelessWidget {
                 ),
                 children: [
                   const TextSpan(
-                    text: 'LitWindow — GUI for the BIP300/301 sidechain enforcer.\n\n',
+                    text: 'LitWindow — GUI for the LIP 005 sidechain enforcer.\n\n',
                   ),
                   const TextSpan(
                     text: 'Copyright (C) 2009-2026 The Drivechain developers\n',
@@ -1421,7 +1421,7 @@ class AboutBitwindowDialog extends StatelessWidget {
                     text: '. The source code for the underlying enforcer is available from ',
                   ),
                   TextSpan(
-                    text: 'https://github.com/LayerTwo-Labs/bip300301_enforcer',
+                    text: 'LayerTwo Labs enforcer repository',
                     style: TextStyle(
                       color: theme.colors.primary,
                       decoration: TextDecoration.underline,
