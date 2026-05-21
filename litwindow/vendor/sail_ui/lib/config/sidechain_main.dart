@@ -202,13 +202,29 @@ Future<void> copyBinariesFromAssets(Logger log, Directory appDir) async {
 
   for (final binary in allBinaries) {
     try {
-      final binaryName = binary.binary + (Platform.isWindows && !binary.binary.endsWith('.exe') ? '.exe' : '');
-      final assetPath = 'assets/bin/$binaryName';
+      ByteData? binResource;
+      String? sourceAssetPath;
+      for (final sourceBinary in binary.bundledBinaryNames) {
+        final sourceBinaryName =
+            sourceBinary + (Platform.isWindows && !sourceBinary.endsWith('.exe') ? '.exe' : '');
+        final assetPath = 'assets/bin/$sourceBinaryName';
+        try {
+          binResource = await rootBundle.load(assetPath);
+          sourceAssetPath = assetPath;
+          break;
+        } catch (e) {
+          if (!e.toString().contains('Unable to load asset')) rethrow;
+        }
+      }
 
-      final binResource = await rootBundle.load(assetPath);
+      if (binResource == null) {
+        throw Exception('Unable to load asset');
+      }
+
+      final binaryName = binary.binary + (Platform.isWindows && !binary.binary.endsWith('.exe') ? '.exe' : '');
       final file = File(path.join(fileDir.path, binaryName));
 
-      log.d('Writing binary ${binary.name} to: ${file.path}');
+      log.d('Writing binary ${binary.name} from $sourceAssetPath to: ${file.path}');
 
       final buffer = binResource.buffer;
       await file.writeAsBytes(
@@ -218,7 +234,7 @@ Future<void> copyBinariesFromAssets(Logger log, Directory appDir) async {
         ),
       );
 
-      // Ensure the copied binary is executable. bitwindowd spawns
+      // Ensure the copied binary is executable. litwindowd spawns
       // orchestratord via Go's exec.Command which does NOT chmod, so without
       // this orchestratord fails with "permission denied" on fresh installs.
       if (!Platform.isWindows) {
@@ -228,7 +244,7 @@ Future<void> copyBinariesFromAssets(Logger log, Directory appDir) async {
 
       log.d('Successfully wrote binary: ${binary.name}');
     } catch (e) {
-      // Most binaries aren't bundled into assets/bin (only bitwindowd and
+      // Most binaries aren't bundled into assets/bin (only litwindowd and
       // orchestratord are) — Flutter's "Unable to load asset" error is
       // expected for everything else. Silence it; surface anything else.
       if (!e.toString().contains('Unable to load asset')) {

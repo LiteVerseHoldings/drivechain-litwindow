@@ -689,7 +689,7 @@ class _SailCreateWalletPageState extends State<SailCreateWalletPage> {
               variant: ButtonVariant.primary,
               disabled: !_isValidInput || _awaitingBackend,
               loading: _awaitingBackend,
-              loadingLabel: 'Connecting to bitwindowd…',
+              loadingLabel: 'Connecting to litwindowd…',
               onPressed: _handleAdvancedCreate,
             ),
           ],
@@ -771,7 +771,7 @@ class _SailCreateWalletPageState extends State<SailCreateWalletPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: SailText.primary15(
                             _awaitingBackend
-                                ? 'Connecting to bitwindowd…'
+                                ? 'Connecting to litwindowd…'
                                 : _isGenerating
                                 ? 'Generating Your Wallet'
                                 : hasExistingWallet
@@ -913,7 +913,7 @@ class _SailCreateWalletPageState extends State<SailCreateWalletPage> {
                     disabled: _awaitingBackend,
                     loading: _awaitingBackend,
                     onPressed: _handleRestore,
-                    loadingLabel: _awaitingBackend ? 'Connecting to bitwindowd…' : 'Restoring your wallet',
+                    loadingLabel: _awaitingBackend ? 'Connecting to litwindowd…' : 'Restoring your wallet',
                   ),
                 ],
               ),

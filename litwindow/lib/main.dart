@@ -503,7 +503,7 @@ class _BitwindowAppContent extends StatelessWidget {
       ),
       builder: (context, child) {
         // PersistentStatusBar collapses to SizedBox.shrink when orch +
-        // bitwindowd are healthy (or still booting), so this wrap adds no
+        // litwindowd is healthy (or still booting), so this wrap adds no
         // layout cost on normal routes. When either daemon fails terminally
         // it renders a 36px red banner — visible on pre-auth screens where
         // root_page's richer BottomNav isn't mounted.
@@ -804,12 +804,12 @@ Future<void> bootBitwindowBackend(Logger log) async {
     }
   }());
 
-  // 1. Start bitwindowd — it manages orchestratord internally,
+  // 1. Start litwindowd — it manages orchestratord internally,
   //    which in turn manages litecoind, enforcer, and sidechains.
-  log.i('STARTUP: starting bitwindowd');
+  log.i('STARTUP: starting litwindowd');
   await binaryProvider.start(bitwindow);
 
-  // 2. Wait for orchestratord (managed by bitwindowd) to become ready.
+  // 2. Wait for orchestratord (managed by litwindowd) to become ready.
   //    _startDaemonBinary cleared bitwindow's initializingBinary when the
   //    process came up, but we're not actually "ready" until orchestratord
   //    is serving gRPC — re-assert the flag and push a startup log so

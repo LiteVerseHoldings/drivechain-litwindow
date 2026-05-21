@@ -53,7 +53,7 @@
     },
     "bitwindow": {
       "type": "core",
-      "name": "BitWindow",
+      "name": "LitWindow",
       "version": "latest",
       "description": "GUI for managing drivechain operations",
       "repo_url": "https://github.com/LayerTwo-Labs/drivechain-frontends/bitwindow",
@@ -75,7 +75,7 @@
         }
       },
       "download": {
-        "binary": "bitwindowd",
+        "binary": "litwindowd",
         "files": {
           "default": {
             "base_url": "",

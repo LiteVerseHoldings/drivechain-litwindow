@@ -72,6 +72,8 @@ abstract class Binary {
   String get ticker => '';
   String get binary => metadata.downloadConfig.binary;
   String get binaryName => binary;
+  List<String> get bundledBinaryNames => [binary];
+  List<String> get processNameAliases => const [];
   bool get isDownloaded => metadata.binaryPath != null;
 
   bool get updateAvailable =>
@@ -743,7 +745,9 @@ abstract class Binary {
   Future<File> resolveBinaryPath(Directory appDir) async {
     // First find all possible paths the binary might be in,
     // such as .exe, .app, /assets/bin, $datadir/assets etc.
-    final possiblePaths = _getPossibleBinaryPaths(binary, appDir);
+    final possiblePaths = [
+      for (final candidate in [binary, ...processNameAliases]) ..._getPossibleBinaryPaths(candidate, appDir),
+    ];
 
     // Check if binary exists in any of the possible paths
     for (final binaryPath in possiblePaths) {
@@ -1134,7 +1138,7 @@ class BitWindow extends Binary {
              metadata ??
              MetadataConfig(
                downloadConfig: DownloadConfig(
-                 binary: 'bitwindowd',
+                 binary: 'litwindowd',
                  baseUrls: allNetworksUrl(''),
                  // should not be downloaded from any platform
                  files: allNetworks({
@@ -1153,6 +1157,12 @@ class BitWindow extends Binary {
 
   @override
   BinaryType get type => BinaryType.BINARY_TYPE_BITWINDOWD;
+
+  @override
+  List<String> get bundledBinaryNames => ['litwindowd', 'bitwindowd'];
+
+  @override
+  List<String> get processNameAliases => const ['bitwindowd'];
 
   @override
   Color get color => SailColorScheme.green;

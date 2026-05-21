@@ -147,7 +147,7 @@ class BackendStateProvider extends ChangeNotifier {
     return switch (name) {
       'bitcoind' => GetIt.I.isRegistered<BitcoindConnection>() ? GetIt.I.get<BitcoindConnection>() : null,
       'enforcer' => GetIt.I.isRegistered<EnforcerRPC>() ? GetIt.I.get<EnforcerRPC>() : null,
-      // bitwindowd state is managed by BinaryProvider (daemon binary), not the orchestrator stream.
+      // litwindowd state is managed by BinaryProvider (daemon binary), not the orchestrator stream.
       'thunder' => GetIt.I.isRegistered<ThunderRPC>() ? GetIt.I.get<ThunderRPC>() : null,
       'zside' => GetIt.I.isRegistered<ZSideRPC>() ? GetIt.I.get<ZSideRPC>() : null,
       'bitnames' => GetIt.I.isRegistered<BitnamesRPC>() ? GetIt.I.get<BitnamesRPC>() : null,
@@ -171,6 +171,7 @@ class BackendStateProvider extends ChangeNotifier {
         return BinaryType.BINARY_TYPE_ZSIDE;
       case 'bitwindow':
       case 'bitwindowd':
+      case 'litwindowd':
         return BinaryType.BINARY_TYPE_BITWINDOWD;
       case 'bitnames':
         return BinaryType.BINARY_TYPE_BITNAMES;

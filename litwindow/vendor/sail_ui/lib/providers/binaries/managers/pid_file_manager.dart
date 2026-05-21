@@ -128,7 +128,7 @@ class PidFileManager {
 
   /// Get the process name for a PID (platform-specific)
   ///
-  /// Returns the executable name (e.g., "bitwindowd", "bip300301-enforcer")
+  /// Returns the executable name (e.g., "litwindowd", "bip300301-enforcer")
   /// or null if the process doesn't exist or name can't be determined.
   Future<String?> getProcessName(int pid) async {
     try {
@@ -181,13 +181,16 @@ class PidFileManager {
     final processName = await getProcessName(pid);
     if (processName == null) return false;
 
-    // The process name should contain the binary name
-    // e.g., processName="bip300301-enforcer" should match binary.binaryName="bip300301-enforcer"
+    // The process name should contain the binary name.
+    // e.g., processName="bip300301-enforcer" should match binary.binaryName="bip300301-enforcer".
     // Process name may be truncated on some systems, so check both directions
-    final binaryName = binary.binaryName.toLowerCase();
     final procName = processName.toLowerCase();
+    final expectedNames = [
+      binary.binaryName,
+      ...binary.processNameAliases,
+    ].map((name) => name.toLowerCase());
 
-    return procName.contains(binaryName) || binaryName.contains(procName);
+    return expectedNames.any((binaryName) => procName.contains(binaryName) || binaryName.contains(procName));
   }
 
   /// Validate a PID: check if it's alive AND belongs to the expected binary
