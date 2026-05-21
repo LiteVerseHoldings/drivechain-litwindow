@@ -376,7 +376,7 @@ abstract class Binary {
         ]);
 
       case BinaryType.BINARY_TYPE_BITWINDOWD:
-        return _getExistingFilesInDir(networkDir, ['bitdrive', 'bitwindow.db']);
+        return _getExistingFilesInDir(networkDir, ['bitwindow.db']);
 
       case BinaryType.BINARY_TYPE_BITNAMES:
       case BinaryType.BINARY_TYPE_BITASSETS:
@@ -1039,8 +1039,7 @@ class BitcoinCore extends Binary {
                downloadConfig: DownloadConfig(
                  baseUrls: {
                    ...allNetworksUrl(''),
-                   BitcoinNetwork.BITCOIN_NETWORK_MAINNET:
-                       'https://download.litecoin.org/litecoin-0.21.5.5/',
+                   BitcoinNetwork.BITCOIN_NETWORK_MAINNET: 'https://download.litecoin.org/litecoin-0.21.5.5/',
                  },
                  binary: 'litecoind',
                  files: {

@@ -83,7 +83,6 @@ enum SailSVGAsset {
   iconWallet,
   iconDelete,
   iconMultisig,
-  iconBitdrive,
   iconHDWallet,
 
   lightMode,
@@ -4768,8 +4767,6 @@ extension AsAssetPath on SailSVGAsset {
         return 'assets/svgs/icon_delete.svg';
       case SailSVGAsset.iconMultisig:
         return 'assets/svgs/icon_multisig.svg';
-      case SailSVGAsset.iconBitdrive:
-        return 'assets/svgs/icon_bitdrive.svg';
       case SailSVGAsset.iconHDWallet:
         return 'assets/svgs/icon_hdwallet.svg';
 

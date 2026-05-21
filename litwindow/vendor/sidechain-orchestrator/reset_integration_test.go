@@ -169,7 +169,6 @@ func bootedLayout(t *testing.T, home, network string) []string {
 	writeStub(t, filepath.Join(bwNet, "server.log"))
 	writeStub(t, filepath.Join(bwNet, "wallet.json"))
 	writeStub(t, filepath.Join(bwNet, "wallet_encryption.json"))
-	writeDir(t, filepath.Join(bwNet, "bitdrive"))
 
 	for _, f := range []string{
 		"bitwindow-bitcoin.conf", "debug.log", "settings.json",
@@ -186,7 +185,6 @@ func bootedLayout(t *testing.T, home, network string) []string {
 		filepath.Join(bwNet, "server.log"),
 		filepath.Join(bwNet, "wallet.json"),
 		filepath.Join(bwNet, "wallet_encryption.json"),
-		filepath.Join(bwNet, "bitdrive"),
 		filepath.Join(bwRoot, "assets"),
 		filepath.Join(bwRoot, "bitwindow-bitcoin.conf"),
 		filepath.Join(bwRoot, "debug.log"),

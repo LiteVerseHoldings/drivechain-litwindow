@@ -17,7 +17,6 @@ import (
 	"connectrpc.com/connect"
 	"connectrpc.com/grpcreflect"
 
-	api_bitdrive "github.com/LayerTwo-Labs/sidesail/bitwindow/server/api/bitdrive"
 	api_bitwindowd "github.com/LayerTwo-Labs/sidesail/bitwindow/server/api/bitwindowd"
 	api_drivechain "github.com/LayerTwo-Labs/sidesail/bitwindow/server/api/drivechain"
 	api_enforcer "github.com/LayerTwo-Labs/sidesail/bitwindow/server/api/enforcer"
@@ -36,7 +35,6 @@ import (
 	dial "github.com/LayerTwo-Labs/sidesail/bitwindow/server/dial"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/engines"
 
-	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitdrive/v1/bitdrivev1connect"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1/bitwindowdv1connect"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/drivechain/v1/drivechainv1connect"
 	fast_withdrawalv1connect "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/fast_withdrawal/v1/fast_withdrawalv1connect"
@@ -103,7 +101,6 @@ type Runtime struct {
 	notificationEngine *engines.NotificationEngine
 	sidechainMonitor   *engines.SidechainMonitorEngine
 	m4Engine           *engines.M4Engine
-	bitdriveEngine     *engines.BitDriveEngine
 
 	conf        config.Config
 	chainParams *chaincfg.Params
@@ -172,7 +169,6 @@ func (s *Server) buildRuntime(ctx context.Context, conf config.Config) (*Runtime
 	rt.timestampEngine = engines.NewTimestampEngine(rt.db, timestampLogger, walletAdapter, s.Bitcoind)
 	rt.m4Engine = engines.NewM4Engine(rt.db)
 	rt.notificationEngine = engines.NewNotificationEngine(rt.db, s.Bitcoind)
-	rt.bitdriveEngine = engines.NewBitDriveEngine(rt.db, rt.walletEngine, conf.Datadir, rt.chainParams)
 	rt.sidechainMonitor = engines.NewSidechainMonitorEngine(
 		s.Thunder, s.BitNames, s.BitAssets, s.Truthcoin, s.Photon, s.CoinShift,
 		rt.notificationEngine,
@@ -226,11 +222,6 @@ func (s *Server) buildRuntime(ctx context.Context, conf config.Config) (*Runtime
 	{
 		notifSvc := api_notification.New(rt.notificationEngine)
 		path, h := notificationv1connect.NewNotificationServiceHandler(notifSvc, stdOpts...)
-		register(path, h)
-	}
-	{
-		bitdriveSvc := api_bitdrive.New(rt.db, s.Wallet, s.Bitcoind, rt.bitdriveEngine)
-		path, h := bitdrivev1connect.NewBitDriveServiceHandler(bitdriveSvc, stdOpts...)
 		register(path, h)
 	}
 	{

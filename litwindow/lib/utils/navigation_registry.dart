@@ -55,6 +55,5 @@ final Map<String, NavigationTarget> navigationRegistry = {
   'wallet_timestamps.dart': NavigationTarget(tabIndex: TabIndices.wallet, subtabIndex: WalletSubtabs.timestamps),
   'denability_page.dart': NavigationTarget(tabIndex: TabIndices.wallet, subtabIndex: WalletSubtabs.tools),
   'wallet_hd.dart': NavigationTarget(tabIndex: TabIndices.wallet, subtabIndex: WalletSubtabs.tools),
-  'bitdrive_page.dart': NavigationTarget(tabIndex: TabIndices.wallet, subtabIndex: WalletSubtabs.tools),
   'wallet_multisig_lounge.dart': NavigationTarget(tabIndex: TabIndices.wallet, subtabIndex: WalletSubtabs.tools),
 };

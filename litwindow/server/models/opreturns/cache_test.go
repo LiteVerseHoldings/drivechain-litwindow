@@ -38,7 +38,7 @@ func TestList_LimitCaps(t *testing.T) {
 	assert.Len(t, got, limit)
 }
 
-// List(..., 0) is the explicit "full table" escape hatch (bitdrive).
+// List(..., 0) is the explicit "full table" escape hatch.
 func TestList_LimitZeroIsUnbounded(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()

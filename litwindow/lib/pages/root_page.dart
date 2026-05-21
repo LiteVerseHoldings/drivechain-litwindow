@@ -268,11 +268,6 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
         onSelected: () => GetIt.I.get<AppRouter>().push(const CreateTimestampRoute()),
       ),
       CommandItem(
-        label: 'BitDrive',
-        category: 'Use Litecoin',
-        onSelected: () => GetIt.I.get<WindowProvider>().open(SubWindowTypes.bitDrive),
-      ),
-      CommandItem(
         label: 'Sign / Verify Message',
         category: 'Use Litecoin',
         onSelected: () => GetIt.I.get<WindowProvider>().open(SubWindowTypes.messageSigner),
@@ -686,13 +681,6 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
                                 ),
                               ),
                             );
-                          },
-                        ),
-                        PlatformMenuItem(
-                          label: 'BitDrive',
-                          onSelected: () {
-                            final windowProvider = GetIt.I.get<WindowProvider>();
-                            windowProvider.open(SubWindowTypes.bitDrive);
                           },
                         ),
                       ],

@@ -7,7 +7,6 @@ import 'package:fixnum/fixnum.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-import 'package:sail_ui/gen/bitdrive/v1/bitdrive.pb.dart' as bitdrivepb;
 import 'package:sail_ui/gen/multisig/v1/multisig.pb.dart' as multisigpb;
 import 'package:sail_ui/gen/multisig/v1/multisig.connect.client.dart';
 import 'package:sail_ui/gen/utils/v1/utils.pb.dart' as utilspb;
@@ -29,7 +28,6 @@ abstract class BitwindowRPC extends RPCConnection {
   MiscAPI get misc;
   M4API get m4;
   NotificationAPI get notifications;
-  BitDriveAPI get bitdrive;
   MultisigAPI get multisig;
   UtilsAPI get utils;
 
@@ -54,8 +52,6 @@ class BitwindowRPCLive extends BitwindowRPC {
   @override
   late NotificationAPI notifications;
   @override
-  late BitDriveAPI bitdrive;
-  @override
   late MultisigAPI multisig;
   @override
   late UtilsAPI utils;
@@ -79,7 +75,6 @@ class BitwindowRPCLive extends BitwindowRPC {
     misc = _MiscAPILive(MiscServiceClient(transport));
     m4 = _M4APILive(M4ServiceClient(transport));
     notifications = _NotificationAPILive(NotificationServiceClient(transport));
-    bitdrive = _BitDriveAPILive(BitDriveServiceClient(transport));
     multisig = _MultisigAPILive(MultisigServiceClient(transport));
     utils = _UtilsAPILive(UtilsServiceClient(transport));
 
@@ -205,15 +200,6 @@ class BitwindowRPCLive extends BitwindowRPC {
       'wallet.v1.WalletService/SendTransaction',
       'wallet.v1.WalletService/SignMessage',
       'wallet.v1.WalletService/VerifyMessage',
-      'bitdrive.v1.BitDriveService/StoreFile',
-      'bitdrive.v1.BitDriveService/RetrieveContent',
-      'bitdrive.v1.BitDriveService/ScanForFiles',
-      'bitdrive.v1.BitDriveService/DownloadPendingFiles',
-      'bitdrive.v1.BitDriveService/ListFiles',
-      'bitdrive.v1.BitDriveService/GetFile',
-      'bitdrive.v1.BitDriveService/DeleteFile',
-      'bitdrive.v1.BitDriveService/StoreMultisigData',
-      'bitdrive.v1.BitDriveService/WipeData',
       'multisig.v1.MultisigService/ListGroups',
       'multisig.v1.MultisigService/SaveGroup',
       'multisig.v1.MultisigService/DeleteGroup',
@@ -1438,198 +1424,6 @@ class _NotificationAPILive implements NotificationAPI {
       throw BitcoindException(error);
     }
   }
-}
-
-abstract class BitDriveAPI {
-  Future<bitdrivepb.StoreFileResponse> storeFile({
-    required List<int> content,
-    String? filename,
-    String? mimeType,
-    bool encrypt = false,
-    int? feeSatPerVbyte,
-  });
-
-  Future<bitdrivepb.RetrieveContentResponse> retrieveContent(String txid);
-
-  Future<bitdrivepb.ScanForFilesResponse> scanForFiles();
-
-  Future<bitdrivepb.DownloadPendingFilesResponse> downloadPendingFiles();
-
-  Future<List<bitdrivepb.BitDriveFile>> listFiles();
-
-  Future<bitdrivepb.GetFileResponse> getFile({Int64? id, String? txid});
-
-  Future<void> deleteFile(Int64 id);
-
-  Future<bitdrivepb.StoreMultisigDataResponse> storeMultisigData({
-    required List<int> jsonData,
-    bool encrypt = false,
-    int? feeSatPerVbyte,
-  });
-
-  Future<void> wipeData();
-
-  Future<String> getBitdriveDir();
-
-  Future<void> openBitdriveDir();
-}
-
-class _BitDriveAPILive implements BitDriveAPI {
-  final BitDriveServiceClient _client;
-  Logger get log => GetIt.I.get<Logger>();
-
-  _BitDriveAPILive(this._client);
-
-  @override
-  Future<bitdrivepb.StoreFileResponse> storeFile({
-    required List<int> content,
-    String? filename,
-    String? mimeType,
-    bool encrypt = false,
-    int? feeSatPerVbyte,
-  }) async {
-    try {
-      final request = bitdrivepb.StoreFileRequest(
-        content: content,
-        filename: filename,
-        mimeType: mimeType,
-        encrypt: encrypt,
-        feeSatPerVbyte: feeSatPerVbyte != null ? Int64(feeSatPerVbyte) : null,
-      );
-      final response = await _client.storeFile(request);
-      return response;
-    } catch (e) {
-      final error = 'could not store file: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<bitdrivepb.RetrieveContentResponse> retrieveContent(
-    String txid,
-  ) async {
-    try {
-      final request = bitdrivepb.RetrieveContentRequest(txid: txid);
-      final response = await _client.retrieveContent(request);
-      return response;
-    } catch (e) {
-      final error = 'could not retrieve content: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<bitdrivepb.ScanForFilesResponse> scanForFiles() async {
-    try {
-      final response = await _client.scanForFiles(Empty());
-      return response;
-    } catch (e) {
-      final error = 'could not scan for files: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<bitdrivepb.DownloadPendingFilesResponse> downloadPendingFiles() async {
-    try {
-      final response = await _client.downloadPendingFiles(Empty());
-      return response;
-    } catch (e) {
-      final error = 'could not download pending files: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<List<bitdrivepb.BitDriveFile>> listFiles() async {
-    try {
-      final response = await _client.listFiles(Empty());
-      return response.files;
-    } catch (e) {
-      final error = 'could not list files: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<bitdrivepb.GetFileResponse> getFile({Int64? id, String? txid}) async {
-    try {
-      final request = bitdrivepb.GetFileRequest(id: id, txid: txid);
-      final response = await _client.getFile(request);
-      return response;
-    } catch (e) {
-      final error = 'could not get file: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<void> deleteFile(Int64 id) async {
-    try {
-      await _client.deleteFile(bitdrivepb.DeleteFileRequest(id: id));
-    } catch (e) {
-      final error = 'could not delete file: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<bitdrivepb.StoreMultisigDataResponse> storeMultisigData({
-    required List<int> jsonData,
-    bool encrypt = false,
-    int? feeSatPerVbyte,
-  }) async {
-    try {
-      final request = bitdrivepb.StoreMultisigDataRequest(
-        jsonData: jsonData,
-        encrypt: encrypt,
-        feeSatPerVbyte: feeSatPerVbyte != null ? Int64(feeSatPerVbyte) : null,
-      );
-      final response = await _client.storeMultisigData(request);
-      return response;
-    } catch (e) {
-      final error = 'could not store multisig data: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<void> wipeData() async {
-    try {
-      await _client.wipeData(Empty());
-    } catch (e) {
-      final error = 'could not wipe data: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<String> getBitdriveDir() async {
-    try {
-      final response = await _client.getBitdriveDir(Empty());
-      return response.path;
-    } catch (e) {
-      final error = 'could not get bitdrive dir: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-
-  @override
-  Future<void> openBitdriveDir() async {
-    try {
-      await _client.openBitdriveDir(Empty());
-    } catch (e) {
-      final error = 'could not open bitdrive dir: ${extractConnectException(e)}';
-      throw BitDriveException(error);
-    }
-  }
-}
-
-class BitDriveException implements Exception {
-  final String message;
-  BitDriveException(this.message);
-  @override
-  String toString() => 'BitDriveException: $message';
 }
 
 // ─── MultisigAPI ──────────────────────────────────────────────────

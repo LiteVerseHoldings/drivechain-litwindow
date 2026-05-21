@@ -1,6 +1,5 @@
 import 'package:fixnum/src/int64.dart';
 import 'package:sail_ui/classes/rpc_connection.dart';
-import 'package:sail_ui/gen/bitdrive/v1/bitdrive.pb.dart';
 import 'package:sail_ui/gen/multisig/v1/multisig.pb.dart' as multisigpb;
 import 'package:sail_ui/gen/bitwindowd/v1/bitwindowd.pb.dart';
 import 'package:sail_ui/gen/drivechain/v1/drivechain.pb.dart';
@@ -12,9 +11,6 @@ import 'package:sail_ui/gen/wallet/v1/wallet.pb.dart';
 import 'package:sail_ui/rpcs/bitwindow_api.dart';
 
 class MockAPI extends BitwindowRPC {
-  @override
-  final BitDriveAPI bitdrive = MockBitDriveAPI();
-  @override
   final MultisigAPI multisig = MockMultisigAPI();
   @override
   final UtilsAPI utils = MockUtilsAPI();
@@ -441,73 +437,6 @@ class MockNotificationAPI implements NotificationAPI {
   @override
   Stream<WatchResponse> watch() {
     return Stream.periodic(const Duration(seconds: 1)).map((_) => WatchResponse());
-  }
-}
-
-class MockBitDriveAPI implements BitDriveAPI {
-  @override
-  Future<StoreFileResponse> storeFile({
-    required List<int> content,
-    String? filename,
-    String? mimeType,
-    bool encrypt = false,
-    int? feeSatPerVbyte,
-  }) {
-    return Future.value(StoreFileResponse());
-  }
-
-  @override
-  Future<RetrieveContentResponse> retrieveContent(String txid) {
-    return Future.value(RetrieveContentResponse());
-  }
-
-  @override
-  Future<ScanForFilesResponse> scanForFiles() {
-    return Future.value(ScanForFilesResponse());
-  }
-
-  @override
-  Future<DownloadPendingFilesResponse> downloadPendingFiles() {
-    return Future.value(DownloadPendingFilesResponse());
-  }
-
-  @override
-  Future<List<BitDriveFile>> listFiles() {
-    return Future.value([]);
-  }
-
-  @override
-  Future<GetFileResponse> getFile({Int64? id, String? txid}) {
-    return Future.value(GetFileResponse());
-  }
-
-  @override
-  Future<void> deleteFile(Int64 id) {
-    return Future.value();
-  }
-
-  @override
-  Future<StoreMultisigDataResponse> storeMultisigData({
-    required List<int> jsonData,
-    bool encrypt = false,
-    int? feeSatPerVbyte,
-  }) {
-    return Future.value(StoreMultisigDataResponse());
-  }
-
-  @override
-  Future<void> wipeData() {
-    return Future.value();
-  }
-
-  @override
-  Future<String> getBitdriveDir() {
-    return Future.value('/tmp/mock-bitdrive');
-  }
-
-  @override
-  Future<void> openBitdriveDir() {
-    return Future.value();
   }
 }
 

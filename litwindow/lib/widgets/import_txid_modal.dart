@@ -208,7 +208,7 @@ class ImportTxidModalViewModel extends BaseViewModel {
       notifyListeners();
 
       if (!opReturn.message.contains('|')) {
-        modalError = 'Invalid OP_RETURN format - not a BitDrive transaction';
+        modalError = 'Invalid OP_RETURN format';
         return;
       }
 

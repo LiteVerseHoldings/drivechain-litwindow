@@ -342,7 +342,7 @@ func (b BinaryDirConfig) GetBlockchainDataPaths(networkDir string, network Netwo
 		return GetExistingFilesInDir(rootdir, []string{"validator", "bitwindow-enforcer.conf", networkName}, log)
 
 	case b.BinaryName == "bitwindowd":
-		return GetExistingFilesInDir(networkDir, []string{"bitdrive", "bitwindow.db"}, log)
+		return GetExistingFilesInDir(networkDir, []string{"bitwindow.db"}, log)
 
 	case b.BinaryName == "thunder" || b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon" || b.BinaryName == "coinshift":
 		return GetExistingFilesInDir(networkDir, []string{"data.mdb", "lock.mdb", "logs"}, log)

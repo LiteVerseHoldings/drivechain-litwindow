@@ -11,9 +11,7 @@ import 'package:bitwindow/pages/message_signer.dart';
 import 'package:bitwindow/pages/wallet/denability_page.dart';
 import 'package:bitwindow/pages/wallet/wallet_hd.dart';
 import 'package:bitwindow/pages/wallet/wallet_multisig_lounge.dart';
-import 'package:bitwindow/pages/wallet/bitdrive_page.dart';
 import 'package:bitwindow/providers/address_book_provider.dart';
-import 'package:bitwindow/providers/bitdrive_provider.dart';
 import 'package:bitwindow/providers/bitwindow_settings_provider.dart';
 import 'package:bitwindow/providers/chat_provider.dart';
 import 'package:bitwindow/providers/fast_withdrawal_provider.dart';
@@ -238,7 +236,6 @@ Future<(Directory, File, Logger)> init(String arguments) async {
   GetIt.I.registerSingleton<CoinSelectionProvider>(CoinSelectionProvider());
   GetIt.I.registerSingleton<MiningProvider>(MiningProvider());
   GetIt.I.registerSingleton<HDWalletProvider>(HDWalletProvider());
-  GetIt.I.registerSingleton<BitDriveProvider>(BitDriveProvider());
   // Eager initialization so it can listen for wallet unlock events
   final checkProvider = CheckProvider();
   GetIt.I.registerSingleton<CheckProvider>(checkProvider);
@@ -369,9 +366,6 @@ void runMultiWindow(String argumentsStr, Logger log, Directory applicationDir, F
       break;
     case SubWindowTypes.multisigLoungeId:
       child = const MultisigLoungeTab();
-      break;
-    case SubWindowTypes.bitDriveId:
-      child = const BitDriveTab();
       break;
   }
 
@@ -1014,14 +1008,6 @@ class SubWindowTypes {
     name: 'Multisig Lounge',
     defaultSize: Size(1200, 800),
     defaultPosition: Offset(100, 100),
-  );
-
-  static const String bitDriveId = 'bitdrive';
-  static var bitDrive = SailWindow(
-    identifier: bitDriveId,
-    name: 'BitDrive',
-    defaultSize: Size(1000, 700),
-    defaultPosition: Offset(150, 150),
   );
 }
 

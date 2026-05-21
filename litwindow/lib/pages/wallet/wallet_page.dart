@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:bitwindow/main.dart';
-import 'package:bitwindow/pages/wallet/bitdrive_page.dart';
 import 'package:bitwindow/pages/wallet/denability_page.dart';
 import 'package:bitwindow/pages/wallet/wallet_hd.dart';
 import 'package:bitwindow/pages/wallet/wallet_multisig_lounge.dart';
@@ -92,10 +91,6 @@ class WalletPage extends StatelessWidget {
                 TabItem(
                   label: 'HD Wallet Explorer',
                   child: HDWalletTab(),
-                ),
-                TabItem(
-                  label: 'BitDrive',
-                  child: BitDriveTab(),
                 ),
                 TabItem(
                   label: 'Multisig Lounge',
