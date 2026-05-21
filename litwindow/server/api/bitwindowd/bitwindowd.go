@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -1295,9 +1296,9 @@ func (s *Server) GetNetworkStats(ctx context.Context, req *connect.Request[empty
 
 	// Get per-process bandwidth statistics
 	var bitcoindBandwidth *pb.ProcessBandwidth
-	bitcoindPID := findPIDByName("bitcoind")
+	bitcoindPID := findPIDByName("litecoind")
 	if bitcoindPID > 0 {
-		stats, err := s.bandwidthTracker.GetStats(bitcoindPID, "bitcoind")
+		stats, err := s.bandwidthTracker.GetStats(bitcoindPID, "litecoind")
 		if err == nil {
 			bitcoindBandwidth = &pb.ProcessBandwidth{
 				ProcessName:     stats.ProcessName,
@@ -1347,6 +1348,10 @@ func (s *Server) GetNetworkStats(ctx context.Context, req *connect.Request[empty
 
 // findPIDByName finds a process PID by its name
 func findPIDByName(processName string) int {
+	if runtime.GOOS == "windows" {
+		return findPIDByNameWindows(processName)
+	}
+
 	cmd := exec.Command("pgrep", "-x", processName)
 	output, err := cmd.Output()
 	if err != nil {
@@ -1366,6 +1371,45 @@ func findPIDByName(processName string) int {
 	}
 
 	return pid
+}
+
+func findPIDByNameWindows(processName string) int {
+	imageName := processName
+	if !strings.HasSuffix(strings.ToLower(imageName), ".exe") {
+		imageName += ".exe"
+	}
+
+	cmd := exec.Command("tasklist", "/FI", fmt.Sprintf("IMAGENAME eq %s", imageName), "/FO", "CSV", "/NH")
+	output, err := cmd.Output()
+	if err != nil {
+		return 0
+	}
+
+	for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+		fields := parseTasklistCSVLine(line)
+		if len(fields) < 2 || !strings.EqualFold(fields[0], imageName) {
+			continue
+		}
+		pid, err := strconv.Atoi(fields[1])
+		if err == nil {
+			return pid
+		}
+	}
+
+	return 0
+}
+
+func parseTasklistCSVLine(line string) []string {
+	line = strings.TrimSpace(line)
+	if line == "" || strings.Contains(line, "INFO:") {
+		return nil
+	}
+
+	fields := strings.Split(line, "\",\"")
+	for i := range fields {
+		fields[i] = strings.Trim(fields[i], "\"")
+	}
+	return fields
 }
 
 func (s *Server) calculateAverageBlockTime(ctx context.Context, bitcoind corerpc.BitcoinServiceClient, currentHeight int64) (float64, error) {

@@ -238,7 +238,8 @@ func (t *Tracker) updateStatsWindows(stats *Stats) error {
 
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
-		if strings.Contains(line, pidStr) {
+		fields := strings.Fields(line)
+		if len(fields) > 0 && fields[len(fields)-1] == pidStr {
 			count++
 		}
 	}
