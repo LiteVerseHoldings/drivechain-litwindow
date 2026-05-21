@@ -32,8 +32,12 @@ class WalletReaderProvider extends ChangeNotifier {
 
   WalletData? get activeWallet => wallets.where((w) => w.id == activeWalletId).firstOrNull;
   WalletData? get enforcerWallet => wallets.where((w) => w.walletType == BinaryType.BINARY_TYPE_ENFORCER).firstOrNull;
+  List<WalletData> get userWallets => wallets.where((w) => w.walletType != BinaryType.BINARY_TYPE_ENFORCER).toList();
 
-  List<WalletMetadata> get availableWallets => wallets
+  List<WalletMetadata> get availableWallets => _metadataFor(wallets);
+  List<WalletMetadata> get availableUserWallets => _metadataFor(userWallets);
+
+  List<WalletMetadata> _metadataFor(List<WalletData> source) => source
       .map(
         (w) => WalletMetadata(
           id: w.id,
@@ -137,10 +141,7 @@ class WalletReaderProvider extends ChangeNotifier {
         name: protoWallet.name,
         gradient: gradient,
         createdAt: createdAt,
-        walletType: BinaryType.values.firstWhere(
-          (t) => t.name == protoWallet.walletType,
-          orElse: () => BinaryType.BINARY_TYPE_ENFORCER,
-        ),
+        walletType: WalletData.binaryTypeFromWalletType(protoWallet.walletType),
         walletTypeRaw: protoWallet.walletType,
       );
     }).toList();
@@ -148,7 +149,7 @@ class WalletReaderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> init() async {
+  Future<void> init({bool force = false}) async {
     if (Environment.isInTest) return;
     if (!GetIt.I.isRegistered<OrchestratorRPC>()) {
       // bootBackendManagedSidechain calls back into init() once the
@@ -163,7 +164,7 @@ class WalletReaderProvider extends ChangeNotifier {
     // even when the orchestrator already has the wallet on disk.
     // listWallets + getWalletStatus return the same fields the stream
     // would push, so we can populate the provider directly.
-    if (wallets.isNotEmpty) return;
+    if (!force && wallets.isNotEmpty) return;
     final orchestrator = GetIt.I.get<OrchestratorRPC>();
     Future<List<dynamic>> seed() => Future.wait([
       orchestrator.wallet.listWallets(),
@@ -194,7 +195,7 @@ class WalletReaderProvider extends ChangeNotifier {
       }
     }
     // Stream may have delivered while we awaited — let it win.
-    if (wallets.isNotEmpty) return;
+    if (!force && wallets.isNotEmpty) return;
     final list = results[0] as dynamic;
     final status = results[1] as dynamic;
     if (list.wallets.isEmpty) return;

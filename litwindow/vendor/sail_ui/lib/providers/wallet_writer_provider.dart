@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
+import 'package:sail_ui/env.dart';
 import 'package:sail_ui/sail_ui.dart';
 
 /// Wallet writer provider backed by orchestrator's WalletManagerService.
@@ -10,6 +11,7 @@ class WalletWriterProvider extends ChangeNotifier {
   final Logger _logger = GetIt.I.get<Logger>();
   OrchestratorWalletRPC get _client => GetIt.I.get<OrchestratorRPC>().wallet;
   final Directory bitwindowAppDir;
+  bool _ensuringDefaultLitecoinWallet = false;
 
   WalletWriterProvider({required this.bitwindowAppDir});
 
@@ -48,7 +50,7 @@ class WalletWriterProvider extends ChangeNotifier {
         'generateWallet: wallet generated via backend, id=${resp.walletId}',
       );
 
-      await _walletReader.init();
+      await _walletReader.init(force: true);
       notifyListeners();
 
       return {'wallet_id': resp.walletId, 'mnemonic': resp.mnemonic};
@@ -69,6 +71,53 @@ class WalletWriterProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> ensureDefaultLitecoinWallet({
+    String name = 'Litecoin Wallet',
+    int attempts = 45,
+    Duration delay = const Duration(seconds: 2),
+  }) async {
+    if (_ensuringDefaultLitecoinWallet || Environment.isInTest) return;
+    _ensuringDefaultLitecoinWallet = true;
+
+    try {
+      for (var attempt = 1; attempt <= attempts; attempt++) {
+        await _walletReader.init(force: true);
+
+        final existingWallet = _walletReader.userWallets.where((w) => !w.isWatchOnly).firstOrNull;
+        if (existingWallet != null) {
+          if (_walletReader.activeWalletId != existingWallet.id) {
+            _logger.i('ensureDefaultLitecoinWallet: selecting existing Litecoin wallet id=${existingWallet.id}');
+            await _walletReader.switchWallet(existingWallet.id);
+          }
+          return;
+        }
+
+        if (!_walletReader.isWalletUnlocked) {
+          _logger.i('ensureDefaultLitecoinWallet: wallet is locked or unavailable; skipping default wallet creation');
+          return;
+        }
+
+        try {
+          _logger.i('ensureDefaultLitecoinWallet: creating default Litecoin wallet (attempt $attempt/$attempts)');
+          await createBitcoinCoreWallet(
+            name: name,
+            gradient: WalletGradient.fromWalletId(name),
+          );
+          await _walletReader.init(force: true);
+          return;
+        } catch (e) {
+          if (!isExpectedBootError(e)) {
+            _logger.w('ensureDefaultLitecoinWallet: create attempt failed: $e');
+          }
+          if (attempt == attempts) rethrow;
+          await Future.delayed(delay);
+        }
+      }
+    } finally {
+      _ensuringDefaultLitecoinWallet = false;
+    }
+  }
+
   Future<void> createWatchOnlyWallet({
     required String name,
     required String xpubOrDescriptor,
@@ -85,7 +134,7 @@ class WalletWriterProvider extends ChangeNotifier {
         'createWatchOnlyWallet: created via backend, id=${resp.walletId}',
       );
 
-      await _walletReader.init();
+      await _walletReader.init(force: true);
       notifyListeners();
     } catch (e) {
       _logger.e('createWatchOnlyWallet: failed: $e');
@@ -174,7 +223,7 @@ class WalletWriterProvider extends ChangeNotifier {
         name: name,
         gradientJson: gradient.toJsonString(),
       );
-      await _walletReader.init();
+      await _walletReader.init(force: true);
     } catch (e) {
       _logger.e('updateWalletMetadata: failed: $e');
       rethrow;

@@ -154,25 +154,13 @@ func (e *WalletEngine) createBitcoinCoreWallet(ctx context.Context, walletName, 
 	fingerprint := masterFingerprint(masterKey)
 	coinType := e.coinType()
 
-	// Build descriptors with checksum
-	descriptors := []ImportDescriptor{
-		{
-			Desc:      mustAddChecksum(fmt.Sprintf("wpkh([%s/84'/%d'/0']%s/0/*)", fingerprint, coinType, accountXprv)),
-			Active:    true,
-			Timestamp: "now",
-			Internal:  false,
-			Range:     []int{0, 999},
-		},
-		{
-			Desc:      mustAddChecksum(fmt.Sprintf("wpkh([%s/84'/%d'/0']%s/1/*)", fingerprint, coinType, accountXprv)),
-			Active:    true,
-			Timestamp: "now",
-			Internal:  true,
-			Range:     []int{0, 999},
-		},
-	}
-
-	return e.createAndImport(ctx, walletName, false, descriptors)
+	// The Litecoin signet branch used by LitWindow currently rejects descriptor
+	// wallets. Create a regular Core wallet with its own keypool so receive/send
+	// works on signet; the app-level seed is still retained for metadata/backup.
+	_ = accountXprv
+	_ = fingerprint
+	_ = coinType
+	return e.createAndImport(ctx, walletName, false, nil)
 }
 
 // createWatchOnlyWallet creates a watch-only Litecoin Core wallet.
@@ -244,7 +232,8 @@ func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, d
 	}
 
 	if !found {
-		if err := e.rpc.CreateWallet(ctx, walletName, disablePrivateKeys, true); err != nil {
+		blank := len(descriptors) > 0
+		if err := e.rpc.CreateWallet(ctx, walletName, disablePrivateKeys, blank); err != nil {
 			if strings.Contains(err.Error(), "already exists") {
 				if loadErr := e.rpc.LoadWallet(ctx, walletName); loadErr != nil {
 					return fmt.Errorf("load existing wallet: %w", loadErr)
@@ -252,6 +241,11 @@ func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, d
 			} else {
 				return fmt.Errorf("create wallet: %w", err)
 			}
+		}
+
+		if len(descriptors) == 0 {
+			e.log.Info().Str("wallet", walletName).Msg("created Litecoin Core wallet")
+			return nil
 		}
 
 		results, err := e.rpc.ImportDescriptors(ctx, walletName, descriptors)

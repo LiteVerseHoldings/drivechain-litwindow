@@ -879,6 +879,14 @@ Future<void> bootBitwindowBackend(Logger log) async {
         log.w('STARTUP: L1 stack dispatch failed (non-fatal): $e');
       }
     }());
+
+    unawaited(() async {
+      try {
+        await GetIt.I.get<WalletWriterProvider>().ensureDefaultLitecoinWallet();
+      } catch (e) {
+        log.w('STARTUP: default Litecoin wallet was not ready yet: $e');
+      }
+    }());
   }
 }
 

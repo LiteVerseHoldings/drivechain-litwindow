@@ -60,5 +60,6 @@ ed25519.priv
 /vendor/
 
 # Build artifacts
+.gocache/
 litwindow/vendor/sidechain-orchestrator/orchestratorctl
 litwindow/vendor/sidechain-orchestrator/orchestratord

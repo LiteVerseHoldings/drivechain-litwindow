@@ -112,7 +112,18 @@ func (c *CoreRPCClient) call(ctx context.Context, walletName, method string, par
 
 // CreateWallet creates a new Litecoin Core wallet.
 func (c *CoreRPCClient) CreateWallet(ctx context.Context, name string, disablePrivateKeys, blank bool) error {
-	_, err := c.call(ctx, "", "createwallet", name, disablePrivateKeys, blank)
+	_, err := c.call(
+		ctx,
+		"",
+		"createwallet",
+		name,
+		disablePrivateKeys,
+		blank,
+		"",    // passphrase
+		false, // avoid_reuse
+		false, // descriptors; the Litecoin signet branch used here is legacy-wallet only
+		false, // load_on_startup
+	)
 	return err
 }
 

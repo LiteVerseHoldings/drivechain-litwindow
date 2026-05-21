@@ -34,6 +34,25 @@ class WalletData {
   /// True iff this is a watch-only wallet.
   bool get isWatchOnly => walletTypeRaw == 'watchOnly';
 
+  static BinaryType binaryTypeFromWalletType(String? walletTypeStr) {
+    switch (walletTypeStr) {
+      case 'enforcer':
+      case 'BINARY_TYPE_ENFORCER':
+        return BinaryType.BINARY_TYPE_ENFORCER;
+      case 'bitcoinCore':
+      case 'litecoinCore':
+      case 'bitcoind':
+      case 'BINARY_TYPE_BITCOIND':
+      case 'watchOnly':
+        return BinaryType.BINARY_TYPE_BITCOIND;
+    }
+
+    return BinaryType.values.firstWhere(
+      (e) => e.name == walletTypeStr,
+      orElse: () => BinaryType.BINARY_TYPE_BITCOIND,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'version': version,
@@ -51,12 +70,7 @@ class WalletData {
   factory WalletData.fromJson(Map<String, dynamic> json) {
     final walletId = json['id'] as String? ?? _generateId();
     final walletTypeStr = json['wallet_type'] as String?;
-    final walletType = walletTypeStr != null
-        ? BinaryType.values.firstWhere(
-            (e) => e.name == walletTypeStr,
-            orElse: () => BinaryType.BINARY_TYPE_BITCOIND,
-          )
-        : BinaryType.BINARY_TYPE_BITCOIND;
+    final walletType = binaryTypeFromWalletType(walletTypeStr);
 
     return WalletData(
       version: json['version'] as int? ?? 1,
