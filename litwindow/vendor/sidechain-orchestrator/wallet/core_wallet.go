@@ -11,6 +11,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/rs/zerolog"
 	"github.com/tyler-smith/go-bip32"
 	"golang.org/x/crypto/ripemd160" //nolint:staticcheck // Bitcoin protocol requires RIPEMD160
@@ -100,7 +103,7 @@ func (e *WalletEngine) EnsureCoreWallet(ctx context.Context, walletID string) (s
 	var err error
 	switch targetWallet.WalletType {
 	case "bitcoinCore":
-		err = e.createBitcoinCoreWallet(ctx, walletName, targetWallet.Master.SeedHex)
+		err = e.createBitcoinCoreWallet(ctx, walletName, targetWallet)
 	case "watchOnly":
 		err = e.createWatchOnlyWallet(ctx, walletName, targetWallet)
 	default:
@@ -122,9 +125,9 @@ func (e *WalletEngine) EnsureCoreWallet(ctx context.Context, walletID string) (s
 	return walletName, nil
 }
 
-// createBitcoinCoreWallet creates a Litecoin Core descriptor wallet from a seed.
-func (e *WalletEngine) createBitcoinCoreWallet(ctx context.Context, walletName, seedHex string) error {
-	seed, err := hex.DecodeString(seedHex)
+// createBitcoinCoreWallet creates a Litecoin Core legacy wallet from a seed.
+func (e *WalletEngine) createBitcoinCoreWallet(ctx context.Context, walletName string, w *WalletData) error {
+	seed, err := hex.DecodeString(w.Master.SeedHex)
 	if err != nil {
 		return fmt.Errorf("decode seed hex: %w", err)
 	}
@@ -150,17 +153,31 @@ func (e *WalletEngine) createBitcoinCoreWallet(ctx context.Context, walletName, 
 		return fmt.Errorf("derive account: %w", err)
 	}
 
-	accountXprv := e.serializeKey(account)
-	fingerprint := masterFingerprint(masterKey)
-	coinType := e.coinType()
+	hdSeedWIF, err := e.deriveCoreHDSeedWIF(account)
+	if err != nil {
+		return fmt.Errorf("derive Core HD seed: %w", err)
+	}
 
 	// The Litecoin signet branch used by LitWindow currently rejects descriptor
-	// wallets. Create a regular Core wallet with its own keypool so receive/send
-	// works on signet; the app-level seed is still retained for metadata/backup.
-	_ = accountXprv
-	_ = fingerprint
-	_ = coinType
-	return e.createAndImport(ctx, walletName, false, nil)
+	// wallets. Use a regular legacy Core wallet, then seed Core's HD keypool
+	// from the LitWindow wallet seed so receive/send still restores from backup.
+
+	created, err := e.createAndImport(ctx, walletName, false, true, nil)
+	if err != nil {
+		return err
+	}
+
+	if created || !w.CoreHDSeeded {
+		if err := e.rpc.SetHDSeed(ctx, walletName, true, hdSeedWIF); err != nil {
+			return fmt.Errorf("set Litecoin Core HD seed: %w", err)
+		}
+		if err := e.svc.MarkCoreHDSeeded(w.ID); err != nil {
+			return fmt.Errorf("mark Core HD seed imported: %w", err)
+		}
+		e.log.Info().Str("wallet", walletName).Msg("seeded Litecoin Core wallet from LitWindow seed")
+	}
+
+	return nil
 }
 
 // createWatchOnlyWallet creates a watch-only Litecoin Core wallet.
@@ -213,14 +230,15 @@ func (e *WalletEngine) createWatchOnlyWallet(ctx context.Context, walletName str
 		return fmt.Errorf("watch-only wallet requires descriptor or xpub")
 	}
 
-	return e.createAndImport(ctx, walletName, true, descriptors)
+	_, err := e.createAndImport(ctx, walletName, true, true, descriptors)
+	return err
 }
 
 // createAndImport creates a Core wallet and imports descriptors.
-func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, disablePrivateKeys bool, descriptors []ImportDescriptor) error {
+func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, disablePrivateKeys, blank bool, descriptors []ImportDescriptor) (bool, error) {
 	existing, err := e.rpc.ListWallets(ctx)
 	if err != nil {
-		return fmt.Errorf("list wallets: %w", err)
+		return false, fmt.Errorf("list wallets: %w", err)
 	}
 
 	found := false
@@ -232,25 +250,24 @@ func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, d
 	}
 
 	if !found {
-		blank := len(descriptors) > 0
 		if err := e.rpc.CreateWallet(ctx, walletName, disablePrivateKeys, blank); err != nil {
 			if strings.Contains(err.Error(), "already exists") {
 				if loadErr := e.rpc.LoadWallet(ctx, walletName); loadErr != nil {
-					return fmt.Errorf("load existing wallet: %w", loadErr)
+					return false, fmt.Errorf("load existing wallet: %w", loadErr)
 				}
 			} else {
-				return fmt.Errorf("create wallet: %w", err)
+				return false, fmt.Errorf("create wallet: %w", err)
 			}
 		}
 
 		if len(descriptors) == 0 {
 			e.log.Info().Str("wallet", walletName).Msg("created Litecoin Core wallet")
-			return nil
+			return true, nil
 		}
 
 		results, err := e.rpc.ImportDescriptors(ctx, walletName, descriptors)
 		if err != nil {
-			return fmt.Errorf("import descriptors: %w", err)
+			return false, fmt.Errorf("import descriptors: %w", err)
 		}
 
 		for i, r := range results {
@@ -259,14 +276,15 @@ func (e *WalletEngine) createAndImport(ctx context.Context, walletName string, d
 				if r.Error != nil {
 					errMsg = r.Error.Message
 				}
-				return fmt.Errorf("descriptor %d import failed: %s", i, errMsg)
+				return false, fmt.Errorf("descriptor %d import failed: %s", i, errMsg)
 			}
 		}
 
 		e.log.Info().Str("wallet", walletName).Msg("created Litecoin Core wallet")
+		return true, nil
 	}
 
-	return nil
+	return false, nil
 }
 
 // EnsureCoreWallets syncs all bitcoinCore/watchOnly wallets to Litecoin Core.
@@ -341,6 +359,52 @@ func (e *WalletEngine) serializeKey(key *bip32.Key) string {
 	raw := serialized[:78]
 	copy(raw[0:4], tprvVersionBytes)
 	return base58CheckEncode(raw)
+}
+
+func (e *WalletEngine) deriveCoreHDSeedWIF(account *bip32.Key) (string, error) {
+	seedKey, err := account.NewChildKey(0)
+	if err != nil {
+		return "", fmt.Errorf("derive Core HD seed chain: %w", err)
+	}
+	seedKey, err = seedKey.NewChildKey(0)
+	if err != nil {
+		return "", fmt.Errorf("derive Core HD seed key: %w", err)
+	}
+
+	privKey, _ := btcec.PrivKeyFromBytes(seedKey.Key)
+	wif, err := btcutil.NewWIF(privKey, litecoinParams(e.network), true)
+	if err != nil {
+		return "", fmt.Errorf("encode Core HD seed WIF: %w", err)
+	}
+	return wif.String(), nil
+}
+
+func litecoinParams(network string) *chaincfg.Params {
+	params := chaincfg.TestNet3Params
+	params.Name = "litecoin-signet"
+	params.PubKeyHashAddrID = 0x6f
+	params.ScriptHashAddrID = 0x3a
+	params.PrivateKeyID = 0xef
+	params.Bech32HRPSegwit = "tltc"
+
+	switch network {
+	case "mainnet":
+		params = chaincfg.MainNetParams
+		params.Name = "litecoin-mainnet"
+		params.PubKeyHashAddrID = 0x30
+		params.ScriptHashAddrID = 0x32
+		params.PrivateKeyID = 0xb0
+		params.Bech32HRPSegwit = "ltc"
+	case "regtest":
+		params = chaincfg.RegressionNetParams
+		params.Name = "litecoin-regtest"
+		params.PubKeyHashAddrID = 0x6f
+		params.ScriptHashAddrID = 0x3a
+		params.PrivateKeyID = 0xef
+		params.Bech32HRPSegwit = "rltc"
+	}
+
+	return &params
 }
 
 // ============================================================================

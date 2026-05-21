@@ -14,16 +14,17 @@ type WalletFile struct {
 
 // WalletData contains all information for a single wallet.
 type WalletData struct {
-	Version    int               `json:"version"`
-	Master     MasterWallet      `json:"master"`
-	L1         L1Wallet          `json:"l1"`
-	Sidechains []SidechainWallet `json:"sidechains"`
-	ID         string            `json:"id"`
-	Name       string            `json:"name"`
-	Gradient   json.RawMessage   `json:"gradient"`
-	CreatedAt  time.Time         `json:"-"`
-	WalletType string            `json:"wallet_type"`
-	WatchOnly  json.RawMessage   `json:"watch_only,omitempty"`
+	Version      int               `json:"version"`
+	Master       MasterWallet      `json:"master"`
+	L1           L1Wallet          `json:"l1"`
+	Sidechains   []SidechainWallet `json:"sidechains"`
+	ID           string            `json:"id"`
+	Name         string            `json:"name"`
+	Gradient     json.RawMessage   `json:"gradient"`
+	CreatedAt    time.Time         `json:"-"`
+	WalletType   string            `json:"wallet_type"`
+	WatchOnly    json.RawMessage   `json:"watch_only,omitempty"`
+	CoreHDSeeded bool              `json:"core_hd_seeded,omitempty"`
 }
 
 // Custom JSON marshal/unmarshal for WalletData to handle time format

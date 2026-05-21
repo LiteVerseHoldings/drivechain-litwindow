@@ -127,6 +127,12 @@ func (c *CoreRPCClient) CreateWallet(ctx context.Context, name string, disablePr
 	return err
 }
 
+// SetHDSeed sets the Litecoin Core legacy-wallet HD seed from a WIF private key.
+func (c *CoreRPCClient) SetHDSeed(ctx context.Context, walletName string, newKeyPool bool, wif string) error {
+	_, err := c.call(ctx, walletName, "sethdseed", newKeyPool, wif)
+	return err
+}
+
 // LoadWallet loads an existing Litecoin Core wallet.
 func (c *CoreRPCClient) LoadWallet(ctx context.Context, name string) error {
 	_, err := c.call(ctx, "", "loadwallet", name)

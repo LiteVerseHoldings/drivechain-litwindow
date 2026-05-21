@@ -620,6 +620,23 @@ func (s *Service) UpdateWallet(wallet WalletData) error {
 	return s.saveWalletFile()
 }
 
+// MarkCoreHDSeeded records that a Litecoin Core wallet has had its HD seed set
+// from the LitWindow wallet seed. Restore still sets the seed again when the
+// Core wallet is recreated, because the Core wallet will not exist yet.
+func (s *Service) MarkCoreHDSeeded(walletID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for i := range s.wallets {
+		if s.wallets[i].ID == walletID {
+			s.wallets[i].CoreHDSeeded = true
+			return s.saveWalletFile()
+		}
+	}
+
+	return fmt.Errorf("wallet %s not found", walletID)
+}
+
 // --- Generate ---
 
 func (s *Service) GenerateWallet(name, customMnemonic, passphrase string, slots []SidechainSlot) (*WalletData, error) {
