@@ -220,7 +220,7 @@ class _TransactionTableState extends State<TransactionTable> {
               SizedBox(
                 height: 300,
                 child: SailSkeletonizer(
-                  description: 'Waiting for enforcer to boot and wallet to sync..',
+                  description: 'Loading wallet activity...',
                   enabled: widget.model.loading,
                   child: ListenableBuilder(
                     listenable: formatter,
@@ -382,7 +382,6 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
   final TransactionProvider _txProvider = GetIt.I<TransactionProvider>();
   final BitwindowRPC _bitwindowRPC = GetIt.I<BitwindowRPC>();
   final OrchestratorWalletRPC _orchestratorWallet = GetIt.I<OrchestratorRPC>().wallet;
-  final EnforcerRPC _enforcerRPC = GetIt.I<EnforcerRPC>();
   final BalanceProvider _balanceProvider = GetIt.I<BalanceProvider>();
   WalletReaderProvider get _walletReader => GetIt.I<WalletReaderProvider>();
 
@@ -396,7 +395,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
           feeSats: Int64(1000),
           receivedSatoshi: Int64(50000000), // 0.5 LTC
           sentSatoshi: Int64(0),
-          address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+          address: 'tltc1qdummywalletactivityaddress000000000000',
           addressLabel: 'Main Wallet',
           note: 'Received payment',
           confirmationTime: Confirmation(
@@ -409,7 +408,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
           feeSats: Int64(2000),
           receivedSatoshi: Int64(0),
           sentSatoshi: Int64(100000000), // 1 LTC
-          address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+          address: 'tltc1qdummywalletactivityaddress000000000000',
           addressLabel: 'Exchange',
           note: 'Sent to exchange',
           confirmationTime: Confirmation(
@@ -422,7 +421,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
           feeSats: Int64(1500),
           receivedSatoshi: Int64(25000000), // 0.25 LTC
           sentSatoshi: Int64(0),
-          address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+          address: 'tltc1qdummywalletactivityaddress000000000000',
           addressLabel: 'Mining Pool',
           note: 'Mining reward',
           confirmationTime: Confirmation(
@@ -480,7 +479,7 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
 
   final TextEditingController searchController = TextEditingController();
 
-  bool get loading => _enforcerRPC.initializingBinary;
+  bool get loading => isCoreWallet && !_txProvider.initialized && _txProvider.error == null;
 
   OverviewViewModel() {
     initChangeTracker();
@@ -489,7 +488,6 @@ class OverviewViewModel extends BaseViewModel with ChangeTrackingMixin {
     _txProvider.addListener(_debouncedGetStats);
     _balanceProvider.addListener(_onChange);
     _balanceProvider.addListener(_debouncedGetStats);
-    _enforcerRPC.addListener(_onChange);
     getStats();
   }
 

@@ -386,7 +386,7 @@ class _UTXOTableState extends State<UTXOTable> {
         label: 'Hide frozen ($frozenCount)',
       ),
       child: SailSkeletonizer(
-        description: 'Waiting for enforcer to start and wallet to sync..',
+        description: 'Loading wallet UTXOs...',
         enabled: widget.model.loading,
         child: ListenableBuilder(
           listenable: Listenable.merge([formatter, _coinSelection]),
@@ -504,7 +504,7 @@ class _UTXOTableState extends State<UTXOTable> {
 /// - Consolidation sendTransaction: MOVED to orchestrator shared wallet RPC
 class LatestUTXOsViewModel extends BaseViewModel with ChangeTrackingMixin {
   final TransactionProvider _txProvider = GetIt.I<TransactionProvider>();
-  final EnforcerRPC _enforcerRPC = GetIt.I<EnforcerRPC>();
+  WalletReaderProvider get _walletReader => GetIt.I<WalletReaderProvider>();
 
   List<UnspentOutput> get entries {
     if (loading) {
@@ -544,7 +544,10 @@ class LatestUTXOsViewModel extends BaseViewModel with ChangeTrackingMixin {
     notifyIfChanged();
   }
 
-  bool get loading => _enforcerRPC.initializingBinary;
+  bool get loading =>
+      _walletReader.activeWallet?.walletType != BinaryType.BINARY_TYPE_ENFORCER &&
+      !_txProvider.initialized &&
+      _txProvider.error == null;
 
   @override
   void dispose() {

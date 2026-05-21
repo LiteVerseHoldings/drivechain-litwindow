@@ -9,6 +9,7 @@ import 'package:logger/logger.dart';
 import 'package:sail_ui/classes/rpc_connection.dart';
 import 'package:sail_ui/env.dart';
 import 'package:sail_ui/gen/google/protobuf/timestamp.pb.dart';
+import 'package:sail_ui/gen/orchestrator/v1/orchestrator.pb.dart';
 import 'package:sail_ui/gen/wallet/v1/wallet.pb.dart';
 import 'package:sail_ui/providers/balance_provider.dart';
 import 'package:sail_ui/providers/wallet_reader_provider.dart';
@@ -35,6 +36,8 @@ class TransactionProvider extends ChangeNotifier {
 
   bool _isFetching = false;
   Timer? _fetchTimer; // Timer to periodically fetch transactions
+
+  bool get _activeWalletIsEnforcer => _walletReader.activeWallet?.walletType == BinaryType.BINARY_TYPE_ENFORCER;
 
   TransactionProvider() {
     balanceProvider.addListener(fetch);
@@ -88,6 +91,11 @@ class TransactionProvider extends ChangeNotifier {
         _log.i('TransactionProvider: recovered activeWalletId=$activeId via getWalletStatus');
       }
       final String walletId = activeId;
+
+      if (_activeWalletIsEnforcer) {
+        _setReadyEmptyState();
+        return;
+      }
 
       // Run all updates in parallel
       final results = await Future.wait([
@@ -205,6 +213,27 @@ class TransactionProvider extends ChangeNotifier {
       }
     } finally {
       _isFetching = false;
+    }
+  }
+
+  void _setReadyEmptyState() {
+    final changed =
+        !initialized ||
+        error != null ||
+        walletTransactions.isNotEmpty ||
+        utxos.isNotEmpty ||
+        receiveAddresses.isNotEmpty ||
+        address.isNotEmpty;
+
+    walletTransactions = [];
+    utxos = [];
+    receiveAddresses = [];
+    address = '';
+    initialized = true;
+    error = null;
+
+    if (changed) {
+      notifyListeners();
     }
   }
 
