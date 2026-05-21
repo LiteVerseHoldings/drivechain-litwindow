@@ -28,6 +28,14 @@ var derivedEnforcerSettings = []string{
 	"wallet-esplora-url",
 	"signet-miner-bitcoin-cli-path",
 	"signet-miner-bitcoin-util-path",
+	"bitcoin-core-skip-version-check",
+}
+
+var ignoredEnforcerSettings = map[string]bool{
+	// Older local test configs used this to select Litecoin, but the packaged
+	// enforcer does not expose a --mainchain flag. LitWindow selects Litecoin
+	// by wiring the enforcer to litecoind-derived RPC/ZMQ settings instead.
+	"mainchain": true,
 }
 
 // ---------------------------------------------------------------------------
@@ -325,9 +333,16 @@ func (m *EnforcerConfManager) WriteConfig(content string) error {
 func (m *EnforcerConfManager) GetCliArgs() []string {
 	var args []string
 	seen := make(map[string]bool)
+	derived := make(map[string]bool, len(derivedEnforcerSettings))
+	for _, key := range derivedEnforcerSettings {
+		derived[key] = true
+	}
 
 	if m.Config != nil {
 		for key, value := range m.Config.Settings {
+			if ignoredEnforcerSettings[key] || derived[key] {
+				continue
+			}
 			seen[key] = true
 			switch value {
 			case "true":
@@ -359,11 +374,13 @@ func (m *EnforcerConfManager) GetCliArgs() []string {
 	}
 
 	for key, value := range m.GetExpectedSignetMinerSettings() {
-		if seen[key] || value == "" {
+		if value == "" {
 			continue
 		}
 		args = append(args, fmt.Sprintf("--%s=%s", key, value))
 	}
+
+	args = append(args, "--bitcoin-core-skip-version-check")
 
 	return args
 }

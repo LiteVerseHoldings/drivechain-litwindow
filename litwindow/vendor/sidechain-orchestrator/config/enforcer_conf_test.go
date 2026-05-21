@@ -283,12 +283,10 @@ func TestGetCliArgsAlwaysOverlaysDerivedFromBitcoinConf(t *testing.T) {
 	requireArg(t, args, "--wallet-esplora-url=")
 }
 
-func TestGetCliArgsPersistedValuesWinOverNetworkDerivation(t *testing.T) {
-	// bitwindow-enforcer.conf has precedence: when a derived field is
-	// explicitly set in the persisted config, GetCliArgs uses that and
-	// does NOT also emit the bitcoin.conf-derived value. This is the
-	// "advanced override" path — point the enforcer at a different
-	// bitcoind than BitWindow's own.
+func TestGetCliArgsDerivedValuesWinOverPersistedStaleConfig(t *testing.T) {
+	// Runtime connection settings are owned by LitWindow. Stale persisted
+	// enforcer.conf values must not pin startup to an old node/port or bypass
+	// the active Litecoin network selected by bitcoin.conf.
 	m, _ := newTestEnforcerManager(t) // signet
 	require.NoError(t, m.LoadConfig())
 
@@ -299,15 +297,13 @@ func TestGetCliArgsPersistedValuesWinOverNetworkDerivation(t *testing.T) {
 
 	args := m.GetCliArgs()
 
-	// Persisted values must show up.
-	requireArg(t, args, "--node-rpc-addr="+customAddr)
-	requireArg(t, args, "--wallet-esplora-url="+customEsplora)
+	// Persisted runtime values must be ignored.
+	rejectArg(t, args, "--node-rpc-addr="+customAddr)
+	rejectArg(t, args, "--wallet-esplora-url="+customEsplora)
 
-	// And the network-derived defaults must NOT also be appended —
-	// otherwise the enforcer would see two --node-rpc-addr flags and
-	// the override wouldn't actually override anything.
-	rejectArg(t, args, fmt.Sprintf("--node-rpc-addr=127.0.0.1:%d", RPCPortForNetwork(m.bitcoinConf.Network)))
-	rejectArg(t, args, fmt.Sprintf("--wallet-esplora-url=%s", EsploraURLForNetwork(m.bitcoinConf.Network)))
+	// The active network-derived values are emitted exactly once.
+	requireArg(t, args, fmt.Sprintf("--node-rpc-addr=127.0.0.1:%d", RPCPortForNetwork(m.bitcoinConf.Network)))
+	requireArg(t, args, fmt.Sprintf("--wallet-esplora-url=%s", EsploraURLForNetwork(m.bitcoinConf.Network)))
 }
 
 func TestGetCliArgsSignetUsesBundledLitecoinCli(t *testing.T) {
@@ -365,7 +361,7 @@ func TestGetCliArgsSignetMinerArgsOnlyOnSignet(t *testing.T) {
 	rejectArgPrefix(t, args, "--signet-miner-bitcoin-util-path=")
 }
 
-func TestGetCliArgsPersistedSignetMinerPathWins(t *testing.T) {
+func TestGetCliArgsDerivesSignetMinerPathOverPersistedStalePath(t *testing.T) {
 	m, _ := newTestEnforcerManager(t)
 	require.NoError(t, m.LoadConfig())
 
@@ -378,8 +374,20 @@ func TestGetCliArgsPersistedSignetMinerPathWins(t *testing.T) {
 
 	args := m.GetCliArgs()
 
-	requireArg(t, args, "--signet-miner-bitcoin-cli-path="+customPath)
-	rejectArg(t, args, "--signet-miner-bitcoin-cli-path="+bundledPath)
+	rejectArg(t, args, "--signet-miner-bitcoin-cli-path="+customPath)
+	requireArg(t, args, "--signet-miner-bitcoin-cli-path="+bundledPath)
+}
+
+func TestGetCliArgsIgnoresUnsupportedMainchainOverride(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+
+	m.Config.SetSetting("mainchain", "litecoin")
+
+	args := m.GetCliArgs()
+
+	rejectArg(t, args, "--mainchain=litecoin")
+	requireArg(t, args, "--bitcoin-core-skip-version-check")
 }
 
 func TestGetCliArgsReflectsCurrentNetwork(t *testing.T) {

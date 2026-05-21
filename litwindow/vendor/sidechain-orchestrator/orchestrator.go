@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -8,7 +9,9 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -176,6 +179,11 @@ type Orchestrator struct {
 	enforcerHTTPClient  *http.Client
 	sidechainHTTPClient *http.Client
 	explorerHTTPClient  *http.Client
+
+	enforcerCoreProxyMu     sync.Mutex
+	enforcerCoreProxy       *http.Server
+	enforcerCoreProxyTarget string
+	enforcerCoreProxyAddr   string
 
 	// stopBinary is the Stop primitive used by SetCoreVariant. Production wires
 	// this to o.Stop; tests override it to inject force/graceful failures.
@@ -690,7 +698,267 @@ func (o *Orchestrator) prepareEnforcerArgs(opts *StartOpts) {
 		return
 	}
 	opts.EnforcerArgs = o.EnforcerConf.GetCliArgs()
+	if proxyAddr, err := o.ensureEnforcerCoreRPCProxy(); err != nil {
+		o.log.Warn().Err(err).Msg("failed to start enforcer Litecoin RPC compatibility proxy")
+	} else if proxyAddr != "" {
+		opts.EnforcerArgs = replaceCLIArg(opts.EnforcerArgs, "node-rpc-addr", proxyAddr)
+	}
+	opts.EnforcerArgs = replaceCLIArg(opts.EnforcerArgs, "data-dir", filepath.Join(o.BitwindowDir, "lip005-enforcer"))
 	o.log.Info().Strs("enforcer_args", opts.EnforcerArgs).Msg("auto-built enforcer args from config")
+}
+
+func replaceCLIArg(args []string, key, value string) []string {
+	prefix := "--" + key
+	filtered := make([]string, 0, len(args)+1)
+	for _, arg := range args {
+		if arg == prefix || strings.HasPrefix(arg, prefix+"=") {
+			continue
+		}
+		filtered = append(filtered, arg)
+	}
+	return append(filtered, fmt.Sprintf("%s=%s", prefix, value))
+}
+
+func (o *Orchestrator) ensureEnforcerCoreRPCProxy() (string, error) {
+	if o.BitcoinConf == nil {
+		return "", nil
+	}
+
+	port := o.BitcoinConf.GetRPCPort()
+	target := fmt.Sprintf("http://127.0.0.1:%d", port)
+	var user, password string
+	signetChallenge := "51"
+	if o.BitcoinConf.Config != nil {
+		section := o.BitcoinConf.Network.CoreSection()
+		user = o.BitcoinConf.Config.GetEffectiveSetting("rpcuser", section)
+		password = o.BitcoinConf.Config.GetEffectiveSetting("rpcpassword", section)
+		if challenge := o.BitcoinConf.Config.GetEffectiveSetting("signetchallenge", section); challenge != "" {
+			signetChallenge = challenge
+		}
+	}
+
+	o.enforcerCoreProxyMu.Lock()
+	defer o.enforcerCoreProxyMu.Unlock()
+
+	if o.enforcerCoreProxy != nil && o.enforcerCoreProxyTarget == target {
+		return o.enforcerCoreProxyAddr, nil
+	}
+	if o.enforcerCoreProxy != nil {
+		_ = o.enforcerCoreProxy.Close()
+		o.enforcerCoreProxy = nil
+		o.enforcerCoreProxyTarget = ""
+		o.enforcerCoreProxyAddr = ""
+	}
+
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return "", fmt.Errorf("listen: %w", err)
+	}
+
+	proxy := &litecoinRPCCompatProxy{
+		target:          target,
+		user:            user,
+		pass:            password,
+		signetChallenge: signetChallenge,
+		client:          &http.Client{Timeout: 30 * time.Second},
+	}
+	server := &http.Server{Handler: proxy}
+
+	o.enforcerCoreProxy = server
+	o.enforcerCoreProxyTarget = target
+	o.enforcerCoreProxyAddr = ln.Addr().String()
+
+	go func() {
+		if err := server.Serve(ln); err != nil && err != http.ErrServerClosed {
+			o.log.Warn().Err(err).Msg("enforcer Litecoin RPC compatibility proxy stopped")
+		}
+	}()
+
+	o.log.Info().
+		Str("listen", o.enforcerCoreProxyAddr).
+		Str("target", target).
+		Msg("started enforcer Litecoin RPC compatibility proxy")
+
+	return o.enforcerCoreProxyAddr, nil
+}
+
+type litecoinRPCCompatProxy struct {
+	target          string
+	user            string
+	pass            string
+	signetChallenge string
+	client          *http.Client
+}
+
+func (p *litecoinRPCCompatProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_ = r.Body.Close()
+
+	rpcMethod := jsonRPCMethod(body)
+	if r.Method == http.MethodPost {
+		body = normalizeLitecoinRPCRequest(body)
+	}
+
+	req, err := http.NewRequestWithContext(r.Context(), r.Method, p.target+litecoinCompatRequestURI(r.URL), bytes.NewReader(body))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	req.Header = r.Header.Clone()
+	req.Host = ""
+	if p.user != "" || p.pass != "" {
+		req.SetBasicAuth(p.user, p.pass)
+	}
+
+	resp, err := p.client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	if r.Method == http.MethodPost {
+		respBody = normalizeLitecoinRPCResponse(respBody, rpcMethod, p.signetChallenge)
+	}
+
+	for key, values := range resp.Header {
+		for _, value := range values {
+			w.Header().Add(key, value)
+		}
+	}
+	w.Header().Del("Content-Length")
+	w.WriteHeader(resp.StatusCode)
+	_, _ = w.Write(respBody)
+}
+
+func litecoinCompatRequestURI(u *url.URL) string {
+	if strings.HasPrefix(u.Path, "/rest/headers/") && strings.HasSuffix(u.Path, ".json") {
+		if count := u.Query().Get("count"); count != "" {
+			hash := strings.TrimSuffix(strings.TrimPrefix(u.Path, "/rest/headers/"), ".json")
+			query := u.Query()
+			query.Del("count")
+
+			path := fmt.Sprintf("/rest/headers/%s/%s.json", count, hash)
+			if encoded := query.Encode(); encoded != "" {
+				return path + "?" + encoded
+			}
+			return path
+		}
+	}
+	return u.RequestURI()
+}
+
+func jsonRPCMethod(body []byte) string {
+	var request map[string]json.RawMessage
+	if err := json.Unmarshal(body, &request); err != nil {
+		return ""
+	}
+	var method string
+	_ = json.Unmarshal(request["method"], &method)
+	return method
+}
+
+func normalizeLitecoinRPCResponse(body []byte, method string, signetChallenge string) []byte {
+	trimmed := bytes.TrimSpace(body)
+	if bytes.HasPrefix(trimmed, []byte("[")) {
+		var batch []json.RawMessage
+		if err := json.Unmarshal(body, &batch); err != nil {
+			return body
+		}
+		normalized := make([]json.RawMessage, 0, len(batch))
+		for _, item := range batch {
+			normalized = append(normalized, normalizeLitecoinRPCResponse(item, "", signetChallenge))
+		}
+		out, err := json.Marshal(normalized)
+		if err != nil {
+			return body
+		}
+		return out
+	}
+
+	var envelope map[string]json.RawMessage
+	if err := json.Unmarshal(body, &envelope); err != nil {
+		return body
+	}
+
+	rawErr, ok := envelope["error"]
+	if ok && bytes.Equal(bytes.TrimSpace(rawErr), []byte("null")) {
+		delete(envelope, "error")
+	}
+
+	if method == "getblocktemplate" && signetChallenge != "" {
+		var result map[string]any
+		if err := json.Unmarshal(envelope["result"], &result); err == nil && result != nil {
+			if _, ok := result["signet_challenge"]; !ok {
+				result["signet_challenge"] = signetChallenge
+				envelope["result"] = mustMarshalJSON(result)
+			}
+		}
+	}
+
+	normalized, err := json.Marshal(envelope)
+	if err != nil {
+		return body
+	}
+	return normalized
+}
+
+func normalizeLitecoinRPCRequest(body []byte) []byte {
+	var request map[string]json.RawMessage
+	if err := json.Unmarshal(body, &request); err != nil {
+		return body
+	}
+
+	var method string
+	if err := json.Unmarshal(request["method"], &method); err != nil || method != "getblocktemplate" {
+		return body
+	}
+
+	params := request["params"]
+	if len(bytes.TrimSpace(params)) == 0 || bytes.Equal(bytes.TrimSpace(params), []byte("null")) {
+		request["params"] = mustMarshalJSON([]map[string]any{{"rules": []string{"mweb", "segwit"}}})
+		return mustMarshalJSON(request)
+	}
+
+	var paramList []map[string]any
+	if err := json.Unmarshal(params, &paramList); err != nil || len(paramList) == 0 {
+		request["params"] = mustMarshalJSON([]map[string]any{{"rules": []string{"mweb", "segwit"}}})
+		return mustMarshalJSON(request)
+	}
+
+	rules, _ := paramList[0]["rules"].([]any)
+	seen := map[string]bool{}
+	for _, rule := range rules {
+		if s, ok := rule.(string); ok {
+			seen[s] = true
+		}
+	}
+	if !seen["mweb"] {
+		rules = append(rules, "mweb")
+	}
+	if !seen["segwit"] {
+		rules = append(rules, "segwit")
+	}
+	paramList[0]["rules"] = rules
+	request["params"] = mustMarshalJSON(paramList)
+	return mustMarshalJSON(request)
+}
+
+func mustMarshalJSON(v any) []byte {
+	out, err := json.Marshal(v)
+	if err != nil {
+		return nil
+	}
+	return out
 }
 
 // injectSidechainStarter writes the sidechain seed to a temp file and appends
