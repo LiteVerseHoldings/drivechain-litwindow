@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"connectrpc.com/connect"
@@ -48,18 +47,7 @@ type Parser struct {
 	db       *sql.DB
 	conf     config.Config
 
-	mu       sync.Mutex
-	topics   []opreturns.TopicInfo
 	m4Engine *M4Engine
-
-	// Dedicated sink for coinnews sync events. Nil => logging disabled.
-	coinnewsLog *zerolog.Logger
-}
-
-// SetCoinnewsLogger attaches a dedicated logger for coinnews sync events.
-// Passing nil disables coinnews-sync logging.
-func (p *Parser) SetCoinnewsLogger(logger *zerolog.Logger) {
-	p.coinnewsLog = logger
 }
 
 // Run runs the engine. It checks if a new block has been mined,
@@ -69,18 +57,6 @@ func (p *Parser) SetCoinnewsLogger(logger *zerolog.Logger) {
 func (p *Parser) Run(ctx context.Context) error {
 	alertTicker := time.NewTicker(2 * time.Second)
 	defer alertTicker.Stop()
-
-	topics, err := opreturns.ListTopics(ctx, p.db)
-	if err != nil {
-		return fmt.Errorf("list topics: %w", err)
-	}
-	p.topics = lo.Map(topics, func(t opreturns.Topic, _ int) opreturns.TopicInfo {
-		return opreturns.TopicInfo{
-			ID:            t.Topic,
-			Name:          t.Name,
-			RetentionDays: t.RetentionDays,
-		}
-	})
 
 	zerolog.Ctx(ctx).Info().
 		Msgf("bitcoind_engine/parser: started parser ticker")
@@ -195,12 +171,6 @@ func (p *Parser) handleBlockTick(ctx context.Context) error {
 		zerolog.Ctx(ctx).Trace().
 			Msgf("bitcoind_engine/parser: detected reorg, processing last 20 blocks")
 
-		// Wipe the CoinNews rows that came from blocks we're about to
-		// replay; otherwise the canonical first-wins rules see stale
-		// orphans from the pre-reorg chain and ignore the new winners.
-		if err := p.purgeCoinNewsAtOrAbove(ctx, lastProcessedHeight+1); err != nil {
-			return fmt.Errorf("purge coinnews on reorg: %w", err)
-		}
 	}
 
 	const batchSize = 30
@@ -293,14 +263,6 @@ func (p *Parser) handleBlockTick(ctx context.Context) error {
 // and marks the block as processed.
 func (p *Parser) processBlocks(ctx context.Context, coreBlocks []lo.Tuple2[uint32, *wire.MsgBlock]) error {
 
-	// CoinNews indexing must commit BEFORE the block is marked processed:
-	// if it fails, we want the next sync attempt to retry, not skip the
-	// block as already-done. Sequential, canonical-order pass — see
-	// indexCoinNewsBlocks for the spec rationale.
-	if err := p.indexCoinNewsBlocks(ctx, coreBlocks); err != nil {
-		return fmt.Errorf("index coinnews: %w", err)
-	}
-
 	// Insert the processed blocks
 	if err := blocks.MarkBlocksProcessed(ctx, p.db, lo.Map(coreBlocks, func(t lo.Tuple2[uint32, *wire.MsgBlock], _ int) blocks.ProcessedBlock {
 		height, block := t.Unpack()
@@ -348,8 +310,6 @@ func (p *Parser) HandleNewRawTransaction(
 }
 
 // Nil height means unconfirmed. Nil time means we don't know the TX time.
-// CoinNews indexing runs separately, in canonical scan order, after all
-// blocks in a batch are fetched (see processBlocks).
 func (p *Parser) opReturnForTXID(
 	ctx context.Context, tx *wire.MsgTx,
 	height *uint32, createdAt *time.Time,
@@ -366,31 +326,6 @@ func (p *Parser) opReturnForTXID(
 	if err := opreturns.Persist(ctx, p.db, opReturns); err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func (p *Parser) handleCreateTopic(
-	ctx context.Context, info opreturns.TopicInfo, txid string,
-) error {
-
-	zerolog.Ctx(ctx).Info().
-		Msgf("bitcoind_engine/parser: found create topic: %s", info.Name)
-
-	if err := opreturns.CreateTopic(
-		ctx, p.db, info.ID, info.Name, txid, true, info.RetentionDays,
-	); err != nil {
-		return fmt.Errorf("persist create topic: %w", err)
-	}
-
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	p.topics = append(p.topics, opreturns.TopicInfo{
-		ID:            info.ID,
-		Name:          info.Name,
-		RetentionDays: info.RetentionDays,
-	})
 
 	return nil
 }
@@ -615,12 +550,6 @@ func (p *Parser) handleOpReturns(
 			continue
 		}
 
-		if info, ok := opreturns.IsCreateTopic(data); ok {
-			if err := p.handleCreateTopic(ctx, info, txid); err != nil {
-				return nil, err
-			}
-		}
-
 		// Check if this is a timestamp with STAMP prefix
 		if err := p.handleTimestamp(ctx, data, txid, height); err != nil {
 			zerolog.Ctx(ctx).Warn().
@@ -634,18 +563,6 @@ func (p *Parser) handleOpReturns(
 			Int("vout", vout).
 			Msgf("bitcoind_engine/parser: found OP_RETURN")
 
-		p.logCoinnews(txid, vout, data, height)
-
-		// CoinNews indexing happens elsewhere — we cannot do it here
-		// because handleOpReturns runs concurrently across blocks in
-		// a batch, and the spec's first-wins/last-wins rules require
-		// canonical (height, tx_index, vout_index) order. See
-		// processBlocks → indexCoinNewsBlocks.
-
-		// Always fetch fee for OP_RETURN transactions. This avoids a race
-		// condition where blocks are processed in parallel and a topic
-		// created in one block isn't yet registered when a news article
-		// in a later block (same batch) checks isKnownTopic.
 		if rawTx == nil {
 			core, err := p.bitcoind.Get(ctx)
 			if err != nil {
@@ -679,62 +596,6 @@ func (p *Parser) handleOpReturns(
 	}
 
 	return opReturns, nil
-}
-
-// logCoinnews emits a detailed line to the dedicated coinnews-sync log when
-// the OP_RETURN's first 4 bytes match a known coin_news_topics entry.
-// No-op if no logger is attached (SetCoinnewsLogger not called).
-func (p *Parser) logCoinnews(txid string, vout int, data []byte, height *uint32) {
-	if p.coinnewsLog == nil || len(data) < 4 {
-		return
-	}
-
-	p.mu.Lock()
-	topicHex := hex.EncodeToString(data[:4])
-	var topicName string
-	for _, t := range p.topics {
-		if t.ID.String() == topicHex {
-			topicName = t.Name
-			break
-		}
-	}
-	p.mu.Unlock()
-
-	if topicName == "" {
-		return // not a coinnews entry
-	}
-
-	// Skip topic-creation OP_RETURNs — bytes 5..7 == "new" (0x6e6577).
-	if len(data) >= 8 && bytes.Equal(data[4:7], []byte("new")) {
-		return
-	}
-
-	payload := data[4:]
-	payloadHex := hex.EncodeToString(payload)
-	// Trim trailing NULs for the text preview; those are padding, not content.
-	textPreview := string(bytes.TrimRight(payload, "\x00"))
-	if len(textPreview) > 120 {
-		textPreview = textPreview[:120]
-	}
-
-	heightVal := int64(-1)
-	if height != nil {
-		heightVal = int64(*height)
-	}
-
-	evt := p.coinnewsLog.Info().
-		Str("txid", txid).
-		Int("vout", vout).
-		Int64("height", heightVal).
-		Str("topic_hex", topicHex).
-		Str("topic_name", topicName).
-		Int("payload_bytes", len(payload)).
-		Str("payload_hex", payloadHex).
-		Str("text_preview", textPreview)
-	if height == nil {
-		evt = evt.Str("source", "mempool")
-	}
-	evt.Msg("coinnews synced")
 }
 
 // parseOPReturnData extracts the actual data from an OP_RETURN script by handling

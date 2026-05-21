@@ -4,9 +4,9 @@
     "bitcoincore": {
       "type": "core",
       "name": "Litecoin Core",
-      "version": "0.21.5.5-signet",
+      "version": "0.21.5.4-signet",
       "description": "Litecoin Core with LiteVerse signet support",
-      "repo_url": "https://github.com/litecoin-project/litecoin",
+      "repo_url": "https://github.com/AllSage/litecoin/tree/add-signet-support",
       "port": 0,
       "chain_layer": 1,
       "color": "green",

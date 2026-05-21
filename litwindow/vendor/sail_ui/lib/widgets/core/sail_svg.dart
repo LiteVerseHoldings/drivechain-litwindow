@@ -81,7 +81,6 @@ enum SailSVGAsset {
   iconConnectionStatus,
   iconWarning,
   iconWallet,
-  iconCoinnews,
   iconDelete,
   iconMultisig,
   iconBitdrive,
@@ -4765,8 +4764,6 @@ extension AsAssetPath on SailSVGAsset {
         return 'assets/svgs/icon_warning.svg';
       case SailSVGAsset.iconWallet:
         return 'assets/svgs/icon_wallet.svg';
-      case SailSVGAsset.iconCoinnews:
-        return 'assets/svgs/icon_coinnews.svg';
       case SailSVGAsset.iconDelete:
         return 'assets/svgs/icon_delete.svg';
       case SailSVGAsset.iconMultisig:

@@ -178,24 +178,6 @@ func (s *Server) buildRuntime(ctx context.Context, conf config.Config) (*Runtime
 		rt.notificationEngine,
 	)
 	rt.bitcoinEngine = engines.NewBitcoind(s.Bitcoind, rt.db, conf)
-
-	// Coinnews dedicated log lives next to the main server log. Path is
-	// derived from conf.LogPath which is also network-scoped (Finalize
-	// rewrites it), so each runtime's coinnews log is in its own folder.
-	coinnewsLogPath := filepath.Join(filepath.Dir(conf.LogPath), "coinnews-sync.log")
-	if coinnewsFile, err := os.OpenFile(coinnewsLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666); err == nil {
-		coinnewsWriter := zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
-			w.Out = coinnewsFile
-			w.NoColor = true
-			w.TimeFormat = time.DateTime + ".000"
-		})
-		coinnewsLogger := zerolog.New(coinnewsWriter).With().Timestamp().Logger()
-		rt.bitcoinEngine.SetCoinnewsLogger(&coinnewsLogger)
-		log.Info().Str("path", coinnewsLogPath).Msg("coinnews sync log enabled")
-	} else {
-		log.Warn().Err(err).Str("path", coinnewsLogPath).Msg("could not open coinnews-sync.log, skipping dedicated log")
-	}
-
 	rt.deniabilityEngine = engines.NewDeniability(s.Wallet, s.Bitcoind, rt.db, rt.walletEngine)
 
 	// Register Connect sub-handlers on rt.mux. All registrations capture
@@ -227,7 +209,7 @@ func (s *Server) buildRuntime(ctx context.Context, conf config.Config) (*Runtime
 		register(path, h)
 	}
 	{
-		miscSvc := api_misc.New(rt.db, s.Wallet, rt.timestampEngine, s.Bitcoind)
+		miscSvc := api_misc.New(rt.db, rt.timestampEngine, s.Bitcoind)
 		path, h := miscv1connect.NewMiscServiceHandler(miscSvc, stdOpts...)
 		register(path, h)
 	}

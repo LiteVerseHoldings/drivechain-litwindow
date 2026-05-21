@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:connectrpc/protobuf.dart';
@@ -146,11 +147,16 @@ class EnforcerConfProvider extends ChangeNotifier {
 
   List<String> getCliArgs(BitcoinNetwork network) {
     final args = <String>[];
-    if (currentConfig == null) return args;
+    final seen = <String>{};
+    if (currentConfig == null) {
+      _appendMissingSettings(args, seen, getExpectedSignetMinerSettings(network));
+      return args;
+    }
 
     for (final entry in currentConfig!.settings.entries) {
       final key = entry.key;
       final value = entry.value;
+      seen.add(key);
       if (value == 'true') {
         args.add('--$key');
       } else if (value == 'false') {
@@ -159,7 +165,72 @@ class EnforcerConfProvider extends ChangeNotifier {
         args.add('--$key=$value');
       }
     }
+    _appendMissingSettings(args, seen, getExpectedSignetMinerSettings(network));
     return args;
+  }
+
+  static Map<String, String> getExpectedSignetMinerSettings(BitcoinNetwork network) {
+    if (network != BitcoinNetwork.BITCOIN_NETWORK_SIGNET) return {};
+
+    final settings = <String, String>{
+      'signet-miner-bitcoin-cli-path': _resolveBundledToolOrFallback(
+        'litecoin-cli',
+        ['bitcoin-cli'],
+      ),
+    };
+
+    final utilPath = _resolveBundledTool(['litecoin-util', 'bitcoin-util']);
+    if (utilPath != null) {
+      settings['signet-miner-bitcoin-util-path'] = utilPath;
+    }
+
+    return settings;
+  }
+
+  static void _appendMissingSettings(
+    List<String> args,
+    Set<String> seen,
+    Map<String, String> settings,
+  ) {
+    for (final entry in settings.entries) {
+      if (seen.contains(entry.key) || entry.value.isEmpty) continue;
+      args.add('--${entry.key}=${entry.value}');
+    }
+  }
+
+  static String _resolveBundledToolOrFallback(String primary, List<String> alternates) {
+    return _resolveBundledTool([primary, ...alternates]) ??
+        _executableName(primary);
+  }
+
+  static String? _resolveBundledTool(List<String> names) {
+    if (!GetIt.I.isRegistered<BinaryProvider>()) return null;
+
+    final appDir = GetIt.I.get<BinaryProvider>().appDir;
+    final assetsDir = binDir(appDir.path);
+    for (final name in names) {
+      for (final candidate in _executableCandidates(name)) {
+        final file = File('${assetsDir.path}${Platform.pathSeparator}$candidate');
+        if (file.existsSync()) {
+          return file.path;
+        }
+      }
+    }
+    return null;
+  }
+
+  static List<String> _executableCandidates(String name) {
+    if (!Platform.isWindows || name.toLowerCase().endsWith('.exe')) {
+      return [name];
+    }
+    return [name, '$name.exe'];
+  }
+
+  static String _executableName(String name) {
+    if (Platform.isWindows && !name.toLowerCase().endsWith('.exe')) {
+      return '$name.exe';
+    }
+    return name;
   }
 
   String getDefaultConfig() {

@@ -396,32 +396,6 @@ class MockMiscAPI implements MiscAPI {
   }
 
   @override
-  Future<BroadcastNewsResponse> broadcastNews(
-    String topic,
-    String headline,
-    String content, {
-    int? feeSatPerVbyte,
-    int? feeSats,
-  }) async {
-    return BroadcastNewsResponse();
-  }
-
-  @override
-  Future<CreateTopicResponse> createTopic(String topic, String name, {int retentionDays = 7}) async {
-    return CreateTopicResponse();
-  }
-
-  @override
-  Future<List<CoinNews>> listCoinNews() async {
-    return [];
-  }
-
-  @override
-  Future<List<Topic>> listTopics() async {
-    return [];
-  }
-
-  @override
   Future<TimestampFileResponse> timestampFile(String filename, List<int> fileData) async {
     return TimestampFileResponse();
   }

@@ -509,7 +509,7 @@ func (h *Handler) callCoreRPC(ctx context.Context, method, paramsJSON, wallet st
 	}
 	body := []byte(fmt.Sprintf(`{"jsonrpc":"1.0","id":"orchestratord","method":%q,"params":%s}`, method, paramsJSON))
 
-	url := fmt.Sprintf("http://localhost:%d", port)
+	url := fmt.Sprintf("http://127.0.0.1:%d", port)
 	if wallet != "" {
 		url = strings.TrimRight(url, "/") + "/wallet/" + wallet
 	}

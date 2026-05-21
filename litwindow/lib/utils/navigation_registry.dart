@@ -6,7 +6,7 @@ class NavigationTarget {
   const NavigationTarget({required this.tabIndex, this.sectionIndex, this.subtabIndex});
 }
 
-// Tab indices for bitwindow
+// Tab indices for LitWindow
 class TabIndices {
   static const int overview = 0;
   static const int wallet = 1;

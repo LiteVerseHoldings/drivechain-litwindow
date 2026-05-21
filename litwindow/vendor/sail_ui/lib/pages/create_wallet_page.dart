@@ -872,7 +872,7 @@ class _SailCreateWalletPageState extends State<SailCreateWalletPage> {
                         textFieldType: TextFieldType.text,
                         size: TextFieldSize.regular,
                       ),
-                      // Additional restore options (e.g., file restore for BitWindow)
+                      // Additional restore options (e.g., file restore for LitWindow)
                       if (widget.additionalRestoreOptionsBuilder != null) ...[
                         const SizedBox(height: 24),
                         widget.additionalRestoreOptionsBuilder!(context),

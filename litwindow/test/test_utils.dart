@@ -1,5 +1,5 @@
 import 'package:bitwindow/providers/blockchain_provider.dart';
-import 'package:bitwindow/providers/news_provider.dart';
+import 'package:bitwindow/providers/op_return_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -69,9 +69,9 @@ Future<void> registerTestDependencies() async {
     );
   }
 
-  if (!GetIt.I.isRegistered<NewsProvider>()) {
-    GetIt.I.registerLazySingleton<NewsProvider>(
-      () => NewsProvider(),
+  if (!GetIt.I.isRegistered<OpReturnProvider>()) {
+    GetIt.I.registerLazySingleton<OpReturnProvider>(
+      () => OpReturnProvider(),
     );
   }
 

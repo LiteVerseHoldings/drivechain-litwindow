@@ -56,7 +56,7 @@ Future<void> initSidechainDependencies({
   final walletReader = WalletReaderProvider(bitwindowDir);
   GetIt.I.registerLazySingleton<WalletReaderProvider>(() => walletReader);
 
-  // Register WalletWriterProvider (same code as BitWindow) for chain-agnostic wallet creation
+  // Register WalletWriterProvider (same code as LitWindow) for chain-agnostic wallet creation
   final walletWriter = WalletWriterProvider(
     bitwindowAppDir: bitwindowDir,
   );

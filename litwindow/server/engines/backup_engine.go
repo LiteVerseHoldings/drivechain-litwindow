@@ -48,7 +48,7 @@ func (e *BackupEngine) CreateBackup(ctx context.Context) ([]byte, string, error)
 	zw := zip.NewWriter(&buf)
 
 	// README
-	readme := `BitWindow Wallet Backup
+	readme := `LitWindow Wallet Backup
 =======================
 
 CONTENTS
@@ -62,7 +62,7 @@ Restoring this backup restores ALL your sidechain wallets automatically.
 
 HOW TO RESTORE
 --------------
-1. Open BitWindow
+1. Open LitWindow
 2. Settings > Your Wallet > Restore Wallet
 3. Select this file
 
@@ -111,7 +111,7 @@ Keep this file secure. Anyone with access can control ALL your funds.
 		return nil, "", fmt.Errorf("close zip: %w", err)
 	}
 
-	filename := fmt.Sprintf("bitwindow-backup-%s.zip", time.Now().Format("2006-01-02_15-04-05"))
+	filename := fmt.Sprintf("litwindow-backup-%s.zip", time.Now().Format("2006-01-02_15-04-05"))
 	log.Info().Str("filename", filename).Int("size", buf.Len()).Msg("backup created")
 	return buf.Bytes(), filename, nil
 }

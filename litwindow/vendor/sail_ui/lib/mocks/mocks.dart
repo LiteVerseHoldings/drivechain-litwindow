@@ -1795,7 +1795,7 @@ String _binaryTypeName(BinaryType type) {
     case BinaryType.BINARY_TYPE_ENFORCER:
       return 'Enforcer';
     case BinaryType.BINARY_TYPE_BITWINDOWD:
-      return 'BitWindow';
+      return 'LitWindow';
     case BinaryType.BINARY_TYPE_THUNDER:
       return 'Thunder';
     case BinaryType.BINARY_TYPE_BITNAMES:

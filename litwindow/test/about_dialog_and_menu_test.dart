@@ -14,7 +14,7 @@ void main() {
     await tester.pumpSailPage(const AboutBitwindowDialog());
 
     expect(
-      find.textContaining('BitWindow — GUI for the BIP300/301 sidechain enforcer.'),
+      find.textContaining('LitWindow — GUI for the BIP300/301 sidechain enforcer.'),
       findsOneWidget,
     );
     expect(find.textContaining('2009-2026 The Drivechain developers'), findsOneWidget);
@@ -32,14 +32,14 @@ void main() {
       // identical across platforms so the shortcut and label match.
       final items = buildVisibilityMenuItems();
       expect(items, hasLength(1));
-      expect(items.single.label, 'Minimize bitwindow');
+      expect(items.single.label, 'Minimize LitWindow');
       expect(
         items.single.shortcut,
         const SingleActivator(LogicalKeyboardKey.keyM, meta: true),
       );
 
       expect(
-        items.where((m) => m.label == 'Hide bitwindow' || m.label == 'Show All'),
+        items.where((m) => m.label == 'Hide LitWindow' || m.label == 'Show All'),
         isEmpty,
         reason:
             'hide/show-all must not return as menu items — bringing the window back relied on a dock icon that hide() removed',

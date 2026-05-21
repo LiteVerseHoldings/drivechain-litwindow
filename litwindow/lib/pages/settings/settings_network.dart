@@ -50,7 +50,7 @@ class _SettingsNetworkState extends State<SettingsNetwork> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Network is controlled by your bitcoin.conf file. To change network in bitwindow, delete your own bitcoin.conf file and restart.',
+              'Network is controlled by your bitcoin.conf file. To change network in LitWindow, delete your own bitcoin.conf file and restart.',
             ),
             backgroundColor: SailTheme.of(context).colors.info,
           ),

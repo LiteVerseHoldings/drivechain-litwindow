@@ -110,7 +110,12 @@ class EnforcerLive extends EnforcerRPC {
 
       case BitcoinNetwork.BITCOIN_NETWORK_SIGNET:
       default:
-      // Signet uses the enforcer's built-in default
+      // Signet miner helper paths are appended below.
+    }
+
+    for (final entry
+        in EnforcerConfProvider.getExpectedSignetMinerSettings(network).entries) {
+      args.add('--${entry.key}=${entry.value}');
     }
 
     // ZMQ sequence address (read from bitcoin.conf, fallback to default)

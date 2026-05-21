@@ -319,7 +319,7 @@ class ReceivePageViewModel extends BaseViewModel {
   String get address => transactionsProvider.address;
   String get bip47PaymentCode => _hdWalletProvider.bip47PaymentCode;
 
-  /// Watch-only wallets in BitWindow only carry a BIP84 xpub today, not the
+  /// Watch-only wallets in LitWindow only carry a BIP84 xpub today, not the
   /// BIP47 branch needed to derive a payment code. Hide the BIP47 card for
   /// them so the receive tab doesn't show an indefinite spinner over a row
   /// the user can't actually populate.

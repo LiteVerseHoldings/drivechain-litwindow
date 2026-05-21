@@ -540,7 +540,7 @@ func (o *Orchestrator) Status(name string) BinaryStatus {
 
 	// Quick port probe if not already known to be running.
 	if config.Port > 0 && !status.Running {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", config.Port), 200*time.Millisecond)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", config.Port), 200*time.Millisecond)
 		if err == nil {
 			_ = conn.Close()
 			status.PortInUse = true
@@ -917,7 +917,7 @@ func (o *Orchestrator) startEnforcerWhenReady(ctx context.Context, opts StartOpt
 	client, err := o.CoreStatusClient()
 	if err == nil {
 		o.log.Info().
-			Str("core_rpc", fmt.Sprintf("localhost:%d", o.BitcoinConf.GetRPCPort())).
+			Str("core_rpc", fmt.Sprintf("127.0.0.1:%d", o.BitcoinConf.GetRPCPort())).
 			Msg("waiting for header sync before starting enforcer")
 		var lastErr error
 		var errCount int
@@ -2045,7 +2045,7 @@ func (o *Orchestrator) GetSyncStatus(ctx context.Context) (*SyncStatus, error) {
 				slot.Error = fmt.Sprintf("unknown sidechain: %s", name)
 				return
 			}
-			url := fmt.Sprintf("http://localhost:%d%s", cfg.Port, path)
+			url := fmt.Sprintf("http://127.0.0.1:%d%s", cfg.Port, path)
 			var resp struct {
 				Count int64 `json:"count"`
 			}
@@ -2236,7 +2236,7 @@ func (o *Orchestrator) CoreStatusClient() (*CoreStatusClient, error) {
 	if o.coreStatusClient != nil && o.coreStatusClientKey == key {
 		return o.coreStatusClient, nil
 	}
-	o.coreStatusClient = NewCoreStatusClient("localhost", port, user, password)
+	o.coreStatusClient = NewCoreStatusClient("127.0.0.1", port, user, password)
 	o.coreStatusClientKey = key
 	return o.coreStatusClient, nil
 }

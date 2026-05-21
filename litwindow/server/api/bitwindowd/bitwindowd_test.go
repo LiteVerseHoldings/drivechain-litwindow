@@ -4,23 +4,26 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/config"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/database"
 	v1 "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1"
 	v1connect "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1/bitwindowdv1connect"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/models/blocks"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/models/deniability"
-	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/models/opreturns"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/tests/apitests"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/tests/mocks"
 	commonv1 "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/cusf/common/v1"
 	mainchainv1 "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/cusf/mainchain/v1"
+	orchv1 "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/orchestrator/v1"
+	orchrpc "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/orchestrator/v1/orchestratorv1connect"
 	corepb "github.com/barebitcoin/btc-buf/gen/bitcoin/bitcoind/v1alpha"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -959,6 +962,141 @@ func TestService_GetSyncInfo(t *testing.T) {
 	})
 }
 
+func TestService_MineBlocksNetworkGuards(t *testing.T) {
+	t.Parallel()
+
+	t.Run("rejects mainnet block generation", func(t *testing.T) {
+		t.Parallel()
+
+		database := database.Test(t)
+
+		ctrl := gomock.NewController(t)
+		mockBitcoind := mocks.NewMockBitcoinServiceClient(ctrl)
+		mockBitcoind.EXPECT().
+			ListWallets(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[corepb.ListWalletsResponse]{
+				Msg: &corepb.ListWalletsResponse{Wallets: []string{}},
+			}, nil).
+			AnyTimes()
+		mockBitcoind.EXPECT().
+			CreateWallet(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[corepb.CreateWalletResponse]{
+				Msg: &corepb.CreateWalletResponse{Name: "cheque_watch"},
+			}, nil).
+			AnyTimes()
+		mockBitcoind.EXPECT().
+			GetBlockchainInfo(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[corepb.GetBlockchainInfoResponse]{
+				Msg: &corepb.GetBlockchainInfoResponse{Chain: "main"},
+			}, nil)
+
+		cli := v1connect.NewBitwindowdServiceClient(apitests.API(t, database, apitests.WithBitcoind(mockBitcoind)))
+
+		stream, err := cli.MineBlocks(context.Background(), connect.NewRequest(&emptypb.Empty{}))
+		require.NoError(t, err)
+		require.False(t, stream.Receive())
+		require.Error(t, stream.Err())
+		assert.Equal(t, connect.CodeFailedPrecondition, connect.CodeOf(stream.Err()))
+		assert.Contains(t, stream.Err().Error(), "generating blocks on main is not supported")
+	})
+
+	t.Run("generates Litecoin signet blocks through Core RPC", func(t *testing.T) {
+		t.Parallel()
+
+		database := database.Test(t)
+		coreCalls := make(chan *orchv1.CoreRawCallRequest, 4)
+		orchServer := testOrchestratorServer(t, coreCalls)
+
+		ctrl := gomock.NewController(t)
+		mockBitcoind := mocks.NewMockBitcoinServiceClient(ctrl)
+		mockBitcoind.EXPECT().
+			ListWallets(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[corepb.ListWalletsResponse]{
+				Msg: &corepb.ListWalletsResponse{Wallets: []string{}},
+			}, nil).
+			AnyTimes()
+		mockBitcoind.EXPECT().
+			CreateWallet(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[corepb.CreateWalletResponse]{
+				Msg: &corepb.CreateWalletResponse{Name: "cheque_watch"},
+			}, nil).
+			AnyTimes()
+		mockBitcoind.EXPECT().
+			GetBlockchainInfo(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[corepb.GetBlockchainInfoResponse]{
+				Msg: &corepb.GetBlockchainInfoResponse{Chain: "signet"},
+			}, nil)
+
+		cli := v1connect.NewBitwindowdServiceClient(apitests.API(
+			t,
+			database,
+			apitests.WithBitcoind(mockBitcoind),
+			apitests.WithServerConfig(config.Config{OrchestratorAddr: orchServer.URL}),
+		))
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		stream, err := cli.MineBlocks(ctx, connect.NewRequest(&emptypb.Empty{}))
+		require.NoError(t, err)
+
+		require.True(t, stream.Receive())
+		blockFound := stream.Msg().GetBlockFound()
+		require.NotNil(t, blockFound)
+		assert.Equal(t, "litecoin-signet-block-1", blockFound.BlockHash)
+
+		cancel()
+		assert.Equal(t, "listwallets", (<-coreCalls).Method)
+		assert.Equal(t, "listwalletdir", (<-coreCalls).Method)
+		createCall := <-coreCalls
+		assert.Equal(t, "createwallet", createCall.Method)
+		assert.Contains(t, createCall.ParamsJson, "litwindow_signet_mining")
+		addressCall := <-coreCalls
+		assert.Equal(t, "getnewaddress", addressCall.Method)
+		assert.Equal(t, "litwindow_signet_mining", addressCall.Wallet)
+		generateCall := <-coreCalls
+		assert.Equal(t, "generatetoaddress", generateCall.Method)
+		assert.Contains(t, generateCall.ParamsJson, "ltc1qlitwindowtest")
+	})
+}
+
+type testOrchestrator struct {
+	orchrpc.UnimplementedOrchestratorServiceHandler
+
+	calls chan<- *orchv1.CoreRawCallRequest
+}
+
+func testOrchestratorServer(t *testing.T, calls chan<- *orchv1.CoreRawCallRequest) *httptest.Server {
+	t.Helper()
+
+	path, handler := orchrpc.NewOrchestratorServiceHandler(&testOrchestrator{calls: calls})
+	mux := http.NewServeMux()
+	mux.Handle(path, handler)
+
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+	return server
+}
+
+func (o *testOrchestrator) CoreRawCall(_ context.Context, req *connect.Request[orchv1.CoreRawCallRequest]) (*connect.Response[orchv1.CoreRawCallResponse], error) {
+	o.calls <- req.Msg
+
+	switch req.Msg.Method {
+	case "listwallets":
+		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `[]`}), nil
+	case "listwalletdir":
+		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `{"wallets":[]}`}), nil
+	case "createwallet":
+		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `{"name":"litwindow_signet_mining"}`}), nil
+	case "getnewaddress":
+		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `"ltc1qlitwindowtest"`}), nil
+	case "generatetoaddress":
+		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `["litecoin-signet-block-1"]`}), nil
+	default:
+		return nil, connect.NewError(connect.CodeUnimplemented, fmt.Errorf("unexpected method %q", req.Msg.Method))
+	}
+}
+
 func TestService_SetTransactionNote(t *testing.T) {
 	t.Parallel()
 
@@ -1054,7 +1192,6 @@ func TestService_GetFireplaceStats(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Empty(t, resp.Msg.TransactionCount_24H)
-	assert.Empty(t, resp.Msg.CoinnewsCount_7D)
 	assert.Empty(t, resp.Msg.BlockCount_24H)
 
 	newHash := func(t *testing.T) chainhash.Hash {
@@ -1092,55 +1229,10 @@ func TestService_GetFireplaceStats(t *testing.T) {
 		},
 	}))
 
-	topicID, err := opreturns.ValidNewsTopicID("deadbeef")
-	require.NoError(t, err)
-	require.NoError(t, opreturns.CreateTopic(ctx, database, topicID, "Test Topic", "topic_txid1", true, 7))
-
-	unknownTopicID, err := opreturns.ValidNewsTopicID("12345678")
-	require.NoError(t, err)
-
-	// one old coin news entry
-	require.NoError(t, opreturns.Persist(ctx, database, []opreturns.OPReturn{
-		// coins new topic creation
-		{
-			Height:    lo.ToPtr(uint32(10)),
-			TxID:      "topic_txid1",
-			Vout:      0,
-			Data:      opreturns.EncodeTopicCreationMessage(topicID, "Test Topic", 7),
-			CreatedAt: lo.ToPtr(time.Now()),
-		},
-		// looks like a coin news entry, but we don't know about the topic
-		// should NOT be included
-		{
-			Height:    lo.ToPtr(uint32(10)),
-			TxID:      "news_txid4",
-			Vout:      0,
-			Data:      opreturns.EncodeNewsMessage(unknownTopicID, "Test Topic", "Test Content"),
-			CreatedAt: lo.ToPtr(time.Now()),
-		},
-		// one new coin news entry
-		{
-			Height:    lo.ToPtr(uint32(9)),
-			TxID:      "news_txid2",
-			Vout:      0,
-			Data:      opreturns.EncodeNewsMessage(topicID, "Test Topic", "Test Content"),
-			CreatedAt: lo.ToPtr(time.Now()),
-		},
-		{
-			Height:    lo.ToPtr(uint32(10)),
-			TxID:      "news_txid3",
-			Vout:      0,
-			Data:      opreturns.EncodeNewsMessage(topicID, "Test Topic", "Test Content"),
-			CreatedAt: lo.ToPtr(time.Now().AddDate(-1, 0, 0)),
-		},
-		// one old coin news entry
-	}))
-
 	resp, err = cli.GetFireplaceStats(ctx, connect.NewRequest(&emptypb.Empty{}))
 	require.NoError(t, err)
 
 	assert.EqualValues(t, 1, resp.Msg.TransactionCount_24H)
-	assert.EqualValues(t, 1, resp.Msg.CoinnewsCount_7D)
 	assert.EqualValues(t, 1, resp.Msg.BlockCount_24H)
 
 }

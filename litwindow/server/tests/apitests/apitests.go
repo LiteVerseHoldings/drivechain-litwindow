@@ -33,10 +33,11 @@ import (
 )
 
 type configg struct {
-	wallet   mainchainv1connect.WalletServiceClient
-	enforcer mainchainv1connect.ValidatorServiceClient
-	crypto   cryptov1connect.CryptoServiceClient
-	bitcoind bitcoindv1alphaconnect.BitcoinServiceClient
+	wallet       mainchainv1connect.WalletServiceClient
+	enforcer     mainchainv1connect.ValidatorServiceClient
+	crypto       cryptov1connect.CryptoServiceClient
+	bitcoind     bitcoindv1alphaconnect.BitcoinServiceClient
+	serverConfig *config.Config
 }
 
 type ServerOpt func(opt *configg)
@@ -94,6 +95,10 @@ func WithBitcoind(bitcoind bitcoindv1alphaconnect.BitcoinServiceClient) ServerOp
 		addChequeEngineMockDefaults(mock)
 	}
 	return func(opt *configg) { opt.bitcoind = bitcoind }
+}
+
+func WithServerConfig(serverConfig config.Config) ServerOpt {
+	return func(opt *configg) { opt.serverConfig = &serverConfig }
 }
 
 // addChequeEngineMockDefaults attaches AnyTimes() expectations for the
@@ -192,10 +197,15 @@ func API(t *testing.T, database *sql.DB, options ...ServerOpt) (connect.HTTPClie
 		DataDir:     walletDir,
 	}
 
-	srv, err := api.New(ctx, services, config.Config{
+	serverConfig := config.Config{
 		GuiBootedMainchain: false,
 		GuiBootedEnforcer:  false,
-	}, func(shutdownCtx context.Context) {
+	}
+	if conf.serverConfig != nil {
+		serverConfig = *conf.serverConfig
+	}
+
+	srv, err := api.New(ctx, services, serverConfig, func(shutdownCtx context.Context) {
 		logger.Info().Msg("shutdown")
 	})
 	require.NoError(t, err)

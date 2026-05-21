@@ -191,11 +191,7 @@ class BitwindowRPCLive extends BitwindowRPC {
       'drivechain.v1.DrivechainService/ListSidechains',
       'drivechain.v1.DrivechainService/ListWithdrawals',
       'drivechain.v1.DrivechainService/ProposeSidechain',
-      'misc.v1.MiscService/BroadcastNews',
-      'misc.v1.MiscService/CreateTopic',
-      'misc.v1.MiscService/ListCoinNews',
       'misc.v1.MiscService/ListOPReturn',
-      'misc.v1.MiscService/ListTopics',
       'm4.v1.M4Service/GenerateM4Bytes',
       'm4.v1.M4Service/GetM4History',
       'm4.v1.M4Service/GetVotePreferences',
@@ -1267,20 +1263,6 @@ class _DrivechainAPILive implements DrivechainAPI {
 
 abstract class MiscAPI {
   Future<List<OPReturn>> listOPReturns();
-  Future<List<CoinNews>> listCoinNews();
-  Future<List<Topic>> listTopics();
-  Future<CreateTopicResponse> createTopic(
-    String topic,
-    String name, {
-    int retentionDays = 7,
-  });
-  Future<BroadcastNewsResponse> broadcastNews(
-    String topic,
-    String headline,
-    String content, {
-    int? feeSatPerVbyte,
-    int? feeSats,
-  });
   Future<TimestampFileResponse> timestampFile(
     String filename,
     List<int> fileData,
@@ -1305,76 +1287,6 @@ class _MiscAPILive implements MiscAPI {
       return response.opReturns;
     } catch (e) {
       final error = 'could not list op returns: ${extractConnectException(e)}';
-      throw BitcoindException(error);
-    }
-  }
-
-  @override
-  Future<BroadcastNewsResponse> broadcastNews(
-    String topic,
-    String headline,
-    String content, {
-    int? feeSatPerVbyte,
-    int? feeSats,
-  }) async {
-    try {
-      final request = BroadcastNewsRequest()
-        ..topic = topic
-        ..headline = headline
-        ..content = content;
-
-      if (feeSatPerVbyte != null) {
-        request.feeSatPerVbyte = Int64(feeSatPerVbyte);
-      } else if (feeSats != null) {
-        request.feeSats = Int64(feeSats);
-      }
-
-      final response = await _client.broadcastNews(request);
-      return response;
-    } catch (e) {
-      final error = 'could not broadcast news: ${extractConnectException(e)}';
-      throw BitcoindException(error);
-    }
-  }
-
-  @override
-  Future<CreateTopicResponse> createTopic(
-    String topic,
-    String name, {
-    int retentionDays = 7,
-  }) async {
-    try {
-      final response = await _client.createTopic(
-        CreateTopicRequest()
-          ..topic = topic
-          ..name = name
-          ..retentionDays = retentionDays,
-      );
-      return response;
-    } catch (e) {
-      final error = 'could not create topic: ${extractConnectException(e)}';
-      throw BitcoindException(error);
-    }
-  }
-
-  @override
-  Future<List<CoinNews>> listCoinNews() async {
-    try {
-      final response = await _client.listCoinNews(ListCoinNewsRequest());
-      return response.coinNews;
-    } catch (e) {
-      final error = 'could not list coin news: ${extractConnectException(e)}';
-      throw BitcoindException(error);
-    }
-  }
-
-  @override
-  Future<List<Topic>> listTopics() async {
-    try {
-      final response = await _client.listTopics(Empty());
-      return response.topics;
-    } catch (e) {
-      final error = 'could not list topics: ${extractConnectException(e)}';
       throw BitcoindException(error);
     }
   }

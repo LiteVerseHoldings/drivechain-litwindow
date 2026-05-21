@@ -5,7 +5,7 @@ import 'package:sail_ui/providers/wallet_reader_provider.dart';
 /// Guard that checks if a wallet exists.
 /// If no wallet exists, navigates to wallet creation page.
 ///
-/// This guard allows sidechains to boot standalone without BitWindow.
+/// This guard allows sidechains to boot standalone without LitWindow.
 /// If the wallet doesn't exist, the user is redirected to create one.
 class WalletGuard extends AutoRouteGuard {
   /// Factory function that creates the wallet creation route.

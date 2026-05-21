@@ -5,7 +5,6 @@ import 'package:bitwindow/pages/sidechains_page.dart';
 import 'package:bitwindow/pages/wallet/denability_page.dart';
 import 'package:bitwindow/providers/network_provider.dart';
 import 'package:bitwindow/routing/router.dart';
-import 'package:bitwindow/widgets/coinnews.dart';
 import 'package:bitwindow/widgets/fast_withdrawal_tab.dart';
 import 'package:bitwindow/widgets/mempool_widget.dart';
 import 'package:bitwindow/widgets/network_stats_widget.dart';
@@ -19,13 +18,13 @@ import 'package:stacked/stacked.dart';
 
 class HomepageWidgetCatalog {
   static final Map<String, HomepageWidgetInfo> _widgets = {
-    'quote_bar': HomepageWidgetInfo(
-      id: 'quote_bar',
-      name: 'Quotes',
-      description: 'Rotating Bitcoin and liberty quotes',
+    'block_progression': HomepageWidgetInfo(
+      id: 'block_progression',
+      name: 'Block Progression',
+      description: 'Current Litecoin block sync state',
       size: WidgetSize.bar,
-      icon: SailSVGAsset.quote,
-      builder: (_) => const QuoteBar(),
+      icon: SailSVGAsset.blocks,
+      builder: (_) => const BlockProgressionBar(),
     ),
     'fireplace_stats': HomepageWidgetInfo(
       id: 'fireplace_stats',
@@ -34,32 +33,6 @@ class HomepageWidgetCatalog {
       size: WidgetSize.full,
       icon: SailSVGAsset.iconSuccess,
       builder: (_) => const FireplaceStats(),
-    ),
-    'coin_news': HomepageWidgetInfo(
-      id: 'coin_news',
-      name: 'Coin News',
-      description: 'Latest news from the blockchain',
-      size: WidgetSize.half,
-      icon: SailSVGAsset.newspaper,
-      builder: (_) => ViewModelBuilder<CoinNewsViewModel>.reactive(
-        viewModelBuilder: () => CoinNewsViewModel(),
-        builder: (context, newsModel, child) {
-          return const CoinNewsView();
-        },
-      ),
-    ),
-    'coin_news_large': HomepageWidgetInfo(
-      id: 'coin_news_large',
-      name: 'Coin News (Large)',
-      description: 'Dual-column news display',
-      size: WidgetSize.full,
-      icon: SailSVGAsset.newspaper,
-      builder: (_) => ViewModelBuilder<CoinNewsLargeViewModel>.reactive(
-        viewModelBuilder: () => CoinNewsLargeViewModel(),
-        builder: (context, newsModel, child) {
-          return const CoinNewsLargeView();
-        },
-      ),
     ),
     'latest_transactions': HomepageWidgetInfo(
       id: 'latest_transactions',

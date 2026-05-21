@@ -75,7 +75,7 @@ class BitwindowHomepageProvider extends HomepageProvider {
     try {
       final setting = HomepageConfigurationSetting();
       final loadedSetting = await _settings.getValue(setting);
-      _configuration = loadedSetting.value;
+      _configuration = _normalizeConfiguration(loadedSetting.value);
       _tempConfiguration = _configuration;
     } catch (e) {
       _configuration = BitwindowHomepageConfiguration.defaultConfiguration;
@@ -84,6 +84,31 @@ class BitwindowHomepageProvider extends HomepageProvider {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  HomepageConfiguration _normalizeConfiguration(HomepageConfiguration configuration) {
+    var hasBlockProgression = false;
+    final widgets = <HomepageWidgetConfig>[];
+
+    for (final widget in configuration.widgets) {
+      if (widget.widgetId == 'quote_bar') {
+        if (!hasBlockProgression) {
+          widgets.add(widget.copyWith(widgetId: 'block_progression'));
+          hasBlockProgression = true;
+        }
+        continue;
+      }
+      if (widget.widgetId == 'block_progression') {
+        hasBlockProgression = true;
+      }
+      widgets.add(widget);
+    }
+
+    if (!hasBlockProgression) {
+      widgets.insert(0, HomepageWidgetConfig(widgetId: 'block_progression'));
+    }
+
+    return configuration.copyWith(widgets: widgets);
   }
 
   @override

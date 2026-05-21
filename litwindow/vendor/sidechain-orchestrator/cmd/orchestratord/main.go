@@ -193,7 +193,7 @@ func run(cctx *cli.Context) error {
 			password = orch.BitcoinConf.Config.GetEffectiveSetting("rpcpassword", section)
 		}
 
-		coreRPC := wallet.NewCoreRPCClient("localhost", port, user, password)
+		coreRPC := wallet.NewCoreRPCClient("127.0.0.1", port, user, password)
 		walletEngine := wallet.NewWalletEngine(walletSvc, coreRPC, network, log)
 		walletHandler.SetEngine(walletEngine)
 
@@ -432,7 +432,7 @@ func startCoreProxy(ctx context.Context, orch *orchestrator.Orchestrator, log ze
 		password = orch.BitcoinConf.Config.GetEffectiveSetting("rpcpassword", section)
 	}
 
-	host := fmt.Sprintf("localhost:%d", port)
+	host := fmt.Sprintf("127.0.0.1:%d", port)
 	log.Info().Str("host", host).Str("user", user).Msg("starting Bitcoin Core proxy")
 
 	// Quiet the proxy's connection logs — its rpcclient retries on a tight

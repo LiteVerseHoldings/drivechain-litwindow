@@ -783,7 +783,7 @@ abstract class Binary {
 
     paths.addAll([path.join(binDir(appDir.path).path, subfolder, baseBinary)]);
 
-    // For L1 binaries, also check BitWindow's assets directory
+    // For L1 binaries, also check LitWindow's assets directory
     // This allows sidechains to reuse already-downloaded binaries
     final isCurrentlyBitwindow = appDir.path.toLowerCase().contains(
       'bitwindow',
@@ -998,9 +998,9 @@ class _CacheEntry {
 class BitcoinCore extends Binary {
   BitcoinCore({
     super.name = 'Litecoin Core',
-    super.version = '0.21.5.5-signet',
+    super.version = '0.21.5.4-signet',
     super.description = 'Litecoin Core with LiteVerse signet support',
-    super.repoUrl = 'https://github.com/litecoin-project/litecoin',
+    super.repoUrl = 'https://github.com/AllSage/litecoin/tree/add-signet-support',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     int? port,
@@ -1034,17 +1034,18 @@ class BitcoinCore extends Binary {
              MetadataConfig(
                downloadConfig: DownloadConfig(
                  baseUrls: {
-                   ...allNetworksUrl(
-                     'https://download.litecoin.org/litecoin-0.21.5.5/',
-                   ),
+                   ...allNetworksUrl(''),
+                   BitcoinNetwork.BITCOIN_NETWORK_MAINNET:
+                       'https://download.litecoin.org/litecoin-0.21.5.5/',
                  },
                  binary: 'litecoind',
                  files: {
-                   ...allNetworks({
+                   ...allNetworks({OS.linux: '', OS.macos: '', OS.windows: ''}),
+                   BitcoinNetwork.BITCOIN_NETWORK_MAINNET: {
                      OS.linux: 'linux/litecoin-0.21.5.5-x86_64-linux-gnu.tar.gz',
                      OS.macos: '',
                      OS.windows: 'win/litecoin-0.21.5.5-win64.zip',
-                   }),
+                   },
                  },
                ),
                remoteTimestamp: null,
@@ -1104,7 +1105,7 @@ class BitcoinCore extends Binary {
 
 class BitWindow extends Binary {
   BitWindow({
-    super.name = 'BitWindow',
+    super.name = 'LitWindow',
     super.version = 'latest',
     super.description = 'GUI for managing drivechain operations',
     super.repoUrl = 'https://github.com/LayerTwo-Labs/drivechain-frontends/bitwindow',
@@ -1607,7 +1608,7 @@ extension BinaryPaths on Binary {
           return litecoinConfPath;
         }
 
-        // Use master config file in BitWindow directory (source of truth)
+        // Use master config file in LitWindow directory (source of truth)
         // A read-only copy is also placed in the Bitcoin/Drivechain dir for inspection
         return path.join(BitWindow().rootDir(), kBitwindowBitcoinConfFilename);
       }(),

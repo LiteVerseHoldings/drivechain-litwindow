@@ -1,8 +1,7 @@
-import 'package:bitwindow/widgets/coinnews.dart';
+import 'package:bitwindow/pages/overview_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sail_ui/sail_ui.dart';
-import 'package:stacked/stacked.dart';
 
 import 'test_utils.dart';
 
@@ -12,20 +11,16 @@ void main() {
   });
 
   group('Dashboard Widget Tests', () {
-    testWidgets('CoinNews widget renders and shows content', (tester) async {
+    testWidgets('Graffiti explorer widget renders', (tester) async {
       await tester.pumpSailPage(
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 600, maxWidth: 800),
-          child: ViewModelBuilder.reactive(
-            viewModelBuilder: () => CoinNewsViewModel(),
-            builder: (context, model, child) => const CoinNewsView(),
-          ),
+          child: const GraffitiExplorerView(),
         ),
       );
       await tester.pumpAndSettle();
 
-      // CoinNews widget should render
-      expect(find.byType(CoinNewsView), findsOneWidget);
+      expect(find.byType(GraffitiExplorerView), findsOneWidget);
     });
   });
 

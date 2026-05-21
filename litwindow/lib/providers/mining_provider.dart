@@ -46,7 +46,7 @@ class MiningProvider extends ChangeNotifier {
         },
         onError: (e) {
           _log.e('Mining stream error: $e');
-          error = e.toString();
+          error = _friendlyMiningError(e);
           isMining = false;
           notifyListeners();
         },
@@ -60,7 +60,7 @@ class MiningProvider extends ChangeNotifier {
       );
     } catch (e) {
       _log.e('Failed to start mining: $e');
-      error = e.toString();
+      error = _friendlyMiningError(e);
       isMining = false;
       notifyListeners();
     }
@@ -90,5 +90,16 @@ class MiningProvider extends ChangeNotifier {
   void dispose() {
     _miningSubscription?.cancel();
     super.dispose();
+  }
+
+  String _friendlyMiningError(Object error) {
+    final message = error.toString();
+    if (message.contains('generating blocks on main is not supported')) {
+      return 'Block generation is disabled on Litecoin mainnet. Switch to signet for test block progression.';
+    }
+    if (message.contains('generate signet blocks through enforcer wallet')) {
+      return 'Signet block generation needs the enforcer signet miner to be configured and running.';
+    }
+    return message;
   }
 }

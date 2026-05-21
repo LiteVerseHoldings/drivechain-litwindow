@@ -25,7 +25,6 @@ import 'package:bitwindow/widgets/proof_of_funds_modal.dart';
 import 'package:bitwindow/widgets/reset_button.dart';
 import 'package:bitwindow/providers/bitwindow_settings_provider.dart';
 import 'package:bitwindow/providers/blockchain_provider.dart';
-import 'package:bitwindow/providers/news_provider.dart';
 import 'package:bitwindow/routing/router.dart';
 import 'package:bitwindow/utils/bitcoin_uri.dart';
 import 'package:flutter/gestures.dart';
@@ -57,7 +56,6 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
   /// Reset code sets this before router.replaceAll to avoid triggering shutdown.
   static bool isNavigatingAway = false;
 
-  final NewsProvider _newsProvider = GetIt.I.get<NewsProvider>();
   final HomepageProvider _homepageProvider = GetIt.I.get<HomepageProvider>();
   final BitwindowSettingsProvider _bitwindowSettingsProvider = GetIt.I.get<BitwindowSettingsProvider>();
   final BitcoinConfProvider _confProvider = GetIt.I.get<BitcoinConfProvider>();
@@ -73,8 +71,6 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
   bool _isWalletEncrypted = false;
   DateTime? _lastShiftPress;
   final CodeSearchService _codeSearchService = CodeSearchService();
-
-  List<Topic> get topics => _newsProvider.topics;
 
   @override
   void initState() {
@@ -385,12 +381,12 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
           menus: [
             // First menu will be Apple menu (system provided)
             PlatformMenu(
-              label: 'bitwindow',
+              label: 'litwindow',
               menus: [
                 PlatformMenuItemGroup(
                   members: [
                     PlatformMenuItem(
-                      label: 'About bitwindow',
+                      label: 'About LitWindow',
                       onSelected: () {
                         showDialog(
                           context: context,
@@ -427,7 +423,7 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
                 PlatformMenuItemGroup(
                   members: [
                     PlatformMenuItem(
-                      label: 'Quit bitwindow',
+                      label: 'Quit LitWindow',
                       shortcut: const SingleActivator(LogicalKeyboardKey.keyQ, meta: true),
                       onSelected: () => GetIt.I.get<BinaryProvider>().onShutdown(
                         shutdownOptions: ShutdownOptions(
@@ -663,10 +659,6 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
                       onSelected: () async {
                         await GetIt.I.get<AppRouter>().push(M4ExplorerRoute());
                       },
-                    ),
-                    PlatformMenuItem(
-                      label: 'Broadcast CoinNews',
-                      onSelected: () => displayBroadcastNewsDialog(context),
                     ),
                     PlatformMenuItem(
                       label: 'Timestamp File(s)',
@@ -1262,7 +1254,7 @@ class _StatusBarState extends State<StatusBar> {
     return BottomNav(
       additionalConnection: ConnectionMonitor(
         rpc: bitwindow,
-        name: 'BitWindow',
+        name: 'LitWindow',
       ),
       navigateToLogs: (title, logPath, binaryType) {
         GetIt.I.get<AppRouter>().push(
@@ -1341,7 +1333,7 @@ List<PlatformMenuItem> buildVisibilityMenuItems() {
   // shortcut for window minimize.
   return [
     PlatformMenuItem(
-      label: 'Minimize bitwindow',
+      label: 'Minimize LitWindow',
       shortcut: const SingleActivator(LogicalKeyboardKey.keyM, meta: true),
       onSelected: () async {
         await windowManager.minimize();
@@ -1384,7 +1376,7 @@ class AboutBitwindowDialog extends StatelessWidget {
                 ),
                 children: [
                   const TextSpan(
-                    text: 'BitWindow — GUI for the BIP300/301 sidechain enforcer.\n\n',
+                    text: 'LitWindow — GUI for the BIP300/301 sidechain enforcer.\n\n',
                   ),
                   const TextSpan(
                     text: 'Copyright (C) 2009-2026 The Drivechain developers\n',

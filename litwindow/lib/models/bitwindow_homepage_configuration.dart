@@ -4,8 +4,8 @@ class BitwindowHomepageConfiguration {
   static HomepageConfiguration get defaultConfiguration {
     return HomepageConfiguration(
       widgets: [
-        HomepageWidgetConfig(widgetId: 'quote_bar'),
-        HomepageWidgetConfig(widgetId: 'coin_news_large'),
+        HomepageWidgetConfig(widgetId: 'block_progression'),
+        HomepageWidgetConfig(widgetId: 'fireplace_stats'),
         HomepageWidgetConfig(widgetId: 'latest_transactions'),
         HomepageWidgetConfig(widgetId: 'latest_blocks'),
       ],

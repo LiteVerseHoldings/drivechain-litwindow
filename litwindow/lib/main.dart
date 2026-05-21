@@ -28,7 +28,7 @@ import 'package:bitwindow/providers/homepage_provider.dart';
 import 'package:bitwindow/providers/m4_provider.dart';
 import 'package:bitwindow/providers/mempool_provider.dart';
 import 'package:bitwindow/providers/mining_provider.dart';
-import 'package:bitwindow/providers/news_provider.dart';
+import 'package:bitwindow/providers/op_return_provider.dart';
 import 'package:bitwindow/providers/notification_stream_provider.dart';
 import 'package:bitwindow/providers/sidechain_provider.dart';
 import 'package:bitwindow/providers/transactions_provider.dart';
@@ -127,7 +127,7 @@ Future<(Directory, File, Logger)> init(String arguments) async {
   logFile ??= await getLogFile();
 
   final log = await logger(Environment.fileLog, Environment.consoleLog, logFile);
-  log.i('starting bitwindow, writing logs to $logFile');
+  log.i('starting LitWindow, writing logs to $logFile');
 
   Environment.validateAtRuntime();
 
@@ -232,7 +232,7 @@ Future<(Directory, File, Logger)> init(String arguments) async {
   GetIt.I.registerSingleton<BlockchainProvider>(BlockchainProvider());
   GetIt.I.registerSingleton<NetworkProvider>(NetworkProvider());
   GetIt.I.registerSingleton<TransactionProvider>(TransactionProvider());
-  GetIt.I.registerSingleton<NewsProvider>(NewsProvider());
+  GetIt.I.registerSingleton<OpReturnProvider>(OpReturnProvider());
   GetIt.I.registerSingleton<SidechainProvider>(SidechainProvider());
   GetIt.I.registerSingleton<M4Provider>(M4Provider());
   GetIt.I.registerSingleton<AddressBookProvider>(AddressBookProvider());
@@ -342,7 +342,7 @@ void runMultiWindow(String argumentsStr, Logger log, Directory applicationDir, F
     case SubWindowTypes.logsId:
       child = LogPage(
         logPath: logFile.path,
-        title: 'Bitwindow Logs',
+        title: 'LitWindow Logs',
       );
       break;
 
@@ -379,7 +379,7 @@ void runMultiWindow(String argumentsStr, Logger log, Directory applicationDir, F
   return runApp(
     buildSailWindowApp(
       log,
-      '$windowTitle | Bitwindow',
+      '$windowTitle | LitWindow',
       child,
       const Color.fromARGB(255, 255, 153, 0),
     ),
@@ -548,7 +548,7 @@ class _SplashScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SailText.primary10(
-                      'Starting BitWindow...',
+                      'Starting LitWindow...',
                       color: theme.colors.inactiveNavText,
                     ),
                     const SizedBox(
@@ -785,7 +785,7 @@ class _ErrorCatcher extends StatelessWidget {
 }
 
 Future<void> bootBitwindowBackend(Logger log) async {
-  log.i('STARTUP: Booting BitWindow backend');
+  log.i('STARTUP: Booting LitWindow backend');
 
   final binaryProvider = GetIt.I.get<BinaryProvider>();
   final orchestrator = GetIt.I.get<OrchestratorRPC>();
@@ -934,7 +934,7 @@ Future<void> setupSignalHandlers(Logger log) async {
   });
 }
 
-// BitWindow window types
+// LitWindow window types
 class SubWindowTypes {
   static const String debugId = 'debug';
   static var debug = SailWindow(

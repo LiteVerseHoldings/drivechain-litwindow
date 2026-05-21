@@ -5,16 +5,18 @@ import 'package:http/http.dart' as http;
 import 'package:sail_ui/env.dart';
 import 'package:sail_ui/extensions/formatting.dart';
 
-/// Provider that fetches and maintains the current BTC/USD exchange rate
+/// Provider that fetches and maintains the current LTC/USD exchange rate.
 class PriceProvider extends ChangeNotifier {
-  double? btcusd;
+  double? ltcusd;
   DateTime? lastUpdated;
   String? error;
   bool isFetching = false;
   Timer? _fetchTimer;
 
-  /// URL for the blockchain.info ticker API
-  static const String _tickerUrl = 'https://blockchain.info/ticker';
+  static const String _tickerUrl = 'https://api.coinbase.com/v2/prices/LTC-USD/spot';
+
+  // Kept for older callers that still use BTC-named helpers in shared UI code.
+  double? get btcusd => ltcusd;
 
   PriceProvider() {
     // Fetch once immediately
@@ -31,7 +33,7 @@ class PriceProvider extends ChangeNotifier {
     _fetchTimer = Timer.periodic(Duration(seconds: 10), (timer) => fetch());
   }
 
-  /// Fetch the latest BTCUSD price from blockchain.info
+  /// Fetch the latest LTC/USD spot price.
   Future<void> fetch() async {
     if (isFetching) {
       return;
@@ -45,27 +47,20 @@ class PriceProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
+        final priceData = data['data'];
+        final amount = priceData is Map<String, dynamic> ? priceData['amount'] : null;
+        final price = amount is String
+            ? double.tryParse(amount)
+            : amount is num
+            ? amount.toDouble()
+            : null;
 
-        // Extract USD price
-        if (data.containsKey('USD') && data['USD'] is Map<String, dynamic>) {
-          final usdData = data['USD'] as Map<String, dynamic>;
-
-          if (usdData.containsKey('last')) {
-            final price = usdData['last'];
-
-            // Convert to double if needed
-            if (price is num) {
-              btcusd = price.toDouble();
-              lastUpdated = DateTime.now();
-              error = null;
-            } else {
-              error = 'Invalid price format from API';
-            }
-          } else {
-            error = 'USD price data missing "last" field';
-          }
+        if (price != null) {
+          ltcusd = price;
+          lastUpdated = DateTime.now();
+          error = null;
         } else {
-          error = 'USD price data not found in response';
+          error = 'Invalid LTC price format from API';
         }
       } else {
         error = 'Failed to fetch price: HTTP ${response.statusCode}';
@@ -78,13 +73,16 @@ class PriceProvider extends ChangeNotifier {
     }
   }
 
-  /// Format the BTC price as a USD string
+  /// Format the LTC price as a USD string.
   String get formattedPrice {
-    if (btcusd == null) {
+    if (ltcusd == null) {
       return 'Loading...';
     }
 
-    return '\$${formatWithThousandSpacers(btcusd!.round())}';
+    if (ltcusd! >= 1000) {
+      return '\$${formatWithThousandSpacers(ltcusd!.round())}';
+    }
+    return '\$${ltcusd!.toStringAsFixed(2)}';
   }
 
   /// Get the age of the last price update
@@ -105,20 +103,28 @@ class PriceProvider extends ChangeNotifier {
     }
   }
 
-  /// Convert BTC amount to USD
-  double? btcToUsd(double btcAmount) {
-    if (btcusd == null) {
+  double? ltcToUsd(double ltcAmount) {
+    if (ltcusd == null) {
       return null;
     }
-    return btcAmount * btcusd!;
+    return ltcAmount * ltcusd!;
   }
 
-  /// Convert USD amount to BTC
-  double? usdToBtc(double usdAmount) {
-    if (btcusd == null || btcusd == 0) {
+  /// Convert the app's native coin amount to USD.
+  double? btcToUsd(double btcAmount) {
+    return ltcToUsd(btcAmount);
+  }
+
+  double? usdToLtc(double usdAmount) {
+    if (ltcusd == null || ltcusd == 0) {
       return null;
     }
-    return usdAmount / btcusd!;
+    return usdAmount / ltcusd!;
+  }
+
+  /// Convert USD amount to the app's native coin.
+  double? usdToBtc(double usdAmount) {
+    return usdToLtc(usdAmount);
   }
 
   @override

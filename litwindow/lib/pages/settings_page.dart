@@ -91,7 +91,7 @@ class SettingsPageState extends State<SettingsPage> {
               'Settings',
               bold: true,
             ),
-            SailText.secondary13('Manage your BitWindow settings.'),
+            SailText.secondary13('Manage your LitWindow settings.'),
             const SailSpacing(SailStyleValues.padding10),
             Divider(
               height: 1,
@@ -471,7 +471,7 @@ class _BackupWalletDialogState extends State<BackupWalletDialog> {
   Future<void> _selectSaveLocation() async {
     try {
       final timestamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
-      final defaultFileName = 'bitwindow-backup-$timestamp.zip';
+      final defaultFileName = 'litwindow-backup-$timestamp.zip';
 
       final result = await FilePicker.saveFile(
         dialogTitle: 'Save Wallet Backup',
@@ -955,7 +955,7 @@ class _RestoreWalletDialogState extends State<RestoreWalletDialog> {
         final timestamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
         autoBackupPath = path.join(
           walletProvider.bitwindowAppDir.path,
-          'bitwindow-backup-before-restore-$timestamp.zip',
+          'litwindow-backup-before-restore-$timestamp.zip',
         );
       }
 
@@ -1119,7 +1119,7 @@ class _ResetSettingsContentState extends State<_ResetSettingsContent> {
                 title: 'Reset Wallet?',
                 subtitle:
                     'Are you sure you want to reset all wallet data? This will:\n\n'
-                    '• Permanently delete all wallet files from BitWindow\n'
+                    '• Permanently delete all wallet files from LitWindow\n'
                     '• Permanently delete all wallet files from the Enforcer\n'
                     '• Stop all running processes\n'
                     '• Return you to the wallet creation screen\n\n'
@@ -1369,7 +1369,7 @@ class _AboutSettingsContentState extends State<_AboutSettingsContent> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => SailAlertCard(
-        title: 'Update BitWindow?',
+        title: 'Update LitWindow?',
         subtitle:
             'The application will download and install version ${_updateProvider.latestVersion}, then restart automatically.',
         onConfirm: () async => Navigator.of(context).pop(true),
@@ -1780,10 +1780,10 @@ class _NetworkSwapProgressDialogState extends State<NetworkSwapProgressDialog> {
     final stepNames = [
       'Stopping Bitcoin Core',
       'Stopping Enforcer',
-      'Stopping BitWindow',
+      'Stopping LitWindow',
       'Waiting for processes to exit',
       'Updating bitcoin.conf',
-      'Starting Core, Enforcer and BitWindow',
+      'Starting Core, Enforcer and LitWindow',
       'Network swap complete',
     ];
 

@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os/exec"
@@ -103,6 +104,8 @@ type blocksTip struct {
 	height uint32
 	hash   string
 }
+
+const litecoinSignetMiningWallet = "litwindow_signet_mining"
 
 // observeTip records the current tip and returns true the first time we
 // see a new (height, hash) pair. Same-height reorgs are caught because
@@ -553,15 +556,8 @@ func (s *Server) GetFireplaceStats(ctx context.Context, req *connect.Request[emp
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get transaction count: %w", err))
 	}
 
-	// Calculate coinnews count in last 7 days
-	coinnewsCount7d, err := s.getCoinnewsCount7d(ctx)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get coinnews count: %w", err))
-	}
-
 	return connect.NewResponse(&pb.GetFireplaceStatsResponse{
 		TransactionCount_24H: txCount24h,
-		CoinnewsCount_7D:     coinnewsCount7d,
 		BlockCount_24H:       blockCount24h,
 	}), nil
 }
@@ -599,34 +595,6 @@ func (s *Server) getTransactionCount24h(ctx context.Context) (int64, error) {
 
 	if err != nil {
 		return 0, fmt.Errorf("query transaction count: %w", err)
-	}
-
-	return count, nil
-}
-
-// getCoinnewsCount7d returns the number of coin news entries in the last 7 days
-func (s *Server) getCoinnewsCount7d(ctx context.Context) (int64, error) {
-	cutoffTime := time.Now().Add(-7 * 24 * time.Hour)
-
-	var count int64
-	err := s.db.QueryRowContext(ctx, `
-		SELECT COUNT(*)
-		FROM op_returns o
-		-- created in the last 7 days
-		WHERE o.created_at >= ?
-		AND LENGTH(o.op_return_data) >= 16
-		-- filter out all all topic creation operations
-		-- 6e6577 is hex for "new"
-		AND NOT(SUBSTR(o.op_return_data, 9, 6) = '6e6577')
-		-- and is a valid coin news entry (topic is 4 bytes = 8 hex chars)
-		AND EXISTS (
-			SELECT 1 FROM coin_news_topics t
-			WHERE t.topic = SUBSTR(o.op_return_data, 1, 8)
-		)
-	`, cutoffTime).Scan(&count)
-
-	if err != nil {
-		return 0, fmt.Errorf("query coinnews count: %w", err)
 	}
 
 	return count, nil
@@ -971,7 +939,10 @@ func (s *Server) MineBlocks(ctx context.Context, req *connect.Request[emptypb.Em
 	}
 
 	switch info.Msg.Chain {
+	case "signet":
+		return s.mineLitecoinSignetBlocks(ctx, stream)
 	case "regtest", "testnet3", "testnet4", "forknet":
+		return s.mineProofOfWorkBlocks(ctx, stream)
 	default:
 		return connect.NewError(
 			connect.CodeFailedPrecondition,
@@ -981,7 +952,177 @@ func (s *Server) MineBlocks(ctx context.Context, req *connect.Request[emptypb.Em
 			),
 		)
 	}
+}
 
+func (s *Server) mineLitecoinSignetBlocks(ctx context.Context, stream *connect.ServerStream[pb.MineBlocksResponse]) error {
+	if s.config.OrchestratorAddr == "" {
+		return connect.NewError(connect.CodeUnavailable, fmt.Errorf("orchestrator.addr not configured"))
+	}
+
+	orchClient := orchrpc.NewOrchestratorServiceClient(http.DefaultClient, s.config.OrchestratorAddr)
+
+	if err := ensureLitecoinSignetMiningWallet(ctx, orchClient); err != nil {
+		return connect.NewError(
+			connect.CodeFailedPrecondition,
+			fmt.Errorf("prepare Litecoin signet mining wallet: %w", err),
+		)
+	}
+
+	addrResp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
+		Method:     "getnewaddress",
+		ParamsJson: "[]",
+		Wallet:     litecoinSignetMiningWallet,
+	}))
+	if err != nil {
+		return connect.NewError(
+			connect.CodeFailedPrecondition,
+			fmt.Errorf("get Litecoin signet mining address through Core RPC: %w", err),
+		)
+	}
+
+	var address string
+	if err := json.Unmarshal([]byte(addrResp.Msg.ResultJson), &address); err != nil || address == "" {
+		if err == nil {
+			err = fmt.Errorf("empty address")
+		}
+		return connect.NewError(
+			connect.CodeFailedPrecondition,
+			fmt.Errorf("decode Litecoin signet mining address: %w", err),
+		)
+	}
+
+	start := time.Now()
+	var blocksFound uint64
+
+	for {
+		hashes, err := mineLitecoinSignetBlock(ctx, orchClient, address)
+		if err != nil {
+			return connect.NewError(
+				connect.CodeFailedPrecondition,
+				fmt.Errorf("mine Litecoin signet block through Core RPC: %w", err),
+			)
+		}
+
+		for _, blockHash := range hashes {
+			blocksFound++
+			if err := stream.Send(&pb.MineBlocksResponse{
+				Event: &pb.MineBlocksResponse_BlockFound_{
+					BlockFound: &pb.MineBlocksResponse_BlockFound{
+						BlockHash: blockHash,
+					},
+				},
+			}); err != nil {
+				return fmt.Errorf("send signet block found update: %w", err)
+			}
+		}
+
+		elapsed := time.Since(start).Seconds()
+		if elapsed > 0 {
+			if err := stream.Send(&pb.MineBlocksResponse{
+				Event: &pb.MineBlocksResponse_HashRate_{
+					HashRate: &pb.MineBlocksResponse_HashRate{
+						HashRate: float64(blocksFound) / elapsed,
+					},
+				},
+			}); err != nil {
+				return fmt.Errorf("send signet block rate update: %w", err)
+			}
+		}
+
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-time.After(time.Second):
+		}
+	}
+}
+
+func ensureLitecoinSignetMiningWallet(ctx context.Context, orchClient orchrpc.OrchestratorServiceClient) error {
+	listResp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
+		Method:     "listwallets",
+		ParamsJson: "[]",
+	}))
+	if err != nil {
+		return fmt.Errorf("list loaded wallets: %w", err)
+	}
+
+	var loaded []string
+	if err := json.Unmarshal([]byte(listResp.Msg.ResultJson), &loaded); err != nil {
+		return fmt.Errorf("decode loaded wallets: %w", err)
+	}
+	if slices.Contains(loaded, litecoinSignetMiningWallet) {
+		return nil
+	}
+
+	dirResp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
+		Method:     "listwalletdir",
+		ParamsJson: "[]",
+	}))
+	if err != nil {
+		return fmt.Errorf("list wallet directory: %w", err)
+	}
+
+	var walletDir struct {
+		Wallets []struct {
+			Name string `json:"name"`
+		} `json:"wallets"`
+	}
+	if err := json.Unmarshal([]byte(dirResp.Msg.ResultJson), &walletDir); err != nil {
+		return fmt.Errorf("decode wallet directory: %w", err)
+	}
+
+	for _, wallet := range walletDir.Wallets {
+		if wallet.Name == litecoinSignetMiningWallet {
+			params, err := json.Marshal([]string{litecoinSignetMiningWallet})
+			if err != nil {
+				return fmt.Errorf("encode loadwallet params: %w", err)
+			}
+			_, err = orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
+				Method:     "loadwallet",
+				ParamsJson: string(params),
+			}))
+			if err != nil {
+				return fmt.Errorf("load mining wallet: %w", err)
+			}
+			return nil
+		}
+	}
+
+	params, err := json.Marshal([]string{litecoinSignetMiningWallet})
+	if err != nil {
+		return fmt.Errorf("encode createwallet params: %w", err)
+	}
+	if _, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
+		Method:     "createwallet",
+		ParamsJson: string(params),
+	})); err != nil {
+		return fmt.Errorf("create mining wallet: %w", err)
+	}
+	return nil
+}
+
+func mineLitecoinSignetBlock(ctx context.Context, orchClient orchrpc.OrchestratorServiceClient, address string) ([]string, error) {
+	params, err := json.Marshal([]any{1, address, 10000000})
+	if err != nil {
+		return nil, fmt.Errorf("encode generatetoaddress params: %w", err)
+	}
+
+	resp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
+		Method:     "generatetoaddress",
+		ParamsJson: string(params),
+	}))
+	if err != nil {
+		return nil, err
+	}
+
+	var hashes []string
+	if err := json.Unmarshal([]byte(resp.Msg.ResultJson), &hashes); err != nil {
+		return nil, fmt.Errorf("decode generatetoaddress result: %w", err)
+	}
+	return hashes, nil
+}
+
+func (s *Server) mineProofOfWorkBlocks(ctx context.Context, stream *connect.ServerStream[pb.MineBlocksResponse]) error {
 	// Get a payout address from the active wallet for mining rewards
 	address, err := s.getCoinbaseAddress(ctx)
 	if err != nil {

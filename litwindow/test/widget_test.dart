@@ -5,10 +5,9 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:bitwindow/widgets/coinnews.dart';
+import 'package:bitwindow/pages/overview_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stacked/stacked.dart';
 
 import 'test_utils.dart';
 
@@ -17,18 +16,15 @@ void main() {
     'flutter.test.automatic_wait_for_timers': 'false',
   });
 
-  testWidgets('can build overview page', (WidgetTester tester) async {
+  testWidgets('can build graffiti explorer', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpSailPage(
       ConstrainedBox(
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           maxHeight: 1200,
           maxWidth: 1000,
         ),
-        child: ViewModelBuilder.reactive(
-          viewModelBuilder: () => CoinNewsViewModel(),
-          builder: (context, model, child) => CoinNewsView(),
-        ),
+        child: const GraffitiExplorerView(),
       ),
     );
   });

@@ -9,7 +9,7 @@ import 'package:sail_ui/gen/walletmanager/v1/walletmanager.pb.dart' as wmpb;
 
 /// Shared wallet RPC client backed by orchestrator WalletManagerService.
 ///
-/// This is the shared wallet boundary for BitWindow and sidechain frontends
+/// This is the shared wallet boundary for LitWindow and sidechain frontends
 /// when wallet/runtime ownership lives in orchestrator. Splits unary
 /// (HTTP/1.1) and streaming (HTTP/2) over two transports — see
 /// [OrchestratorRPC] for why.

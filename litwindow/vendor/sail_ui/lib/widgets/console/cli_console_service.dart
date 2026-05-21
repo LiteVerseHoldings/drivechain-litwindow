@@ -49,13 +49,13 @@ class CLIConsole {
   static const _commandTimeout = Duration(minutes: 5);
 
   /// Real CLI binaries we discover on disk and exec. Every binary downloaded
-  /// by the orchestrator lands in BitWindow's `assets/bin/` (the Bitcoin Core
+  /// by the orchestrator lands in LitWindow's `assets/bin/` (the Bitcoin Core
   /// archive ships `bitcoin-cli`, `bitcoin-util`, etc. alongside `bitcoind`).
   /// The enforcer is intentionally absent — it has no native CLI; we expose
   /// it via the synthetic [_buildEnforcerService] instead.
   static const _binaryToCLI = {
     'BitcoinCore': 'bitcoin-cli',
-    'BitWindow': 'bitwindow-cli',
+    'LitWindow': 'bitwindow-cli',
     'Thunder': 'thunder-cli',
     'Truthcoin': 'truthcoin-cli',
     'Photon': 'photon-cli',

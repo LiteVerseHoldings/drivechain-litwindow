@@ -27,6 +27,7 @@ func newTestEnforcerManager(t *testing.T) (*EnforcerConfManager, string) {
 	m := &EnforcerConfManager{
 		bitcoinConf: bitcoinConf,
 		ConfigDir:   tmpDir, // Use temp dir so tests don't pollute the real enforcer config
+		AssetsDir:   filepath.Join(tmpDir, "assets", "bin"),
 		log:         zerolog.Nop(),
 	}
 	return m, tmpDir
@@ -309,6 +310,78 @@ func TestGetCliArgsPersistedValuesWinOverNetworkDerivation(t *testing.T) {
 	rejectArg(t, args, fmt.Sprintf("--wallet-esplora-url=%s", EsploraURLForNetwork(m.bitcoinConf.Network)))
 }
 
+func TestGetCliArgsSignetUsesBundledLitecoinCli(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+
+	cliPath := filepath.Join(m.AssetsDir, executableName("litecoin-cli"))
+	require.NoError(t, os.MkdirAll(filepath.Dir(cliPath), 0755))
+	require.NoError(t, os.WriteFile(cliPath, []byte{}, 0644))
+
+	args := m.GetCliArgs()
+
+	requireArg(t, args, "--signet-miner-bitcoin-cli-path="+cliPath)
+}
+
+func TestGetCliArgsSignetFallsBackToLitecoinCliName(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+
+	args := m.GetCliArgs()
+
+	requireArg(t, args, "--signet-miner-bitcoin-cli-path="+executableName("litecoin-cli"))
+}
+
+func TestGetCliArgsSignetLeavesUtilUnsetWhenNotBundled(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+
+	args := m.GetCliArgs()
+
+	rejectArgPrefix(t, args, "--signet-miner-bitcoin-util-path=")
+}
+
+func TestGetCliArgsSignetUsesBundledBitcoinUtilWhenPresent(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+
+	utilPath := filepath.Join(m.AssetsDir, executableName("bitcoin-util"))
+	require.NoError(t, os.MkdirAll(filepath.Dir(utilPath), 0755))
+	require.NoError(t, os.WriteFile(utilPath, []byte{}, 0644))
+
+	args := m.GetCliArgs()
+
+	requireArg(t, args, "--signet-miner-bitcoin-util-path="+utilPath)
+}
+
+func TestGetCliArgsSignetMinerArgsOnlyOnSignet(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+	m.bitcoinConf.Network = NetworkMainnet
+
+	args := m.GetCliArgs()
+
+	rejectArgPrefix(t, args, "--signet-miner-bitcoin-cli-path=")
+	rejectArgPrefix(t, args, "--signet-miner-bitcoin-util-path=")
+}
+
+func TestGetCliArgsPersistedSignetMinerPathWins(t *testing.T) {
+	m, _ := newTestEnforcerManager(t)
+	require.NoError(t, m.LoadConfig())
+
+	bundledPath := filepath.Join(m.AssetsDir, executableName("litecoin-cli"))
+	require.NoError(t, os.MkdirAll(filepath.Dir(bundledPath), 0755))
+	require.NoError(t, os.WriteFile(bundledPath, []byte{}, 0644))
+
+	const customPath = `C:\custom\litecoin-cli.exe`
+	m.Config.SetSetting("signet-miner-bitcoin-cli-path", customPath)
+
+	args := m.GetCliArgs()
+
+	requireArg(t, args, "--signet-miner-bitcoin-cli-path="+customPath)
+	rejectArg(t, args, "--signet-miner-bitcoin-cli-path="+bundledPath)
+}
+
 func TestGetCliArgsReflectsCurrentNetwork(t *testing.T) {
 	// Swap the manager's network mid-flight and confirm the next
 	// GetCliArgs call surfaces the new network's port + esplora URL.
@@ -363,6 +436,15 @@ func rejectArg(t *testing.T, args []string, bad string) {
 	for _, got := range args {
 		if got == bad {
 			t.Errorf("arg %q must not appear in %v", bad, args)
+		}
+	}
+}
+
+func rejectArgPrefix(t *testing.T, args []string, badPrefix string) {
+	t.Helper()
+	for _, got := range args {
+		if strings.HasPrefix(got, badPrefix) {
+			t.Errorf("arg with prefix %q must not appear in %v", badPrefix, args)
 		}
 	}
 }

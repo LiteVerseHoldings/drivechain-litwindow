@@ -2,14 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:fixnum/fixnum.dart';
-import 'package:sail_ui/gen/google/protobuf/timestamp.pb.dart';
 import 'package:bitwindow/env.dart';
 import 'package:bitwindow/pages/explorer/block_explorer_dialog.dart';
 import 'package:bitwindow/providers/blockchain_provider.dart';
 import 'package:bitwindow/providers/homepage_provider.dart' as bitwindow;
-import 'package:bitwindow/providers/news_provider.dart';
-import 'package:bitwindow/widgets/headline_highlight_text_field.dart';
+import 'package:bitwindow/providers/op_return_provider.dart';
 import 'package:bitwindow/widgets/homepage_widget_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,7 +68,7 @@ class FireplaceViewModel extends BaseViewModel {
 
   FireplaceViewModel() {
     fetchFireplaceStats();
-    priceProvider.addListener(fetchFireplaceStats);
+    priceProvider.addListener(_onPriceChanged);
 
     if (!Environment.isInTest) {
       _timer = Timer.periodic(
@@ -83,6 +80,11 @@ class FireplaceViewModel extends BaseViewModel {
   }
 
   GetFireplaceStatsResponse? stats;
+
+  void _onPriceChanged() {
+    fetchFireplaceStats();
+    notifyListeners();
+  }
 
   Future<void> fetchFireplaceStats() async {
     try {
@@ -99,7 +101,205 @@ class FireplaceViewModel extends BaseViewModel {
   @override
   void dispose() {
     _timer?.cancel();
+    priceProvider.removeListener(_onPriceChanged);
     super.dispose();
+  }
+}
+
+class BlockProgressionBar extends StatelessWidget {
+  const BlockProgressionBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ViewModelBuilder<BlockProgressionViewModel>.reactive(
+      viewModelBuilder: () => BlockProgressionViewModel(),
+      builder: (context, model, child) {
+        final theme = SailTheme.of(context);
+        final current = model.currentHeight?.toDouble() ?? 0;
+        final goal = max(model.headerHeight ?? model.currentHeight ?? 1, 1).toDouble();
+
+        return Container(
+          constraints: const BoxConstraints(minHeight: 72),
+          decoration: BoxDecoration(
+            color: theme.colors.backgroundSecondary,
+            border: Border.all(color: theme.colors.border),
+            borderRadius: SailStyleValues.borderRadius,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 820;
+              final metrics = Wrap(
+                spacing: 20,
+                runSpacing: 6,
+                alignment: compact ? WrapAlignment.start : WrapAlignment.end,
+                children: [
+                  _BlockProgressMetric(label: 'Current block', value: model.currentHeightLabel),
+                  _BlockProgressMetric(label: 'Headers', value: model.headerHeightLabel),
+                  _BlockProgressMetric(label: 'Last block', value: model.lastBlockLabel),
+                ],
+              );
+
+              final progress = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      SailSVG.fromAsset(
+                        SailSVGAsset.blocks,
+                        color: theme.colors.text,
+                        width: 14,
+                      ),
+                      const SizedBox(width: 8),
+                      SailText.primary13('Block progression', bold: true),
+                      const SizedBox(width: 10),
+                      SailText.secondary12(model.statusLabel),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  ProgressBar(
+                    current: current,
+                    goal: goal,
+                  ),
+                ],
+              );
+
+              if (compact) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    progress,
+                    const SizedBox(height: 10),
+                    metrics,
+                  ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: progress),
+                  const SizedBox(width: 24),
+                  metrics,
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class BlockProgressionViewModel extends BaseViewModel {
+  final BlockchainProvider blockchainProvider = GetIt.I.get<BlockchainProvider>();
+  final SyncProvider syncProvider = GetIt.I.get<SyncProvider>();
+  final BitcoinConfProvider confProvider = GetIt.I.get<BitcoinConfProvider>();
+
+  BlockProgressionViewModel() {
+    blockchainProvider.addListener(notifyListeners);
+    syncProvider.addListener(notifyListeners);
+    confProvider.addListener(notifyListeners);
+  }
+
+  SyncInfo? get _syncInfo => syncProvider.mainchainSyncInfo;
+
+  Block? get _latestBlock {
+    if (blockchainProvider.blocks.isEmpty) {
+      return null;
+    }
+    return blockchainProvider.blocks.reduce((a, b) => a.height >= b.height ? a : b);
+  }
+
+  int? get currentHeight => _syncInfo?.progressCurrent.toInt() ?? _latestBlock?.height;
+  int? get headerHeight {
+    final headers = _syncInfo?.progressGoal.toInt();
+    final current = currentHeight;
+    if (headers == null && current == null) {
+      return null;
+    }
+    return max(headers ?? 0, current ?? 0);
+  }
+
+  String get currentHeightLabel => _formatHeight(currentHeight);
+  String get headerHeightLabel => _formatHeight(headerHeight);
+
+  String get lastBlockLabel {
+    final block = _latestBlock;
+    if (block == null) {
+      return 'Waiting';
+    }
+    return block.blockTime.toDateTime().toLocal().format();
+  }
+
+  String get statusLabel {
+    if (syncProvider.mainchainError != null || blockchainProvider.error != null) {
+      return 'Connection pending';
+    }
+    if (confProvider.network == BitcoinNetwork.BITCOIN_NETWORK_SIGNET &&
+        blockchainProvider.peers.isEmpty) {
+      return 'Waiting for signet peer or miner';
+    }
+    final syncInfo = _syncInfo;
+    if (syncInfo == null) {
+      return _latestBlock == null ? 'Waiting for Litecoin Core' : 'Latest indexed block';
+    }
+    if (confProvider.network == BitcoinNetwork.BITCOIN_NETWORK_SIGNET &&
+        syncInfo.isSynced &&
+        syncInfo.progressCurrent == 0) {
+      return 'Signet ready, waiting for blocks';
+    }
+    return syncInfo.isSynced ? 'Synced' : 'Syncing';
+  }
+
+  String _formatHeight(int? value) {
+    if (value == null) {
+      return 'Loading';
+    }
+    return formatWithThousandSpacers(value);
+  }
+
+  @override
+  void dispose() {
+    blockchainProvider.removeListener(notifyListeners);
+    syncProvider.removeListener(notifyListeners);
+    confProvider.removeListener(notifyListeners);
+    super.dispose();
+  }
+}
+
+class _BlockProgressMetric extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _BlockProgressMetric({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = SailTheme.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 112),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SailText.secondary12(
+            label,
+            color: theme.colors.inactiveNavText,
+          ),
+          const SizedBox(height: 2),
+          SailText.primary13(
+            value,
+            bold: true,
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -474,34 +674,6 @@ class _LatestBlocksTableState extends State<LatestBlocksTable> {
   }
 }
 
-Future<void> displayBroadcastNewsDialog(BuildContext context) async {
-  await widgetDialog(
-    context: context,
-    title: 'Broadcast News',
-    subtitle: 'Broadcast News to the whole world',
-    child: BroadcastNewsView(),
-  );
-}
-
-Future<void> displayNewsOverviewDialog(BuildContext context, {required CoinNews news}) async {
-  await widgetDialog(
-    context: context,
-    title: news.headline,
-    subtitle: '',
-    child: NewsOverviewView(news: news),
-  );
-}
-
-Future<void> displayCreateTopicDialog(BuildContext context) async {
-  await widgetDialog(
-    context: context,
-    title: 'Manage News Subscriptions',
-    subtitle: 'View, subscribe to, and create news topics',
-    maxWidth: 700,
-    child: const ManageNewsSubscriptionsView(),
-  );
-}
-
 Future<void> displayGraffitiExplorerDialog(BuildContext context) async {
   await showDialog(
     context: context,
@@ -513,674 +685,6 @@ Future<void> displayGraffitiExplorerDialog(BuildContext context) async {
       ),
     ),
   );
-}
-
-void _showNewsHelp(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('News Help'),
-      content: const Text(
-        'With this page you can pay a fee to broadcast news on any topic. '
-        'Clicking "Broadcast" will create a transaction with an OP_RETURN '
-        'output that encodes the text you have entered.\n\n'
-        'The highlighted green portion is your headline (up to 64 characters). '
-        'Press Enter to end the headline early - everything after becomes content.\n\n'
-        'Anyone subscribed to the topic will see posts filtered by time and '
-        'sorted by fee amount.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('OK'),
-        ),
-      ],
-    ),
-  );
-}
-
-class BroadcastNewsView extends StatelessWidget {
-  const BroadcastNewsView({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ViewModelBuilder<BroadcastNewsViewModel>.reactive(
-      viewModelBuilder: () => BroadcastNewsViewModel(),
-      builder: (context, viewModel, child) {
-        return SingleChildScrollView(
-          child: SailColumn(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: SailStyleValues.padding16,
-            mainAxisSize: MainAxisSize.min,
-            leadingSpacing: true,
-            children: [
-              SailDropdownButton<Topic>(
-                items: [
-                  ...viewModel.topics.map(
-                    (topic) => SailDropdownItem(
-                      value: topic,
-                      label: topic.confirmed ? topic.name : '${topic.name} (pending)',
-                    ),
-                  ),
-                ],
-                onChanged: viewModel.setTopic,
-                value: viewModel.topic,
-                hint: 'Select a topic',
-              ),
-              HeadlineHighlightTextField(
-                controller: viewModel.messageController,
-                label: 'Message (highlighted = headline)',
-                hintText: 'First 64 chars (or until Enter) is the headline',
-                minLines: 10,
-              ),
-              SailTextField(
-                controller: viewModel.feeController,
-                hintText: 'Fee (optional)',
-                suffixWidget: Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: SailText.secondary12(viewModel.feeUnit.symbol),
-                ),
-              ),
-              SailRow(
-                spacing: SailStyleValues.padding08,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SailButton(
-                    label: 'Help',
-                    variant: ButtonVariant.ghost,
-                    icon: SailSVGAsset.iconQuestion,
-                    onPressed: () async => _showNewsHelp(context),
-                  ),
-                  SailButton(
-                    label: 'Broadcast',
-                    onPressed: () async => viewModel.broadcastNews(context),
-                    disabled: viewModel.headline.isEmpty,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class LastUsedTopicSetting extends SettingValue<String> {
-  @override
-  String get key => 'last_used_broadcast_topic';
-
-  LastUsedTopicSetting({super.newValue});
-
-  @override
-  String defaultValue() => '';
-
-  @override
-  String? fromJson(String jsonString) {
-    return jsonString;
-  }
-
-  @override
-  String toJson() {
-    return value;
-  }
-
-  @override
-  SettingValue<String> withValue([String? value]) {
-    return LastUsedTopicSetting(newValue: value);
-  }
-}
-
-class BroadcastNewsViewModel extends BaseViewModel {
-  final NewsProvider _newsProvider = GetIt.I.get<NewsProvider>();
-  final BitwindowRPC _api = GetIt.I.get<BitwindowRPC>();
-  final ClientSettings _settings = GetIt.I.get<ClientSettings>();
-
-  // Single unified controller for headline + content
-  final HeadlineHighlightController messageController = HeadlineHighlightController();
-  final TextEditingController feeController = TextEditingController();
-
-  BitcoinUnit get feeUnit => GetIt.I.get<SettingsProvider>().bitcoinUnit;
-
-  Topic? topic;
-
-  List<Topic> get topics => _newsProvider.topics;
-
-  /// Extract headline from unified text (first 64 chars or up to first newline)
-  String get headline {
-    final text = messageController.text;
-    final newlineIndex = text.indexOf('\n');
-    if (newlineIndex >= 0 && newlineIndex < 64) {
-      return text.substring(0, newlineIndex);
-    }
-    return text.substring(0, min(64, text.length));
-  }
-
-  /// Extract content from unified text (everything after headline)
-  String get content {
-    final text = messageController.text;
-    final newlineIndex = text.indexOf('\n');
-    if (newlineIndex >= 0 && newlineIndex < 64) {
-      return text.substring(newlineIndex + 1);
-    }
-    return text.length > 64 ? text.substring(64) : '';
-  }
-
-  BroadcastNewsViewModel() {
-    _loadLastUsedTopic();
-    messageController.addListener(notifyListeners);
-    feeController.addListener(notifyListeners);
-  }
-
-  Future<void> _loadLastUsedTopic() async {
-    final setting = LastUsedTopicSetting();
-    final lastUsedTopicId = (await _settings.getValue(setting)).value;
-
-    if (lastUsedTopicId.isNotEmpty) {
-      // Try to find the last used topic in the available topics
-      topic = topics.firstWhere(
-        (t) => t.topic == lastUsedTopicId,
-        orElse: () => topics.first,
-      );
-    } else {
-      topic = topics.first;
-    }
-
-    // Defer notifyListeners to avoid mouse tracker assertion during dialog initialization
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
-  }
-
-  void setTopic(Topic? newTopic) async {
-    if (newTopic == null) {
-      return;
-    }
-
-    topic = newTopic;
-    // Persist the selected topic
-    await _settings.setValue(LastUsedTopicSetting(newValue: newTopic.topic));
-
-    // Defer notifyListeners to avoid mouse tracker assertion during dropdown interaction
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
-  }
-
-  Future<void> broadcastNews(BuildContext context) async {
-    if (headline.isEmpty) {
-      return;
-    }
-
-    try {
-      // Parse fee in user's preferred unit and convert to sats
-      final feeSats = feeController.text.isNotEmpty ? parseAmountToSatoshis(feeController.text, feeUnit) : null;
-
-      await _api.misc.broadcastNews(
-        topic!.topic,
-        headline,
-        content,
-        feeSats: feeSats,
-      );
-
-      // Optimistically add to the news list so it shows up immediately
-      _newsProvider.addOptimistic(
-        CoinNews(
-          topic: topic!.topic,
-          headline: headline,
-          content: content,
-          feeSats: Int64(feeSats ?? 0),
-          createTime: Timestamp.fromDateTime(DateTime.now()),
-        ),
-      );
-
-      GetIt.I.get<NotificationProvider>().add(
-        title: 'News broadcast',
-        content: headline,
-        dialogType: DialogType.success,
-      );
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-    } catch (e) {
-      showSnackBar(context, 'could not broadcast news: $e');
-    }
-  }
-
-  @override
-  void dispose() {
-    messageController.removeListener(notifyListeners);
-    messageController.dispose();
-    feeController.removeListener(notifyListeners);
-    feeController.dispose();
-    super.dispose();
-  }
-}
-
-class NewsOverviewView extends StatelessWidget {
-  final CoinNews news;
-
-  const NewsOverviewView({
-    super.key,
-    required this.news,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SailText.primary12(news.content);
-  }
-}
-
-class ManageNewsSubscriptionsView extends StatelessWidget {
-  const ManageNewsSubscriptionsView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ViewModelBuilder<ManageNewsSubscriptionsViewModel>.reactive(
-      viewModelBuilder: () => ManageNewsSubscriptionsViewModel(),
-      builder: (context, viewModel, child) {
-        return SizedBox(
-          height: 400,
-          child: InlineTabBar(
-            secondary: true,
-            tabs: [
-              SingleTabItem(
-                label: 'Your Topics',
-                child: _YourTopicsTab(viewModel: viewModel),
-              ),
-              SingleTabItem(
-                label: 'Subscribe',
-                child: _SubscribeTab(viewModel: viewModel),
-              ),
-              SingleTabItem(
-                label: 'Create Topic',
-                child: _CreateTopicTab(viewModel: viewModel),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _YourTopicsTab extends StatelessWidget {
-  final ManageNewsSubscriptionsViewModel viewModel;
-
-  const _YourTopicsTab({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    return SailColumn(
-      spacing: SailStyleValues.padding16,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: SailTable(
-            getRowId: (index) => viewModel.topics[index].topic,
-            headerBuilder: (context) => [
-              const SailTableHeaderCell(name: 'Name'),
-              const SailTableHeaderCell(name: 'Identifier'),
-              const SailTableHeaderCell(name: 'Status'),
-            ],
-            rowBuilder: (context, row, selected) {
-              final topic = viewModel.topics[row];
-              return [
-                SailTableCell(value: topic.name),
-                SailTableCell(value: topic.topic, monospace: true),
-                SailTableCell(
-                  value: topic.confirmed ? 'Confirmed' : 'Pending',
-                  textColor: topic.confirmed ? context.sailTheme.colors.success : context.sailTheme.colors.orangeLight,
-                ),
-              ];
-            },
-            rowCount: viewModel.topics.length,
-            emptyPlaceholder: 'No topics subscribed',
-            drawGrid: true,
-            onDoubleTap: (rowId) {
-              final topic = viewModel.topics.firstWhere((t) => t.topic == rowId);
-              if (topic.txid.isNotEmpty) {
-                showTransactionDetails(context, topic.txid);
-              }
-            },
-          ),
-        ),
-        SailRow(
-          spacing: SailStyleValues.padding08,
-          children: [
-            SailButton(
-              label: 'Export',
-              variant: ButtonVariant.outline,
-              onPressed: () async => viewModel.exportTopics(context),
-            ),
-            SailButton(
-              label: 'Import',
-              variant: ButtonVariant.outline,
-              onPressed: () async => viewModel.importTopics(context),
-            ),
-            const Spacer(),
-            SailButton(
-              label: 'Restore Defaults',
-              variant: ButtonVariant.secondary,
-              onPressed: () async => viewModel.restoreDefaults(context),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SubscribeTab extends StatelessWidget {
-  final ManageNewsSubscriptionsViewModel viewModel;
-
-  const _SubscribeTab({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    return SailColumn(
-      spacing: SailStyleValues.padding16,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SailText.secondary13('Add news topic by URL:'),
-        SailRow(
-          spacing: SailStyleValues.padding08,
-          children: [
-            Expanded(
-              child: SailTextField(
-                controller: viewModel.urlController,
-                hintText: 'Enter URL e.g. 7{a1a1a1a1}US Weekly',
-              ),
-            ),
-            SailButton(
-              label: 'Paste',
-              variant: ButtonVariant.secondary,
-              onPressed: () async => viewModel.pasteUrl(),
-            ),
-            SailButton(
-              label: 'Add',
-              onPressed: viewModel.urlController.text.isNotEmpty ? () async => viewModel.addFromUrl(context) : null,
-            ),
-          ],
-        ),
-        const SailSpacing(SailStyleValues.padding16),
-        SailText.secondary12(
-          'URL format: {days}{identifier}Name\n'
-          'Example: 7{a1a1a1a1}US Weekly means a topic named "US Weekly" with identifier a1a1a1a1 and 7 day retention',
-          color: context.sailTheme.colors.textTertiary,
-        ),
-      ],
-    );
-  }
-}
-
-class _CreateTopicTab extends StatelessWidget {
-  final ManageNewsSubscriptionsViewModel viewModel;
-
-  const _CreateTopicTab({required this.viewModel});
-
-  @override
-  Widget build(BuildContext context) {
-    final pendingTopics = viewModel.topics.where((t) => !t.confirmed).toList();
-
-    return SingleChildScrollView(
-      child: SailColumn(
-        spacing: SailStyleValues.padding16,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SailTextField(
-            label: 'Title',
-            controller: viewModel.nameController,
-            hintText: 'Enter title (e.g. "US Weekly")',
-          ),
-          SailTextField(
-            label: 'Header Bytes (8 hex chars to identify this news type)',
-            controller: viewModel.identifierController,
-            hintText: 'Enter header bytes e.g. A1A1A1A1',
-          ),
-          SailTextField(
-            label: 'Retention Days (0 = infinite, max 255)',
-            controller: viewModel.retentionDaysController,
-            hintText: '7',
-          ),
-          SailButton(
-            label: 'Create Topic',
-            onPressed: viewModel.canCreate ? () async => viewModel.createTopic(context) : null,
-          ),
-          if (pendingTopics.isNotEmpty) ...[
-            const SailSpacing(SailStyleValues.padding08),
-            SailText.secondary13('Pending Topics (awaiting confirmation)'),
-            ...pendingTopics.map(
-              (topic) => InkWell(
-                onDoubleTap: () => showTransactionDetails(context, topic.txid),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: context.sailTheme.colors.backgroundSecondary,
-                    borderRadius: SailStyleValues.borderRadius,
-                  ),
-                  child: SailRow(
-                    spacing: SailStyleValues.padding08,
-                    children: [
-                      SailText.primary13(topic.name),
-                      SailText.secondary12('(${topic.topic})'),
-                      const Spacer(),
-                      SailText.secondary12(
-                        'double-click to view tx',
-                        italic: true,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class ManageNewsSubscriptionsViewModel extends BaseViewModel {
-  final NewsProvider _newsProvider = GetIt.I.get<NewsProvider>();
-  final BitwindowRPC _api = GetIt.I.get<BitwindowRPC>();
-
-  List<Topic> get topics => _newsProvider.topics;
-
-  final TextEditingController identifierController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController urlController = TextEditingController();
-  final TextEditingController retentionDaysController = TextEditingController(text: '7');
-
-  bool get canCreate =>
-      identifierController.text.isNotEmpty && nameController.text.isNotEmpty && identifierController.text.length == 8;
-
-  ManageNewsSubscriptionsViewModel() {
-    _newsProvider.addListener(notifyListeners);
-    identifierController.addListener(notifyListeners);
-    nameController.addListener(notifyListeners);
-    urlController.addListener(notifyListeners);
-    retentionDaysController.addListener(notifyListeners);
-  }
-
-  Future<void> createTopic(BuildContext context) async {
-    if (identifierController.text.isEmpty || nameController.text.isEmpty) {
-      return;
-    }
-    if (identifierController.text.length != 8) {
-      showSnackBar(context, 'Identifier must be exactly 8 hex characters');
-      return;
-    }
-    final hexRegex = RegExp(r'^[0-9A-Fa-f]+$');
-    if (!hexRegex.hasMatch(identifierController.text)) {
-      showSnackBar(context, 'Identifier must contain only valid hex characters (0-9, A-F)');
-      return;
-    }
-    if (nameController.text.length > 20) {
-      showSnackBar(context, 'Name must be 20 characters or less');
-      return;
-    }
-    final retentionDays = int.tryParse(retentionDaysController.text) ?? 7;
-    if (retentionDays < 0 || retentionDays > 255) {
-      showSnackBar(context, 'Retention days must be between 0 and 255 (0 = infinite)');
-      return;
-    }
-
-    try {
-      final response = await _api.misc.createTopic(
-        identifierController.text,
-        nameController.text,
-        retentionDays: retentionDays,
-      );
-      await _newsProvider.fetch();
-      if (!context.mounted) return;
-      showSnackBar(context, 'Topic created! txid: ${response.txid.substring(0, 8)}...');
-      identifierController.clear();
-      nameController.clear();
-      retentionDaysController.text = '7';
-    } catch (e) {
-      showSnackBar(context, 'Could not create topic: $e');
-    }
-  }
-
-  Future<void> pasteUrl() async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null) {
-      urlController.text = data!.text!;
-    }
-  }
-
-  Future<void> addFromUrl(BuildContext context) async {
-    final url = urlController.text.trim();
-    if (url.isEmpty) return;
-
-    // Parse URL format: {days}{identifier}Name
-    // Example: 7{a1a1a1a1}US Weekly
-    final regex = RegExp(r'^(\d+)\{([a-fA-F0-9]{8})\}(.+)$');
-    final match = regex.firstMatch(url);
-
-    if (match == null) {
-      showSnackBar(context, 'Invalid URL format. Expected: {days}{identifier}Name');
-      return;
-    }
-
-    final days = int.tryParse(match.group(1)!) ?? 7;
-    final identifier = match.group(2)!;
-    final name = match.group(3)!;
-
-    try {
-      final response = await _api.misc.createTopic(identifier, name, retentionDays: days);
-      await _newsProvider.fetch();
-      if (!context.mounted) return;
-      showSnackBar(context, 'Subscribed to "$name"! txid: ${response.txid.substring(0, 8)}...');
-      urlController.clear();
-    } catch (e) {
-      showSnackBar(context, 'Could not subscribe: $e');
-    }
-  }
-
-  Future<void> exportTopics(BuildContext context) async {
-    final urls = topics.map((t) => '${t.retentionDays}{${t.topic}}${t.name}').join('\n');
-    await Clipboard.setData(ClipboardData(text: urls));
-    if (!context.mounted) return;
-    showSnackBar(context, 'Topics exported to clipboard');
-  }
-
-  Future<void> importTopics(BuildContext context) async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text == null || data!.text!.isEmpty) {
-      if (!context.mounted) return;
-      showSnackBar(context, 'Clipboard is empty');
-      return;
-    }
-
-    final lines = data.text!.split('\n').where((l) => l.trim().isNotEmpty).toList();
-    var imported = 0;
-    var failed = 0;
-
-    for (final line in lines) {
-      final regex = RegExp(r'^(\d+)\{([a-fA-F0-9]{8})\}(.+)$');
-      final match = regex.firstMatch(line.trim());
-
-      if (match != null) {
-        final days = int.tryParse(match.group(1)!) ?? 7;
-        final identifier = match.group(2)!;
-        final name = match.group(3)!;
-
-        // Check if already subscribed
-        if (topics.any((t) => t.topic == identifier)) {
-          continue;
-        }
-
-        try {
-          await _api.misc.createTopic(identifier, name, retentionDays: days);
-          imported++;
-        } catch (e) {
-          failed++;
-        }
-      } else {
-        failed++;
-      }
-    }
-
-    await _newsProvider.fetch();
-    if (!context.mounted) return;
-
-    if (imported > 0) {
-      showSnackBar(context, 'Imported $imported topic(s)${failed > 0 ? ', $failed failed' : ''}');
-    } else if (failed > 0) {
-      showSnackBar(context, 'Failed to import $failed topic(s)');
-    } else {
-      showSnackBar(context, 'No new topics to import');
-    }
-  }
-
-  Future<void> restoreDefaults(BuildContext context) async {
-    // Default topics from mainchain-deprecated
-    // Format: (identifier, name, retentionDays)
-    const defaults = [
-      ('a1a1a1a1', 'US Weekly', 7),
-      ('a2a2a2a2', 'Japan Weekly', 7),
-    ];
-
-    var restored = 0;
-    for (final (identifier, name, days) in defaults) {
-      if (!topics.any((t) => t.topic == identifier)) {
-        try {
-          await _api.misc.createTopic(identifier, name, retentionDays: days);
-          restored++;
-        } catch (e) {
-          // Ignore errors for defaults
-        }
-      }
-    }
-
-    await _newsProvider.fetch();
-    if (!context.mounted) return;
-
-    if (restored > 0) {
-      showSnackBar(context, 'Restored $restored default topic(s)');
-    } else {
-      showSnackBar(context, 'All default topics already exist');
-    }
-  }
-
-  @override
-  void dispose() {
-    _newsProvider.removeListener(notifyListeners);
-    identifierController.removeListener(notifyListeners);
-    identifierController.dispose();
-    nameController.removeListener(notifyListeners);
-    nameController.dispose();
-    retentionDaysController.removeListener(notifyListeners);
-    retentionDaysController.dispose();
-    urlController.removeListener(notifyListeners);
-    urlController.dispose();
-    super.dispose();
-  }
 }
 
 class NewGraffitiView extends StatelessWidget {
@@ -1434,7 +938,7 @@ class _DatePickerField extends StatelessWidget {
 }
 
 class GraffitiExplorerViewModel extends BaseViewModel {
-  final NewsProvider _newsProvider = GetIt.I.get<NewsProvider>();
+  final OpReturnProvider _opReturnProvider = GetIt.I.get<OpReturnProvider>();
   final TextEditingController searchController = TextEditingController();
 
   String _sortColumn = 'time';
@@ -1447,7 +951,7 @@ class GraffitiExplorerViewModel extends BaseViewModel {
   DateTime? get fromDate => _fromDate;
   DateTime? get toDate => _toDate;
 
-  List<OPReturn> get allEntries => _newsProvider.opReturns;
+  List<OPReturn> get allEntries => _opReturnProvider.opReturns;
 
   List<OPReturn> get entries {
     var filtered = allEntries.where((entry) {
@@ -1508,8 +1012,8 @@ class GraffitiExplorerViewModel extends BaseViewModel {
   }
 
   GraffitiExplorerViewModel() {
-    _newsProvider.fetch();
-    _newsProvider.addListener(notifyListeners);
+    _opReturnProvider.fetch();
+    _opReturnProvider.addListener(notifyListeners);
     searchController.addListener(notifyListeners);
   }
 
@@ -1542,7 +1046,7 @@ class GraffitiExplorerViewModel extends BaseViewModel {
 
   @override
   void dispose() {
-    _newsProvider.removeListener(notifyListeners);
+    _opReturnProvider.removeListener(notifyListeners);
     searchController.removeListener(notifyListeners);
     searchController.dispose();
     super.dispose();
@@ -1622,10 +1126,9 @@ class FireplaceStatsView extends StatelessWidget {
 
         List<Widget> cardList = [
           FireplaceStat(
-            title: 'Bitcoin Price',
+            title: 'Litecoin Price',
             subtitle: 'Last updated $priceLastUpdated',
             value: price,
-            bitcoinAmount: true,
             icon: SailSVGAsset.dollarSign,
             loading: loading,
           ),
@@ -1634,13 +1137,6 @@ class FireplaceStatsView extends StatelessWidget {
             value: stats.transactionCount24h.toString(),
             subtitle: 'Last 24 hours',
             icon: SailSVGAsset.iconTransactions,
-            loading: loading,
-          ),
-          FireplaceStat(
-            title: 'New coinnews',
-            value: stats.coinnewsCount7d.toString(),
-            subtitle: 'Last 7 days',
-            icon: SailSVGAsset.newspaper,
             loading: loading,
           ),
           FireplaceStat(

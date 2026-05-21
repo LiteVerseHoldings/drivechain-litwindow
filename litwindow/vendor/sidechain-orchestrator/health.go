@@ -158,7 +158,7 @@ func NewHealthChecker(config BinaryConfig, opts ...HealthCheckOpts) HealthChecke
 	if config.IsBitcoinCore {
 		timeout = 60 * time.Second
 	}
-	host := "localhost"
+	host := "127.0.0.1"
 
 	var opt HealthCheckOpts
 	if len(opts) > 0 {
