@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:auto_updater/auto_updater.dart';
 import 'package:bitwindow/dialogs/change_password_dialog.dart';
 import 'package:bitwindow/dialogs/encrypt_wallet_dialog.dart';
 import 'package:bitwindow/gen/version.dart';
@@ -1358,9 +1357,14 @@ class _AboutSettingsContentState extends State<_AboutSettingsContent> {
   Future<void> _checkForUpdates() async {
     if (Platform.isLinux) {
       await _updateProvider.checkNow();
-    } else {
-      await autoUpdater.checkForUpdates();
+      return;
     }
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('LitWindow updates are not configured for this platform yet.')),
+    );
   }
 
   Future<void> _performUpdate() async {

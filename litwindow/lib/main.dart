@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:auto_updater/auto_updater.dart';
 import 'package:bitwindow/env.dart';
 import 'package:bitwindow/gen/version.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
@@ -285,7 +284,7 @@ Future<void> runMainWindow(Logger log, Directory applicationDir, File logFile) a
 
   await setupSignalHandlers(log);
 
-  // check for updates on boot and every hour therafter
+  // Check for updates on boot once LitWindow has its own release feed.
   await initAutoUpdater(log);
 
   final backendReady = ValueNotifier<bool>(false);
@@ -1027,20 +1026,5 @@ List<Binary> initalBinaries() {
 }
 
 Future<void> initAutoUpdater(Logger log) async {
-  if (!Platform.isMacOS && !Platform.isWindows) {
-    log.i('Skipping auto updater initialization because we are not on macOS or Windows)');
-    return;
-  }
-
-  try {
-    const feedURL = 'https://releases.drivechain.info/appcast-bitwindow.xml';
-    log.i('Initializing auto updater with feed URL: $feedURL');
-
-    await autoUpdater.setFeedURL(feedURL);
-    await autoUpdater.checkForUpdates(inBackground: true);
-
-    log.i('Auto updater initialized successfully');
-  } catch (e) {
-    log.w('Failed to initialize auto updater: $e');
-  }
+  log.i('Skipping auto updater initialization until a LitWindow release feed is configured');
 }

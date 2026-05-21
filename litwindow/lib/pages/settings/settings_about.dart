@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:auto_updater/auto_updater.dart';
 import 'package:bitwindow/gen/version.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -35,9 +34,14 @@ class _SettingsAboutState extends State<SettingsAbout> {
   Future<void> _checkForUpdates() async {
     if (Platform.isLinux) {
       await _updateProvider.checkNow();
-    } else {
-      await autoUpdater.checkForUpdates();
+      return;
     }
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('LitWindow updates are not configured for this platform yet.')),
+    );
   }
 
   Future<void> _performUpdate() async {
