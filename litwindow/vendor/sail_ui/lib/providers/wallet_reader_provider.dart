@@ -142,7 +142,6 @@ class WalletReaderProvider extends ChangeNotifier {
           orElse: () => BinaryType.BINARY_TYPE_ENFORCER,
         ),
         walletTypeRaw: protoWallet.walletType,
-        bip47PaymentCode: protoWallet.bip47PaymentCode,
       );
     }).toList();
 
@@ -160,7 +159,7 @@ class WalletReaderProvider extends ChangeNotifier {
     _ensureSupervisor();
     // Seed state synchronously instead of waiting for the WatchWalletData
     // stream. The stream races UI mount on cold start, and a slow/broken
-    // stream leaves the wallet dropdown, BIP47 card and starters tab empty
+    // stream leaves the wallet dropdown and starters tab empty
     // even when the orchestrator already has the wallet on disk.
     // listWallets + getWalletStatus return the same fields the stream
     // would push, so we can populate the provider directly.

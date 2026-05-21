@@ -26,10 +26,6 @@ class HDWalletProvider extends ChangeNotifier {
   bool get isProcessing => _isProcessing;
   String? get mnemonic => _mnemonic;
 
-  /// BIP47 v3 payment code — computed server-side by the orchestrator and
-  /// delivered on the WatchWalletData stream. No local crypto involved.
-  String get bip47PaymentCode => GetIt.I.get<WalletReaderProvider>().activeWallet?.bip47PaymentCode ?? '';
-
   HDWalletProvider() {
     GetIt.I.get<WalletReaderProvider>().addListener(_onWalletStream);
   }

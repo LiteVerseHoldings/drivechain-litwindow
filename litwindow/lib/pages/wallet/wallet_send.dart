@@ -171,7 +171,7 @@ class _RecipientFields extends StatelessWidget {
           key: Key('recipient_address_$key'),
           label: 'Address',
           controller: recipient.addressController,
-          hintText: 'Enter a single L1 litecoin-address (e.g. 1NS17iag...)',
+          hintText: 'Enter a Litecoin address (e.g. ltc1... or tltc1...)',
           size: TextFieldSize.small,
           suffixWidget: SailRow(
             children: [
@@ -565,7 +565,12 @@ class SendPageViewModel extends BaseViewModel {
       final destinations = <String, int>{};
       for (int i = 0; i < recipients.length; i++) {
         final r = recipients[i];
-        final address = r.addressController.text;
+        final address = r.addressController.text.trim();
+        if (_looksLikeUnsupportedPmString(address)) {
+          showSnackBar(context, 'Use a normal Litecoin address.');
+          setBusy(false);
+          return;
+        }
         final satoshis = parseAmountToSatoshis(r.amountController.text, currentUnit);
 
         // Sum amounts for duplicate addresses
@@ -597,6 +602,11 @@ class SendPageViewModel extends BaseViewModel {
       await addressBookProvider.fetch();
       await balanceProvider.fetch();
     }
+  }
+
+  bool _looksLikeUnsupportedPmString(String value) {
+    final trimmed = value.trim();
+    return trimmed.length > 80 && trimmed.startsWith('PM');
   }
 
   Future<void> clearAll() async {

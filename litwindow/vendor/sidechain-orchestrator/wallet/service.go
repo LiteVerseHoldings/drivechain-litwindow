@@ -312,10 +312,10 @@ func (s *Service) EnforcerWallet() *WalletData {
 }
 
 // Log returns a pointer to the service's logger so consumers in the api
-// package can surface wallet-tied errors (e.g. BIP47 derivation failures)
-// without allocating a separate logger or smuggling one through every
-// handler. Pointer-returned because zerolog's level methods (Error/Warn/...)
-// have pointer receivers and can't be called on a returned-by-value Logger.
+// package can surface wallet-tied errors without allocating a separate logger
+// or smuggling one through every handler. Pointer-returned because zerolog's
+// level methods (Error/Warn/...) have pointer receivers and can't be called on
+// a returned-by-value Logger.
 func (s *Service) Log() *zerolog.Logger {
 	return &s.log
 }

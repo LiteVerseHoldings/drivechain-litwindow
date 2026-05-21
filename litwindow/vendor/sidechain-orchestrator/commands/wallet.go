@@ -186,27 +186,23 @@ var walletListCommand = &cli.Command{
 		tw := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
 		verbose := cctx.Bool("verbose")
 		if verbose {
-			_, _ = fmt.Fprintln(tw, "ACTIVE\tID\tNAME\tTYPE\tCREATED\tBIP47\tGRADIENT")
+			_, _ = fmt.Fprintln(tw, "ACTIVE\tID\tNAME\tTYPE\tCREATED\tGRADIENT")
 		} else {
-			_, _ = fmt.Fprintln(tw, "ACTIVE\tID\tNAME\tTYPE\tCREATED\tBIP47")
+			_, _ = fmt.Fprintln(tw, "ACTIVE\tID\tNAME\tTYPE\tCREATED")
 		}
 		for _, w := range resp.Msg.Wallets {
 			marker := " "
 			if w.Id == activeID {
 				marker = "*"
 			}
-			bip47 := w.Bip47PaymentCode
-			if bip47 == "" {
-				bip47 = "-"
-			}
 			if verbose {
 				grad := w.GradientJson
 				if grad == "" {
 					grad = "-"
 				}
-				_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", marker, w.Id, w.Name, w.WalletType, w.CreatedAt, bip47, grad)
+				_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\n", marker, w.Id, w.Name, w.WalletType, w.CreatedAt, grad)
 			} else {
-				_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%s\n", marker, w.Id, w.Name, w.WalletType, w.CreatedAt, bip47)
+				_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\n", marker, w.Id, w.Name, w.WalletType, w.CreatedAt)
 			}
 		}
 		return tw.Flush()

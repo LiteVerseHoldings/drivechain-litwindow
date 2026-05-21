@@ -1,7 +1,6 @@
 package api
 
 import (
-	"strings"
 	"testing"
 	"time"
 
@@ -37,7 +36,7 @@ func TestBuildWatchWalletDataResponseStartersAttachToEnforcer(t *testing.T) {
 	resp := buildWatchWalletDataResponse(
 		[]wallet.WalletData{enforcer, core},
 		core.ID, // active wallet is the Core wallet, NOT the enforcer
-		true, false, true, nil,
+		true, false, true,
 	)
 
 	if got := resp.GetActiveWalletId(); got != core.ID {
@@ -104,7 +103,7 @@ func TestBuildWatchWalletDataResponseEnforcerSidechainsRoundTrip(t *testing.T) {
 	}
 
 	resp := buildWatchWalletDataResponse(
-		[]wallet.WalletData{enforcer}, enforcer.ID, true, false, true, nil,
+		[]wallet.WalletData{enforcer}, enforcer.ID, true, false, true,
 	)
 
 	w := resp.GetWallets()[0]
@@ -117,83 +116,6 @@ func TestBuildWatchWalletDataResponseEnforcerSidechainsRoundTrip(t *testing.T) {
 	}
 	if bySlot[9] != "thunder" || bySlot[5] != "bitnames" {
 		t.Errorf("sidechain mnemonics not preserved: %+v", bySlot)
-	}
-}
-
-// TestBuildWatchWalletDataResponseBip47Populated guards against the
-// receive-tab spinner regression: any wallet with a SeedHex must publish a
-// non-empty bip47_payment_code, otherwise the loader hangs forever.
-func TestBuildWatchWalletDataResponseBip47Populated(t *testing.T) {
-	now := time.Now().UTC()
-	hot := wallet.WalletData{
-		ID:         "hot-id",
-		Name:       "Hot",
-		WalletType: walletTypeEnforcer,
-		CreatedAt:  now,
-		// 64-byte seed (deterministic test vector).
-		Master: wallet.MasterWallet{
-			SeedHex: "0937ba268f2cc405562d1ae9d25573744897ee5e826873317756fef36557acda1126fc3c56870ab263b1e4b59da9674d943f4ad34b8d7981fc38cc9cae6baa84",
-		},
-	}
-	watchOnly := wallet.WalletData{
-		ID:         "watch-id",
-		Name:       "Watch",
-		WalletType: "watchOnly",
-		CreatedAt:  now,
-		Master:     wallet.MasterWallet{SeedHex: ""},
-	}
-
-	resp := buildWatchWalletDataResponse(
-		[]wallet.WalletData{hot, watchOnly},
-		hot.ID, true, false, true, nil,
-	)
-
-	var hotMd, watchMd string
-	for _, w := range resp.GetWallets() {
-		switch w.GetId() {
-		case hot.ID:
-			hotMd = w.GetBip47PaymentCode()
-		case watchOnly.ID:
-			watchMd = w.GetBip47PaymentCode()
-		}
-	}
-
-	if hotMd == "" {
-		t.Errorf("hot wallet must have a non-empty BIP47 payment code")
-	}
-	if !strings.HasPrefix(hotMd, "PM") {
-		t.Errorf("BIP47 payment code expected to start with 'PM', got %q", hotMd)
-	}
-	if watchMd != "" {
-		t.Errorf("watch-only wallet must not have a BIP47 payment code, got %q", watchMd)
-	}
-}
-
-// TestBuildWatchWalletDataResponseBip47ErrorSurfaces ensures derivation
-// errors reach the supplied callback rather than silently turning into the
-// "" value that the UI treats as still-loading.
-func TestBuildWatchWalletDataResponseBip47ErrorSurfaces(t *testing.T) {
-	bad := wallet.WalletData{
-		ID:         "bad-id",
-		WalletType: walletTypeEnforcer,
-		Master:     wallet.MasterWallet{SeedHex: "not-hex-zzz"},
-	}
-	var seenID string
-	var seenErr error
-	cb := func(id string, err error) { seenID = id; seenErr = err }
-
-	resp := buildWatchWalletDataResponse(
-		[]wallet.WalletData{bad}, bad.ID, true, false, true, cb,
-	)
-
-	if resp.GetWallets()[0].GetBip47PaymentCode() != "" {
-		t.Errorf("malformed seed must yield empty payment code")
-	}
-	if seenErr == nil {
-		t.Fatal("malformed seed must invoke the error callback")
-	}
-	if seenID != bad.ID {
-		t.Errorf("error callback got wrong wallet id: %q", seenID)
 	}
 }
 
@@ -213,7 +135,7 @@ func TestBuildWatchWalletDataResponseLegacyWalletTypeStarters(t *testing.T) {
 		Sidechains: []wallet.SidechainWallet{{Slot: 9, Name: "Thunder", Mnemonic: "legacy-side"}},
 	}
 	resp := buildWatchWalletDataResponse(
-		[]wallet.WalletData{legacy}, legacy.ID, true, false, true, nil,
+		[]wallet.WalletData{legacy}, legacy.ID, true, false, true,
 	)
 	w := resp.GetWallets()[0]
 	if w.GetMasterMnemonic() != "legacy master" {

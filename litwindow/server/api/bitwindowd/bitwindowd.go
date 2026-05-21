@@ -378,9 +378,8 @@ func (s *Server) CreateAddressBookEntry(ctx context.Context, req *connect.Reques
 	kind := addressbook.ClassifyAddress(addr)
 	if kind == pb.AddressType_ADDRESS_TYPE_UNKNOWN || kind == pb.AddressType_ADDRESS_TYPE_UNSPECIFIED {
 		err := fmt.Errorf(
-			"invalid address %q: must be (1) a Bitcoin address on any network, "+
-				"(2) a Drivechain deposit address s<slot>_<addr>_<checksum>, or "+
-				"(3) a BIP47 v3 payment code", addr,
+			"invalid address %q: must be (1) a Litecoin address on mainnet, signet, testnet, or regtest, "+
+				"or (2) a Drivechain deposit address s<slot>_<addr>_<checksum>", addr,
 		)
 		zerolog.Ctx(ctx).Error().Err(err).Msg("invalid address format")
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)

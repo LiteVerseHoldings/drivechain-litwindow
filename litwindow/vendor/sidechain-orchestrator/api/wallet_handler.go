@@ -20,7 +20,6 @@ import (
 	pb "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/walletmanager/v1"
 	rpc "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/walletmanager/v1/walletmanagerv1connect"
 	"github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/wallet"
-	"github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/wallet/bip47state"
 )
 
 // allSidechainSlots returns slots for every configured sidechain, so wallet
@@ -50,18 +49,10 @@ type WalletHandler struct {
 	engine         *wallet.WalletEngine            // nil until Core RPC is configured
 	enforcerWallet enforcerrpc.WalletServiceClient // nil until enforcer is configured
 	orch           *orchestrator.Orchestrator      // nil until set; used for Core variant RPCs
-	bip47State     *bip47state.Store               // nil until SetBip47StateStore is called
 }
 
 func NewWalletHandler(svc *wallet.Service) *WalletHandler {
 	return &WalletHandler{svc: svc}
-}
-
-// SetBip47StateStore wires the persistent BIP47 send state used by the
-// orchestrator to derive per-payment indices and remember whether a
-// notification tx has already been broadcast for a given recipient.
-func (h *WalletHandler) SetBip47StateStore(store *bip47state.Store) {
-	h.bip47State = store
 }
 
 // SetEngine sets the wallet engine (called after Core RPC config is available).
@@ -173,8 +164,6 @@ func (h *WalletHandler) RemoveEncryption(ctx context.Context, req *connect.Reque
 }
 
 func (h *WalletHandler) ListWallets(ctx context.Context, req *connect.Request[pb.ListWalletsRequest]) (*connect.Response[pb.ListWalletsResponse], error) {
-	// Use GetAllWallets so we can access the seed for BIP47 derivation —
-	// parity with sendWalletData. ListWallets (metadata-only) can't see it.
 	wallets := h.svc.GetAllWallets()
 	pbWallets := make([]*pb.WalletMetadata, len(wallets))
 	for i, w := range wallets {
@@ -182,17 +171,12 @@ func (h *WalletHandler) ListWallets(ctx context.Context, req *connect.Request[pb
 		if w.Gradient != nil {
 			gradientJSON = string(w.Gradient)
 		}
-		bip47Code, err := wallet.Bip47PaymentCodeFromSeed(w.Master.SeedHex)
-		if err != nil {
-			h.svc.Log().Error().Err(err).Str("wallet_id", w.ID).Msg("ListWallets: bip47 derivation failed")
-		}
 		pbWallets[i] = &pb.WalletMetadata{
-			Id:               w.ID,
-			Name:             w.Name,
-			WalletType:       w.WalletType,
-			GradientJson:     gradientJSON,
-			CreatedAt:        w.CreatedAt.Format(time.RFC3339),
-			Bip47PaymentCode: bip47Code,
+			Id:           w.ID,
+			Name:         w.Name,
+			WalletType:   w.WalletType,
+			GradientJson: gradientJSON,
+			CreatedAt:    w.CreatedAt.Format(time.RFC3339),
 		}
 	}
 	return connect.NewResponse(&pb.ListWalletsResponse{
@@ -248,7 +232,7 @@ func (h *WalletHandler) CreateWatchOnlyWallet(ctx context.Context, req *connect.
 
 func (h *WalletHandler) requireEngine() error {
 	if h.engine == nil {
-		return fmt.Errorf("bitcoin Core RPC not configured")
+		return fmt.Errorf("Litecoin Core RPC not configured")
 	}
 	return nil
 }
@@ -389,16 +373,6 @@ func (h *WalletHandler) SendTransaction(ctx context.Context, req *connect.Reques
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	// Resolve any BIP47 payment-code destinations into per-payment addresses
-	// before the dust check so we validate against the substituted address.
-	expansion, err := h.expandBip47Destinations(ctx, walletID, wType, req.Msg.Destinations)
-	if err != nil {
-		return nil, err
-	}
-	if expansion.notificationTxHex != "" || !destinationsEqual(expansion.destinations, req.Msg.Destinations) {
-		req = connect.NewRequest(applyDestinationsToRequest(req.Msg, expansion.destinations))
-	}
-
 	const dustLimitSats int64 = 546
 	for address, sats := range req.Msg.Destinations {
 		if sats < dustLimitSats {
@@ -407,14 +381,6 @@ func (h *WalletHandler) SendTransaction(ctx context.Context, req *connect.Reques
 				fmt.Errorf("amount to %s is below dust limit (%d sats)", address, dustLimitSats),
 			)
 		}
-	}
-
-	if expansion.notificationTxHex != "" {
-		notifTxID, err := h.broadcastBip47Notification(ctx, walletID, expansion.recipientCode, expansion.notificationTxHex)
-		if err != nil {
-			return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("broadcast bip47 notification: %w", err))
-		}
-		_ = notifTxID
 	}
 
 	if wType == walletTypeEnforcer {
@@ -1202,41 +1168,25 @@ func (h *WalletHandler) sendWalletData(ctx context.Context, stream *connect.Serv
 		h.svc.HasWallet(),
 		h.svc.IsEncrypted(),
 		h.svc.IsUnlocked(),
-		bip47Logger(h.svc),
 	)
 	*seq++
 	resp.Seq = *seq
 	return stream.Send(resp)
 }
 
-// bip47Logger returns a callback that surfaces BIP47 derivation errors via
-// the wallet service's logger. Returning the error path silently as ""
-// reads in the UI as an indefinite spinner — the loader sticks until a
-// non-empty payment code arrives — so the error MUST be observable.
-func bip47Logger(svc *wallet.Service) func(walletID string, err error) {
-	return func(walletID string, err error) {
-		svc.Log().Error().Err(err).Str("wallet_id", walletID).Msg("bip47 derivation failed")
-	}
-}
-
-func buildWatchWalletDataResponse(wallets []wallet.WalletData, activeID string, hasWallet, encrypted, unlocked bool, onBip47Err func(walletID string, err error)) *pb.WatchWalletDataResponse {
+func buildWatchWalletDataResponse(wallets []wallet.WalletData, activeID string, hasWallet, encrypted, unlocked bool) *pb.WatchWalletDataResponse {
 	pbWallets := make([]*pb.WalletMetadata, len(wallets))
 	for i, w := range wallets {
 		var gradientJSON string
 		if w.Gradient != nil {
 			gradientJSON = string(w.Gradient)
 		}
-		bip47Code, err := wallet.Bip47PaymentCodeFromSeed(w.Master.SeedHex)
-		if err != nil && onBip47Err != nil {
-			onBip47Err(w.ID, err)
-		}
 		md := &pb.WalletMetadata{
-			Id:               w.ID,
-			Name:             w.Name,
-			WalletType:       w.WalletType,
-			GradientJson:     gradientJSON,
-			CreatedAt:        w.CreatedAt.Format(time.RFC3339),
-			Bip47PaymentCode: bip47Code,
+			Id:           w.ID,
+			Name:         w.Name,
+			WalletType:   w.WalletType,
+			GradientJson: gradientJSON,
+			CreatedAt:    w.CreatedAt.Format(time.RFC3339),
 		}
 		// Starter material lives only on the enforcer wallet (L1 mnemonic and
 		// sidechain starters are derived from its seed). Attach it to that

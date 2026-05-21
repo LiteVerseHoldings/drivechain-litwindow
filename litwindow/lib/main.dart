@@ -853,7 +853,7 @@ Future<void> bootBitwindowBackend(Logger log) async {
   //    earlier init() in setupBitwindow runs before any backend exists, so
   //    its listWallets/getWalletStatus calls fail and the provider sits
   //    empty until the WatchWalletData stream eventually delivers — which
-  //    can lag long enough that the wallet dropdown, BIP47 card and
+  //    can lag long enough that the wallet dropdown and
   //    starters tab render empty against an already-loaded wallet.
   if (orchestratorReady && GetIt.I.isRegistered<WalletReaderProvider>()) {
     unawaited(GetIt.I.get<WalletReaderProvider>().init());

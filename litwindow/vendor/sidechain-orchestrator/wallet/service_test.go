@@ -797,10 +797,9 @@ func TestServiceLegacyWalletTypeBackfill(t *testing.T) {
 	// Hand-write a wallet.json that omits wallet_type — mirrors what users
 	// generated before the field existed. Both shapes need a fix-up on load:
 	// a wallet with a master mnemonic should land as "enforcer", a wallet
-	// without one should land as "watchOnly". Without the backfill, the
-	// receive-tab BIP47 spinner and the Starters tab both stay blank for
-	// these legacy installs because every code path that branches on
-	// wallet_type defaults to "not enforcer".
+	// without one should land as "watchOnly". Without the backfill, wallet
+	// views stay blank for these legacy installs because every code path that
+	// branches on wallet_type defaults to "not enforcer".
 	legacyJSON := []byte(`{
 		"version": 1,
 		"activeWalletId": "LEGACY1",

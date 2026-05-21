@@ -18,10 +18,6 @@ class WalletData {
   // an arbitrary enum value for those — useless when the UI needs to gate
   // watch-only-specific copy. Keep the literal string for that.
   final String walletTypeRaw;
-  // BIP47 v3 payment code from orchestrator's WatchWalletData stream.
-  // Not persisted — populated only from the proto, not from wallet.json.
-  final String bip47PaymentCode;
-
   WalletData({
     required this.version,
     required this.master,
@@ -33,10 +29,9 @@ class WalletData {
     required this.createdAt,
     required this.walletType,
     this.walletTypeRaw = '',
-    this.bip47PaymentCode = '',
   });
 
-  /// True iff this is a watch-only wallet — no spending key, no BIP47.
+  /// True iff this is a watch-only wallet.
   bool get isWatchOnly => walletTypeRaw == 'watchOnly';
 
   Map<String, dynamic> toJson() {

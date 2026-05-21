@@ -538,9 +538,8 @@ func (c *CoreRPCClient) GetBlockCount(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-// CoreAddressInfo is a subset of getaddressinfo's response. We only need the
-// HD derivation path so the orchestrator can rebuild the privkey from its
-// seed for BIP47 ECDH blinding.
+// CoreAddressInfo is a subset of getaddressinfo's response. We only need
+// ownership and solvability metadata from Core.
 type CoreAddressInfo struct {
 	Address    string `json:"address"`
 	HDKeyPath  string `json:"hdkeypath"`

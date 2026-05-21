@@ -144,7 +144,6 @@ class _ControlsCard extends StatelessWidget {
             spacing: SailStyleValues.padding08,
             children: [
               for (final item in [
-                {'label': 'BIP47 Payment Code:', 'value': model.bip47PaymentCode},
                 {'label': 'Master Seed:', 'value': model.masterSeed},
                 {'label': 'XPRIV:', 'value': model.xpriv},
                 {'label': 'XPUB:', 'value': model.xpub},
@@ -266,7 +265,6 @@ class HDWalletViewModel extends BaseViewModel {
   String _masterSeed = '';
   String _xpriv = '';
   String _xpub = '';
-  String _bip47PaymentCode = '';
   bool _hideMnemonic = false;
   bool _hidePrivateKeys = true;
 
@@ -277,7 +275,6 @@ class HDWalletViewModel extends BaseViewModel {
   String get masterSeed => _masterSeed;
   String get xpriv => _xpriv;
   String get xpub => _xpub;
-  String get bip47PaymentCode => _bip47PaymentCode;
   bool get hideMnemonic => _hideMnemonic;
   bool get hidePrivateKeys => _hidePrivateKeys;
   bool get hasMnemonic => mnemonicController.text.trim().isNotEmpty;
@@ -290,40 +287,6 @@ class HDWalletViewModel extends BaseViewModel {
     // Basic validation for BIP44/84 path format
     final pathRegex = RegExp(r"^m(/\d+'?){3,5}(/\d+)?$");
     return pathRegex.hasMatch(path);
-  }
-
-  String _generateBip47v3PaymentCode(String masterPubKeyHex) {
-    try {
-      if (masterPubKeyHex.length != 66) {
-        return '';
-      }
-
-      final pubKeyBytes = hex.decode(masterPubKeyHex);
-      if (pubKeyBytes.length != 33) {
-        return '';
-      }
-
-      final binaryPayload = Uint8List(34);
-      binaryPayload[0] = 0x03;
-      binaryPayload.setRange(1, 34, pubKeyBytes);
-
-      final versionedPayload = Uint8List(35);
-      versionedPayload[0] = 0x22;
-      versionedPayload.setRange(1, 35, binaryPayload);
-
-      final sha256Digest = SHA256Digest();
-      final hash1 = sha256Digest.process(versionedPayload);
-      final hash2 = sha256Digest.process(hash1);
-      final checksum = hash2.sublist(0, 4);
-
-      final finalBytes = Uint8List(39);
-      finalBytes.setRange(0, 35, versionedPayload);
-      finalBytes.setRange(35, 39, checksum);
-
-      return base58.encode(finalBytes);
-    } catch (e) {
-      return '';
-    }
   }
 
   HDWalletViewModel() {
@@ -392,14 +355,6 @@ class HDWalletViewModel extends BaseViewModel {
         _masterSeed = seedHex;
         _xpriv = masterKey.toString();
         _xpub = extendedPublicKey.toString();
-
-        // Generate BIP47_v3 payment code from master public key
-        final masterQ = extendedPublicKey.q;
-        if (masterQ != null) {
-          final masterPubKeyBytes = masterQ.getEncoded(true);
-          final masterPubKeyHex = hex.encode(masterPubKeyBytes);
-          _bip47PaymentCode = _generateBip47v3PaymentCode(masterPubKeyHex);
-        }
       } catch (e) {
         _errorMessage = 'Error deriving master keys: $e';
         notifyListeners();
@@ -538,7 +493,6 @@ class HDWalletViewModel extends BaseViewModel {
     _masterSeed = '';
     _xpriv = '';
     _xpub = '';
-    _bip47PaymentCode = '';
     _derivedEntries = [];
     _currentPage = 0;
     _errorMessage = null;

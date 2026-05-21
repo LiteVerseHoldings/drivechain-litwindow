@@ -1,5 +1,4 @@
 import 'package:bitwindow/providers/address_book_provider.dart';
-import 'package:bitwindow/providers/hd_wallet_provider.dart';
 import 'package:bitwindow/providers/transactions_provider.dart';
 import 'package:bitwindow/utils/explorer_url.dart';
 import 'package:fixnum/fixnum.dart';
@@ -51,7 +50,7 @@ class ReceiveTab extends StatelessWidget {
                                     description: 'Waiting for enforcer to start and wallet to sync..',
                                   ),
                                   controller: TextEditingController(text: model.address),
-                                  hintText: 'A Drivechain address',
+                                  hintText: 'A Litecoin address',
                                   readOnly: true,
                                   suffixWidget: CopyButton(
                                     text: model.address,
@@ -87,38 +86,6 @@ class ReceiveTab extends StatelessWidget {
                   ),
                 ],
               ),
-              if (!model.hideBip47)
-                SailCard(
-                  title: 'Receive with Bip47 v3 Payment Code',
-                  error: model.modelError,
-                  child: SailColumn(
-                    spacing: SailStyleValues.padding16,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SailRow(
-                        spacing: SailStyleValues.padding08,
-                        children: [
-                          Expanded(
-                            child: SailTextField(
-                              loading: LoadingDetails(
-                                enabled: model.bip47PaymentCode.isEmpty,
-                                description: 'Waiting for wallet to sync..',
-                              ),
-                              controller: TextEditingController(text: model.bip47PaymentCode),
-                              hintText: 'A Drivechain address',
-                              readOnly: true,
-                              suffixWidget: CopyButton(
-                                text: model.bip47PaymentCode,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
               ReceiveAddressesTable(
                 model: model,
               ),
@@ -310,24 +277,12 @@ class _ReceiveAddressesTableState extends State<ReceiveAddressesTable> {
 class ReceivePageViewModel extends BaseViewModel {
   final AddressBookProvider _addressBookProvider = GetIt.I<AddressBookProvider>();
   final BitwindowRPC _bitwindowRPC = GetIt.I<BitwindowRPC>();
-  final HDWalletProvider _hdWalletProvider = GetIt.I<HDWalletProvider>();
   TransactionProvider get transactionsProvider => GetIt.I<TransactionProvider>();
 
   @override
   String? modelError;
 
   String get address => transactionsProvider.address;
-  String get bip47PaymentCode => _hdWalletProvider.bip47PaymentCode;
-
-  /// Watch-only wallets in LitWindow only carry a BIP84 xpub today, not the
-  /// BIP47 branch needed to derive a payment code. Hide the BIP47 card for
-  /// them so the receive tab doesn't show an indefinite spinner over a row
-  /// the user can't actually populate.
-  bool get hideBip47 {
-    final reader = GetIt.I.get<WalletReaderProvider>();
-    final active = reader.activeWallet;
-    return active != null && active.isWatchOnly;
-  }
 
   List<ReceiveAddress> get receiveAddresses => transactionsProvider.receiveAddresses.toList();
 
@@ -346,10 +301,6 @@ class ReceivePageViewModel extends BaseViewModel {
     _bitwindowRPC.addListener(generateNewAddress);
     transactionsProvider.addListener(notifyListeners);
     _addressBookProvider.addListener(notifyListeners);
-    _hdWalletProvider.addListener(notifyListeners);
-    if (!_hdWalletProvider.isInitialized) {
-      _hdWalletProvider.init();
-    }
     generateNewAddress();
   }
 
@@ -357,7 +308,6 @@ class ReceivePageViewModel extends BaseViewModel {
   void dispose() {
     transactionsProvider.removeListener(notifyListeners);
     _addressBookProvider.removeListener(notifyListeners);
-    _hdWalletProvider.removeListener(notifyListeners);
     super.dispose();
   }
 
