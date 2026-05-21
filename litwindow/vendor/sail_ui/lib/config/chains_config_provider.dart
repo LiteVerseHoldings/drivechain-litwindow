@@ -11,6 +11,13 @@ import 'package:sail_ui/sail_ui.dart';
 const _configFileName = 'chains_config.json';
 const _assetsPrefix = 'packages/sail_ui/assets';
 
+String _stripBom(String value) {
+  if (value.isNotEmpty && value.codeUnitAt(0) == 0xFEFF) {
+    return value.substring(1);
+  }
+  return value;
+}
+
 /// Provides binary/sidechain configuration loaded from a JSON file on disk.
 ///
 /// Data flows in one direction: file → listeners.
@@ -110,7 +117,7 @@ class ChainsConfigProvider extends ChangeNotifier {
     final log = Logger(level: Level.info);
 
     try {
-      final contents = await configFile.readAsString();
+      final contents = _stripBom(await configFile.readAsString());
       var userConfig = json.decode(contents) as Map<String, dynamic>;
       final currentVersion = userConfig['version'] as int? ?? 0;
 
@@ -270,7 +277,7 @@ class ChainsConfigProvider extends ChangeNotifier {
 
   Future<void> _loadConfig() async {
     try {
-      final contents = await configFile.readAsString();
+      final contents = _stripBom(await configFile.readAsString());
       _rawConfig = json.decode(contents) as Map<String, dynamic>;
     } catch (e) {
       log.e('Failed to load chains config: $e');
@@ -302,7 +309,7 @@ class ChainsConfigProvider extends ChangeNotifier {
 
   Future<void> _reloadConfig() async {
     try {
-      final contents = await configFile.readAsString();
+      final contents = _stripBom(await configFile.readAsString());
       final newConfig = json.decode(contents) as Map<String, dynamic>;
       if (!mapEquals(_rawConfig, newConfig)) {
         _rawConfig = newConfig;

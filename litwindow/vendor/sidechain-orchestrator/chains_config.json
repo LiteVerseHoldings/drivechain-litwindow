@@ -3,10 +3,10 @@
   "binaries": {
     "bitcoincore": {
       "type": "core",
-      "name": "Bitcoin Core",
-      "version": "30.2",
-      "description": "Bitcoin Core",
-      "repo_url": "https://github.com/bitcoin/bitcoin",
+      "name": "Litecoin Core",
+      "version": "0.21.5.4-signet",
+      "description": "Litecoin Core with LiteVerse signet support",
+      "repo_url": "https://github.com/AllSage/litecoin/tree/add-signet-support",
       "port": 0,
       "chain_layer": 1,
       "color": "green",
@@ -31,14 +31,14 @@
       "directories": {
         "binary": {
           "default": {
-            "linux": ".drivechain",
-            "macos": "Drivechain",
-            "windows": "Drivechain"
+            "linux": ".litecoin-signet",
+            "macos": "LitecoinSignet",
+            "windows": "LitecoinSignet"
           },
           "mainnet": {
-            "linux": ".bitcoin",
-            "macos": "Bitcoin",
-            "windows": "Bitcoin"
+            "linux": ".litecoin",
+            "macos": "Litecoin",
+            "windows": "Litecoin"
           }
         },
         "flutter_frontend": {
@@ -48,37 +48,27 @@
         }
       },
       "download": {
-        "binary": "bitcoind",
+        "binary": "litecoind",
         "variants": {
+          "local-signet": {
+            "subfolder": "litecoin-signet",
+            "base_url": "",
+            "files": {
+              "linux": "",
+              "macos": "",
+              "windows": ""
+            },
+            "available_networks": ["signet", "testnet", "regtest"]
+          },
           "core": {
-            "subfolder": "bitcoin",
-            "base_url": "https://bitcoincore.org/bin/bitcoin-core-30.2/",
+            "subfolder": "litecoin",
+            "base_url": "https://download.litecoin.org/litecoin-0.21.5.5/",
             "files": {
-              "linux": "bitcoin-30.2-x86_64-linux-gnu.tar.gz",
-              "macos": "bitcoin-30.2-x86_64-apple-darwin.tar.gz",
-              "windows": "bitcoin-30.2-win64.zip"
+              "linux": "linux/litecoin-0.21.5.5-x86_64-linux-gnu.tar.gz",
+              "macos": "",
+              "windows": "win/litecoin-0.21.5.5-win64.zip"
             },
-            "available_networks": ["signet", "testnet", "regtest"]
-          },
-          "patched": {
-            "subfolder": "drivechain-patched",
-            "base_url": "https://releases.drivechain.info/",
-            "files": {
-              "linux": "L1-bitcoin-patched-latest-x86_64-unknown-linux-gnu.zip",
-              "macos": "L1-bitcoin-patched-latest-x86_64-apple-darwin.zip",
-              "windows": "L1-bitcoin-patched-latest-x86_64-w64-msvc.zip"
-            },
-            "available_networks": ["mainnet", "signet", "testnet", "regtest", "forknet"]
-          },
-          "knots": {
-            "subfolder": "knots",
-            "base_url": "https://bitcoinknots.org/files/29.x/29.3.knots20260210/",
-            "files": {
-              "linux": "bitcoin-29.3.knots20260210-x86_64-linux-gnu.tar.gz",
-              "macos": "bitcoin-29.3.knots20260210-x86_64-apple-darwin.tar.gz",
-              "windows": "bitcoin-29.3.knots20260210-win64-pgpverifiable.zip"
-            },
-            "available_networks": ["signet", "testnet", "regtest"]
+            "available_networks": ["mainnet", "testnet", "regtest"]
           }
         }
       },

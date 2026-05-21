@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -112,6 +113,7 @@ func LoadConfigFile(path string, log zerolog.Logger) []BinaryConfig {
 // runtime behavior (here: bitcoind no longer matches the BitcoindHealthCheck
 // branch, so presync detection silently regresses).
 func mergeWithEmbedded(onDisk []byte) ([]byte, error) {
+	onDisk = bytes.TrimPrefix(onDisk, []byte{0xEF, 0xBB, 0xBF})
 	var base, overlay map[string]any
 	if err := json.Unmarshal(embeddedConfig, &base); err != nil {
 		return nil, fmt.Errorf("parse embedded: %w", err)
