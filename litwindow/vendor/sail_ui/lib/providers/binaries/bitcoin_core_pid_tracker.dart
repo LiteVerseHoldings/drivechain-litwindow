@@ -6,15 +6,15 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:sail_ui/sail_ui.dart';
 
-/// Tracks Litecoin Core's PID by monitoring the bitcoin.pid file in its datadir,
+/// Tracks Litecoin Core's PID by monitoring the litecoind.pid file in its datadir,
 /// and provides methods to start and stop watching the file.
 /// The PID file location is network-aware:
-/// - mainnet: {datadir}/bitcoin.pid
-/// - testnet: {datadir}/testnet3/bitcoin.pid
-/// - signet: {datadir}/signet/bitcoin.pid
-/// - regtest: {datadir}/regtest/bitcoin.pid
+/// - mainnet: {datadir}/litecoind.pid
+/// - testnet: {datadir}/testnet3/litecoind.pid
+/// - signet: {datadir}/signet/litecoind.pid
+/// - regtest: {datadir}/regtest/litecoind.pid
 /// The running network is fetched directly from the conf provider,
-/// so from {bitwindow-}bitcoin.conf
+/// so from the LitWindow Litecoin config.
 class BitcoinCorePidTracker {
   final Logger log = GetIt.I.get<Logger>();
 
@@ -23,7 +23,7 @@ class BitcoinCorePidTracker {
   /// Get the currently tracked PID (may be null if not running or not yet discovered)
   int? currentPid;
 
-  /// Start watching the bitcoin.pid file
+  /// Start watching the litecoind.pid file
   void startWatching() {
     if (_watcher != null) {
       log.w('BitcoinCorePidTracker already watching');
@@ -40,7 +40,7 @@ class BitcoinCorePidTracker {
     _checkPidFile();
   }
 
-  /// Stop watching the bitcoin.pid file
+  /// Stop watching the litecoind.pid file
   void stopWatching() {
     _watcher?.cancel();
     _watcher = null;
@@ -48,12 +48,12 @@ class BitcoinCorePidTracker {
     log.d('Stopped Litecoin Core PID file watcher');
   }
 
-  /// Check the bitcoin.pid file and update our tracked PID
+  /// Check the litecoind.pid file and update our tracked PID
   Future<void> _checkPidFile() async {
     try {
-      // Build the path to bitcoin.pid, located in the network-aware datadir
+      // Build the path to litecoind.pid, located in the network-aware datadir
       final pidFile = File(
-        path.join(BitcoinCore().datadirNetwork(), 'bitcoind.pid'),
+        path.join(BitcoinCore().datadirNetwork(), 'litecoind.pid'),
       );
 
       if (await pidFile.exists()) {
@@ -62,7 +62,7 @@ class BitcoinCorePidTracker {
 
         if (pid != null && pid != currentPid) {
           log.i(
-            'Litecoin Core PID updated from bitcoin.pid (${pidFile.path}): $pid',
+            'Litecoin Core PID updated from litecoind.pid (${pidFile.path}): $pid',
           );
           currentPid = pid;
         }
@@ -70,7 +70,7 @@ class BitcoinCorePidTracker {
         // PID file doesnt or no longer, clear our cached PID
         if (currentPid != null) {
           log.d(
-            'bitcoin.pid file no longer exists at ${pidFile.path}, clearing cached PID',
+            'litecoind.pid file no longer exists at ${pidFile.path}, clearing cached PID',
           );
           currentPid = null;
         }

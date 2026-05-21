@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sail_ui/bitcoin.dart';
 import 'package:sail_ui/providers/settings_provider.dart';
 
-/// Provider for formatting Bitcoin amounts based on user's unit preference
+/// Provider for formatting Litecoin amounts based on user's unit preference
 /// Views can listen to this provider directly for reactive updates
 class FormatterProvider extends ChangeNotifier {
   final SettingsProvider _settingsProvider;

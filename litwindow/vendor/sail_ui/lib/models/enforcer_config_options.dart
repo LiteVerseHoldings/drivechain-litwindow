@@ -164,7 +164,7 @@ class EnforcerConfigOptions {
       category: 'Node RPC',
       description: 'ZMQ Sequence Address',
       tooltip:
-          'Bitcoin node ZMQ endpoint for `sequence`. If not set, the enforcer tries to find it via bitcoin-cli getzmqnotifications.',
+          'Litecoin node ZMQ endpoint for `sequence`. If not set, the enforcer tries to find it via litecoin-cli getzmqnotifications.',
       inputType: EnforcerConfigInputType.text,
     ),
 
@@ -289,18 +289,18 @@ class EnforcerConfigOptions {
     EnforcerConfigOption(
       key: 'signet-miner-bitcoin-util-path',
       category: 'Signet Miner',
-      description: 'bitcoin-util Path',
-      tooltip: 'Path to the Litecoin Core bitcoin-util binary.',
+      description: 'litecoin-util Path',
+      tooltip: 'Path to the Litecoin Core litecoin-util binary.',
       inputType: EnforcerConfigInputType.path,
-      defaultValue: 'bitcoin-util',
+      defaultValue: 'litecoin-util',
     ),
     EnforcerConfigOption(
       key: 'signet-miner-bitcoin-cli-path',
       category: 'Signet Miner',
-      description: 'bitcoin-cli Path',
-      tooltip: 'Path to the Litecoin Core bitcoin-cli binary.',
+      description: 'litecoin-cli Path',
+      tooltip: 'Path to the Litecoin Core litecoin-cli binary.',
       inputType: EnforcerConfigInputType.path,
-      defaultValue: 'bitcoin-cli',
+      defaultValue: 'litecoin-cli',
     ),
     EnforcerConfigOption(
       key: 'signet-miner-coinbase-recipient',

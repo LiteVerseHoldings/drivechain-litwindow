@@ -118,7 +118,7 @@ class EnforcerLive extends EnforcerRPC {
       args.add('--${entry.key}=${entry.value}');
     }
 
-    // ZMQ sequence address (read from bitcoin.conf, fallback to default)
+    // ZMQ sequence address (read from litecoin.conf, fallback to default)
     var zmqSequence = 'tcp://127.0.0.1:29000';
     try {
       final bitcoinConf = GetIt.I.get<BitcoinConfProvider>();

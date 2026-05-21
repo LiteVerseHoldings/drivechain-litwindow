@@ -55,7 +55,7 @@ class BitcoinConfigOptions {
       category: 'General',
       description: 'Configuration File',
       tooltip:
-          'Specify path to read-only configuration file. Relative paths will be prefixed by datadir location (default: bitcoin.conf)',
+          'Specify path to read-only configuration file. Relative paths will be prefixed by datadir location (default: litecoin.conf)',
       inputType: ConfigInputType.file,
     ),
     BitcoinConfigOption(
@@ -138,9 +138,9 @@ class BitcoinConfigOptions {
       category: 'General',
       description: 'PID File',
       tooltip:
-          'Specify pid file. Relative paths will be prefixed by a net-specific datadir location. (default: bitcoind.pid)',
+          'Specify pid file. Relative paths will be prefixed by a net-specific datadir location. (default: litecoind.pid)',
       inputType: ConfigInputType.file,
-      defaultValue: 'bitcoind.pid',
+      defaultValue: 'litecoind.pid',
     ),
 
     // Connection Options
@@ -607,7 +607,7 @@ class BitcoinConfigOptions {
       category: 'General',
       description: 'Allow Ignored Config',
       tooltip:
-          'For backwards compatibility, treat an unused bitcoin.conf file in the datadir as a warning, not an error.',
+          'For backwards compatibility, treat an unused litecoin.conf file in the datadir as a warning, not an error.',
       inputType: ConfigInputType.boolean,
       defaultValue: false,
     ),

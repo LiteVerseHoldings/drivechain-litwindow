@@ -195,7 +195,7 @@ class ParentChainTabViewModel extends BaseViewModel with ChangeTrackingMixin {
     }
 
     if (bitcoinAddressController.text.isEmpty) {
-      withdrawError = 'Bitcoin address is required';
+      withdrawError = 'Litecoin address is required';
       notifyListeners();
       return;
     }

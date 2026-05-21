@@ -219,10 +219,10 @@ class CLIConsole {
 
   static List<String> _wrapArgs(String cli, List<String> args) {
     switch (cli) {
-      case 'bitcoin-cli':
+      case 'litecoin-cli':
         try {
           final conf = BitcoinCore().confFile();
-          if (path.basename(conf) != 'bitcoin.conf') {
+          if (path.basename(conf) != 'litecoin.conf') {
             return ['-conf=$conf', ...args];
           }
         } catch (_) {}
