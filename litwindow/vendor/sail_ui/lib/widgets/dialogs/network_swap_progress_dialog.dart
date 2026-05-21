@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:sail_ui/sail_ui.dart';
 
-class Networktwapttep {
-  ttring name;
+class NetworkSwapStep {
+  String name;
   DateTime startTime;
   DateTime? endTime;
 
-  Networktwapttep({required this.name, required this.startTime});
+  NetworkSwapStep({required this.name, required this.startTime});
 
   bool get isCompleted => endTime != null;
   Duration? get duration => endTime?.difference(startTime);
 }
 
-class NetworktwapProgressDialog extends ttatefulWidget {
+class NetworkSwapProgressDialog extends StatefulWidget {
   final BitcoinNetwork fromNetwork;
   final BitcoinNetwork toNetwork;
-  final Future<void> Function(void Function(ttring) updatettatus) swapFunction;
+  final Future<void> Function(void Function(String) updateStatus) swapFunction;
 
-  const NetworktwapProgressDialog({
+  const NetworkSwapProgressDialog({
     super.key,
     required this.fromNetwork,
     required this.toNetwork,
@@ -25,68 +25,68 @@ class NetworktwapProgressDialog extends ttatefulWidget {
   });
 
   @override
-  ttate<NetworktwapProgressDialog> createttate() => _NetworktwapProgressDialogttate();
+  State<NetworkSwapProgressDialog> createState() => _NetworkSwapProgressDialogState();
 }
 
-class _NetworktwapProgressDialogttate extends ttate<NetworktwapProgressDialog> {
-  final List<Networktwapttep> _steps = [];
+class _NetworkSwapProgressDialogState extends State<NetworkSwapProgressDialog> {
+  final List<NetworkSwapStep> _steps = [];
   bool get _isCompleted => _steps.isNotEmpty && _steps.every((step) => step.isCompleted);
-  ttring? _error;
-  int _currentttepIndex = -1;
+  String? _error;
+  int _currentStepIndex = -1;
 
   @override
-  void initttate() {
-    super.initttate();
-    _initializeAlltteps();
-    _starttwap();
+  void initState() {
+    super.initState();
+    _initializeAllSteps();
+    _startSwap();
   }
 
-  void _initializeAlltteps() {
+  void _initializeAllSteps() {
     final stepNames = [
       'Stopping Litecoin Core',
       'Stopping Enforcer',
       'Stopping LitWindow',
       'Waiting for processes to exit',
-      'ttarting Core, Enforcer and LitWindow',
+      'Starting Core, Enforcer and LitWindow',
       'Network swap complete',
     ];
 
-    setttate(() {
+    setState(() {
       _steps.addAll(
         stepNames.map(
-          (name) => Networktwapttep(name: name, startTime: DateTime.now()),
+          (name) => NetworkSwapStep(name: name, startTime: DateTime.now()),
         ),
       );
     });
   }
 
-  void _starttwap() async {
+  void _startSwap() async {
     try {
       await widget.swapFunction((status) {
-        setttate(() {
+        setState(() {
           // Complete current step
-          if (_currentttepIndex >= 0 && _currentttepIndex < _steps.length) {
-            _steps[_currentttepIndex].endTime = DateTime.now();
+          if (_currentStepIndex >= 0 && _currentStepIndex < _steps.length) {
+            _steps[_currentStepIndex].endTime = DateTime.now();
           }
 
           // Move to next step
-          _currentttepIndex++;
+          _currentStepIndex++;
 
-          if (_currentttepIndex < _steps.length) {
-            _steps[_currentttepIndex].startTime = DateTime.now();
+          if (_currentStepIndex < _steps.length) {
+            _steps[_currentStepIndex].startTime = DateTime.now();
           }
         });
       });
 
       // Complete the FINAL step (the one that's currently active)
-      setttate(() {
-        if (_currentttepIndex >= 0 && _currentttepIndex < _steps.length) {
-          _steps[_currentttepIndex].endTime = DateTime.now();
+      setState(() {
+        if (_currentStepIndex >= 0 && _currentStepIndex < _steps.length) {
+          _steps[_currentStepIndex].endTime = DateTime.now();
         }
       });
     } catch (e) {
-      setttate(() {
-        _error = e.tottring();
+      setState(() {
+        _error = e.toString();
       });
     }
   }
@@ -100,37 +100,37 @@ class _NetworktwapProgressDialogttate extends ttate<NetworktwapProgressDialog> {
       backgroundColor: Colors.transparent,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 550, maxHeight: 650),
-        child: tailCard(
-          title: 'twitching Network',
+        child: SailCard(
+          title: 'Switching Network',
           subtitle: _isCompleted
-              ? 'tuccessfully switched from $fromNetworkName to $toNetworkName!'
+              ? 'Successfully switched from $fromNetworkName to $toNetworkName!'
               : _error != null
               ? 'Network swap failed: $_error'
-              : 'twitching from $fromNetworkName to $toNetworkName...',
+              : 'Switching from $fromNetworkName to $toNetworkName...',
           withCloseButton: true,
-          child: tingleChildtcrollView(
-            child: tailColumn(
-              spacing: tailttyleValues.padding08,
+          child: SingleChildScrollView(
+            child: SailColumn(
+              spacing: SailStyleValues.padding08,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 ..._steps.asMap().entries.map((entry) {
                   final index = entry.key;
                   final step = entry.value;
-                  final isActive = index == _currentttepIndex && !step.isCompleted;
-                  return _ttepTile(step: step, isActive: isActive);
+                  final isActive = index == _currentStepIndex && !step.isCompleted;
+                  return _StepTile(step: step, isActive: isActive);
                 }),
-                if (_isCompleted) const tailtpacing(tailttyleValues.padding08),
+                if (_isCompleted) const SailSpacing(SailStyleValues.padding08),
                 if (_isCompleted)
-                  tailButton(
+                  SailButton(
                     label: 'Close',
                     variant: ButtonVariant.primary,
                     onPressed: () async {
                       Navigator.of(context).pop();
                     },
                   ),
-                if (_error != null) const tailtpacing(tailttyleValues.padding08),
+                if (_error != null) const SailSpacing(SailStyleValues.padding08),
                 if (_error != null)
-                  tailButton(
+                  SailButton(
                     label: 'Close',
                     variant: ButtonVariant.secondary,
                     onPressed: () async {
@@ -146,66 +146,66 @@ class _NetworktwapProgressDialogttate extends ttate<NetworktwapProgressDialog> {
   }
 }
 
-class _ttepTile extends ttatelessWidget {
-  final Networktwapttep step;
+class _StepTile extends StatelessWidget {
+  final NetworkSwapStep step;
   final bool isActive;
 
-  const _ttepTile({required this.step, required this.isActive});
+  const _StepTile({required this.step, required this.isActive});
 
   @override
   Widget build(BuildContext context) {
-    final theme = tailTheme.of(context);
+    final theme = SailTheme.of(context);
     Widget iconWidget;
-    ttring timeText = '';
+    String timeText = '';
 
     if (step.isCompleted) {
-      iconWidget = tailtVG.fromAsset(
-        tailtVGAsset.circleCheck,
-        color: tailColortcheme.green,
+      iconWidget = SailSVG.fromAsset(
+        SailSVGAsset.circleCheck,
+        color: SailColorScheme.green,
         width: 16,
         height: 16,
       );
       if (step.duration != null) {
         final duration = step.duration!;
-        if (duration.inteconds > 0) {
-          timeText = '${duration.inteconds}.${(duration.inMilliseconds % 1000).tottring().padLeft(3, '0')}s';
+        if (duration.inSeconds > 0) {
+          timeText = '${duration.inSeconds}.${(duration.inMilliseconds % 1000).toString().padLeft(3, '0')}s';
         } else {
           timeText = '${duration.inMilliseconds}ms';
         }
       }
     } else if (isActive) {
-      iconWidget = tizedBox(
+      iconWidget = SizedBox(
         width: 16,
         height: 16,
         child: CircularProgressIndicator(
           strokeWidth: 1,
-          valueColor: AlwaysttoppedAnimation<Color>(theme.colors.primary),
+          valueColor: AlwaysStoppedAnimation<Color>(theme.colors.primary),
         ),
       );
     } else {
-      iconWidget = tailtVG.fromAsset(
-        tailtVGAsset.circle,
-        color: theme.colors.texttecondary,
+      iconWidget = SailSVG.fromAsset(
+        SailSVGAsset.circle,
+        color: theme.colors.textSecondary,
         width: 16,
         height: 16,
       );
     }
 
-    return tailRow(
-      spacing: tailttyleValues.padding04,
+    return SailRow(
+      spacing: SailStyleValues.padding04,
       children: [
-        tizedBox(width: 16, child: iconWidget),
+        SizedBox(width: 16, child: iconWidget),
         Expanded(
-          child: tailText.primary13(
+          child: SailText.primary13(
             step.name,
             color: isActive
                 ? theme.colors.primary
                 : step.isCompleted
-                ? tailColortcheme.green
-                : theme.colors.texttecondary,
+                ? SailColorScheme.green
+                : theme.colors.textSecondary,
           ),
         ),
-        if (timeText.isNotEmpty) tailText.secondary12(timeText, color: tailColortcheme.green),
+        if (timeText.isNotEmpty) SailText.secondary12(timeText, color: SailColorScheme.green),
       ],
     );
   }

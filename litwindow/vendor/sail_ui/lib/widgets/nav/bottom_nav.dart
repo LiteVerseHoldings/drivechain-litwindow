@@ -698,7 +698,7 @@ class BalanceDisplayViewModel extends BaseViewModel with ChangeTrackingMixin {
   double get pendingBalance => _balanceProvider.pendingBalance;
   bool get balanceSyncing => !_balanceProvider.initialized;
   bool get showUnconfirmed => _showUnconfirmed;
-  double? get usdBalance => _priceProvider.btcToUsd(balance);
+  double? get usdBalance => _priceProvider.ltcAmountToUsd(balance);
 
   void toggleUnconfirmed() {
     _showUnconfirmed = !_showUnconfirmed;

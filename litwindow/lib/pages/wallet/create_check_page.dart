@@ -83,13 +83,13 @@ class _CreateCheckPageState extends State<CreateCheckPage> {
       return;
     }
 
-    final btcAmount = double.tryParse(amountText);
-    if (btcAmount == null || btcAmount <= 0) {
+    final ltcAmount = double.tryParse(amountText);
+    if (ltcAmount == null || ltcAmount <= 0) {
       showSnackBar(context, 'Please enter a valid amount');
       return;
     }
 
-    final sats = (btcAmount * 100000000).toInt();
+    final sats = (ltcAmount * 100000000).toInt();
 
     setState(() {
       _isCreating = true;

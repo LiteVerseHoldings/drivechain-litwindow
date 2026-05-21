@@ -270,7 +270,7 @@ class ChecksTable extends StatelessWidget {
   }
 
   String _formatSats(int sats) {
-    final btc = sats / 100000000;
+    final ltc = sats / 100000000;
     return '${ltc.toStringAsFixed(8)} LTC';
   }
 

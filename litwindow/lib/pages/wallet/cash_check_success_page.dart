@@ -18,7 +18,7 @@ class CashCheckSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = SailTheme.of(context);
-    final btcAmount = amountSats != null ? (amountSats! / 100000000).toStringAsFixed(8) : '0.00000000';
+    final ltcAmount = amountSats != null ? (amountSats! / 100000000).toStringAsFixed(8) : '0.00000000';
 
     return Scaffold(
       backgroundColor: theme.colors.background,

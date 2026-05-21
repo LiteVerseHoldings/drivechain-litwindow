@@ -111,8 +111,8 @@ class PriceProvider extends ChangeNotifier {
   }
 
   /// Convert the app's native coin amount to USD.
-  double? btcToUsd(double btcAmount) {
-    return ltcToUsd(btcAmount);
+  double? ltcAmountToUsd(double ltcAmount) {
+    return ltcToUsd(ltcAmount);
   }
 
   double? usdToLtc(double usdAmount) {
@@ -123,7 +123,7 @@ class PriceProvider extends ChangeNotifier {
   }
 
   /// Convert USD amount to the app's native coin.
-  double? usdToBtc(double usdAmount) {
+  double? usdToLtcAmount(double usdAmount) {
     return usdToLtc(usdAmount);
   }
 

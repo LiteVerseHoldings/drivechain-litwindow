@@ -229,7 +229,7 @@ class CheckDetailPage extends StatelessWidget {
     return ViewModelBuilder<CheckDetailViewModel>.reactive(
       viewModelBuilder: () => CheckDetailViewModel(checkId),
       builder: (context, model, child) {
-        final amountBTC = model.check != null
+        final amountLTC = model.check != null
             ? (model.check!.expectedAmountSats.toInt() / 100000000).toStringAsFixed(8)
             : '0.00000000';
 

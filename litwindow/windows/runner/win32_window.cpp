@@ -44,9 +44,10 @@ int Scale(int source, double scale_factor) {
 // happen if the window is stuck — so we kill the managed tree here too.
 void TerminateManagedDaemons() {
   static const wchar_t* const kNames[] = {
+      L"litwindowd.exe",
       L"bitwindowd.exe",
       L"orchestratord.exe",
-      L"bitcoind.exe",
+      L"litecoind.exe",
       L"bip300301_enforcer.exe",
       L"thunder.exe",
       L"zside.exe",

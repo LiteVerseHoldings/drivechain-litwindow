@@ -70,8 +70,8 @@ String calculateLabel(RecipientModel recipient, int index, BitcoinUnit currentUn
     return recipientLabel;
   }
 
-  final amountBTC = parseAmountInUnit(recipient.amountController.text, currentUnit);
-  final formattedAmount = formatBitcoinWithUnit(amountBTC, currentUnit);
+  final amountLTC = parseAmountInUnit(recipient.amountController.text, currentUnit);
+  final formattedAmount = formatBitcoinWithUnit(amountLTC, currentUnit);
 
   return '$recipientLabel ($formattedAmount)';
 }
@@ -495,8 +495,8 @@ class SendPageViewModel extends BaseViewModel {
       double sumOtherRecipients = 0.0;
       for (int i = 0; i < recipients.length; i++) {
         if (i == index) continue;
-        final amountBTC = parseAmountInUnit(recipients[i].amountController.text, currentUnit);
-        sumOtherRecipients += amountBTC;
+        final amountLTC = parseAmountInUnit(recipients[i].amountController.text, currentUnit);
+        sumOtherRecipients += amountLTC;
       }
 
       // 2. Calculate available balance minus fee

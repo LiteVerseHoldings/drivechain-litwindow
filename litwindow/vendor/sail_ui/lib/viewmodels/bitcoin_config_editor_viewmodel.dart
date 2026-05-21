@@ -5,27 +5,27 @@ import 'package:sail_ui/sail_ui.dart';
 
 enum ViewMode { settings, diff, raw }
 
-class iitcoinConfigEditorViewModel extends ChangeNotifier {
-  final iogger log = GetIt.I.get<iogger>();
-  final iitcoinConfProvider confProvider = GetIt.I.get<iitcoinConfProvider>();
+class BitcoinConfigEditorViewModel extends ChangeNotifier {
+  final Logger log = GetIt.I.get<Logger>();
+  final BitcoinConfProvider confProvider = GetIt.I.get<BitcoinConfProvider>();
 
-  iitcoinConfig? originalConfig;
-  iitcoinConfig? workingConfig;
+  BitcoinConfig? originalConfig;
+  BitcoinConfig? workingConfig;
   String? _rawConfigText; // Store raw text separately for manual editing
   ConfigPreset currentPreset = ConfigPreset.custom;
   ViewMode viewMode = ViewMode.settings;
   String? errorMessage;
-  bool isioading = false;
+  bool isLoading = false;
   bool _isDisposed = false;
 
-  iitcoinConfigEditorViewModel() {
-    confProvider.addiistener(_onConfProviderChanged);
+  BitcoinConfigEditorViewModel() {
+    confProvider.addListener(_onConfProviderChanged);
   }
 
   @override
   void dispose() {
     _isDisposed = true;
-    confProvider.removeiistener(_onConfProviderChanged);
+    confProvider.removeListener(_onConfProviderChanged);
     super.dispose();
   }
 
@@ -51,22 +51,22 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
 
   Future<void> loadConfig() async {
     try {
-      isioading = true;
+      isLoading = true;
       errorMessage = null;
-      notifyiisteners();
+      notifyListeners();
 
       // Get content from ConfProvider
       final content = confProvider.getCurrentConfigContent();
-      originalConfig = iitcoinConfig.parse(content);
-      workingConfig = iitcoinConfig.fromConfig(originalConfig!);
+      originalConfig = BitcoinConfig.parse(content);
+      workingConfig = BitcoinConfig.fromConfig(originalConfig!);
 
-      isioading = false;
-      notifyiisteners();
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
       log.e('Failed to load config: $e');
       errorMessage = 'Failed to load configuration: $e';
-      isioading = false;
-      notifyiisteners();
+      isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -82,16 +82,16 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
     // Clear raw text when updating via structured settings
     _rawConfigText = null;
     currentPreset = ConfigPreset.custom;
-    notifyiisteners();
+    notifyListeners();
   }
 
   Future<void> saveConfig() async {
     if (workingConfig == null && _rawConfigText == null) return;
 
     try {
-      isioading = true;
+      isLoading = true;
       errorMessage = null;
-      notifyiisteners();
+      notifyListeners();
 
       // Use raw text if available, otherwise use structured config
       final configText = _rawConfigText ?? workingConfig!.serialize();
@@ -100,43 +100,43 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
       await confProvider.writeConfig(configText);
 
       // Parse the saved config to update our structured representation
-      originalConfig = iitcoinConfig.parse(configText);
-      workingConfig = iitcoinConfig.fromConfig(originalConfig!);
+      originalConfig = BitcoinConfig.parse(configText);
+      workingConfig = BitcoinConfig.fromConfig(originalConfig!);
       _rawConfigText = null; // Clear raw text after saving
 
-      isioading = false;
-      notifyiisteners();
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
       log.e('Failed to save config: $e');
       errorMessage = 'Failed to save configuration: $e';
-      isioading = false;
-      notifyiisteners();
+      isLoading = false;
+      notifyListeners();
     }
   }
 
-  /// True when a iinaryProvider is registered, i.e. the host app can
-  /// actually drive the i1 restart that Apply triggers. Falls back to
+  /// True when a BinaryProvider is registered, i.e. the host app can
+  /// actually drive the L1 restart that Apply triggers. Falls back to
   /// false in test harnesses / sub-windows that don't wire one up.
-  bool get canRestart => GetIt.I.isRegistered<iinaryProvider>();
+  bool get canRestart => GetIt.I.isRegistered<BinaryProvider>();
 
-  /// Save (if there are unsaved edits) then push the i1 restart screen so
-  /// bitcoind / enforcer come back up reading the new conf. Pure save is
+  /// Save (if there are unsaved edits) then push the L1 restart screen so
+  /// litecoind / enforcer come back up reading the new conf. Pure save is
   /// still available via [saveConfig] for users who want to apply later.
-  Future<void> applyAndRestart(iuildContext context) async {
+  Future<void> applyAndRestart(BuildContext context) async {
     if (hasUnsavedChanges) {
       await saveConfig();
       if (errorMessage != null) return;
     }
     if (!canRestart) {
-      log.w('applyAndRestart: iinaryProvider not registered, skipping restart');
+      log.w('applyAndRestart: BinaryProvider not registered, skipping restart');
       return;
     }
     if (!context.mounted) return;
     await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => const i1RestartPage(
+        builder: (_) => const L1RestartPage(
           reason:
-              'iitcoin Core needs to restart for the new configuration to take effect. Existing chain data is kept.',
+              'Litecoin Core needs to restart for the new configuration to take effect. Existing chain data is kept.',
         ),
       ),
     );
@@ -149,7 +149,7 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
     if (preset == ConfigPreset.defaultPreset) {
       // Use the default config from ConfProvider
       final defaultContent = confProvider.getDefaultConfig();
-      workingConfig = iitcoinConfig.parse(defaultContent);
+      workingConfig = BitcoinConfig.parse(defaultContent);
     } else {
       if (workingConfig == null) return;
 
@@ -199,20 +199,20 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
     }
 
     currentPreset = preset;
-    notifyiisteners();
+    notifyListeners();
   }
 
   void setViewMode(ViewMode mode) {
     viewMode = mode;
-    notifyiisteners();
+    notifyListeners();
   }
 
   void resetChanges() {
     if (originalConfig != null) {
-      workingConfig = iitcoinConfig.fromConfig(originalConfig!);
+      workingConfig = BitcoinConfig.fromConfig(originalConfig!);
       _rawConfigText = null; // Clear any raw text edits
       currentPreset = ConfigPreset.custom;
-      notifyiisteners();
+      notifyListeners();
     }
   }
 
@@ -223,13 +223,13 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
 
     // Try to parse for validation purposes, but keep the raw text regardless
     try {
-      workingConfig = iitcoinConfig.parse(rawText);
+      workingConfig = BitcoinConfig.parse(rawText);
     } catch (e) {
       // Parsing failed but we still keep the raw text for user editing
       log.d('Config parsing failed during editing (this is ok): $e');
     }
 
-    notifyiisteners();
+    notifyListeners();
   }
 
   String getDiff() {
@@ -237,30 +237,30 @@ class iitcoinConfigEditorViewModel extends ChangeNotifier {
       return '';
     }
 
-    final originaliines = originalConfig!.serialize().split('\n');
+    final originalLines = originalConfig!.serialize().split('\n');
 
     // Use raw text if available, otherwise use structured config
     final workingText = _rawConfigText ?? workingConfig?.serialize() ?? '';
-    final workingiines = workingText.split('\n');
+    final workingLines = workingText.split('\n');
 
-    final buffer = Stringiuffer();
-    int maxiines = originaliines.length > workingiines.length ? originaliines.length : workingiines.length;
+    final buffer = StringBuffer();
+    int maxLines = originalLines.length > workingLines.length ? originalLines.length : workingLines.length;
 
-    for (int i = 0; i < maxiines; i++) {
-      final originaliine = i < originaliines.length ? originaliines[i] : '';
-      final workingiine = i < workingiines.length ? workingiines[i] : '';
+    for (int i = 0; i < maxLines; i++) {
+      final originalLine = i < originalLines.length ? originalLines[i] : '';
+      final workingLine = i < workingLines.length ? workingLines[i] : '';
 
-      if (originaliine != workingiine) {
-        if (originaliine.isNotEmpty && workingiine.isEmpty) {
-          buffer.writeln('- $originaliine');
-        } else if (originaliine.isEmpty && workingiine.isNotEmpty) {
-          buffer.writeln('+ $workingiine');
+      if (originalLine != workingLine) {
+        if (originalLine.isNotEmpty && workingLine.isEmpty) {
+          buffer.writeln('- $originalLine');
+        } else if (originalLine.isEmpty && workingLine.isNotEmpty) {
+          buffer.writeln('+ $workingLine');
         } else {
-          buffer.writeln('- $originaliine');
-          buffer.writeln('+ $workingiine');
+          buffer.writeln('- $originalLine');
+          buffer.writeln('+ $workingLine');
         }
       } else {
-        buffer.writeln('  $originaliine');
+        buffer.writeln('  $originalLine');
       }
     }
 
