@@ -1,13 +1,16 @@
 package api_bitwindowd
 
 import (
+	"bytes"
 	"cmp"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"runtime"
 	"slices"
 	"strconv"
@@ -40,9 +43,12 @@ import (
 	"github.com/sourcegraph/conc/pool"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 var _ rpc.BitwindowdServiceHandler = new(Server)
+
+var controlledLitecoinSignetHashRE = regexp.MustCompile(`"hash"\s*:\s*"([0-9a-fA-F]+)"`)
 
 // New creates a new Server. recycle hot-swaps bitwindowd's per-network
 // runtime (DB, engines, sub-handlers) in-process when UpdateNetwork is
@@ -105,8 +111,6 @@ type blocksTip struct {
 	height uint32
 	hash   string
 }
-
-const litecoinSignetMiningWallet = "litwindow_signet_mining"
 
 // observeTip records the current tip and returns true the first time we
 // see a new (height, hash) pair. Same-height reorgs are caught because
@@ -966,39 +970,11 @@ func (s *Server) MineBlocks(ctx context.Context, req *connect.Request[emptypb.Em
 }
 
 func (s *Server) mineLitecoinSignetBlocks(ctx context.Context, stream *connect.ServerStream[pb.MineBlocksResponse]) error {
-	if s.config.OrchestratorAddr == "" {
-		return connect.NewError(connect.CodeUnavailable, fmt.Errorf("orchestrator.addr not configured"))
-	}
-
-	orchClient := orchrpc.NewOrchestratorServiceClient(http.DefaultClient, s.config.OrchestratorAddr)
-
-	if err := ensureLitecoinSignetMiningWallet(ctx, orchClient); err != nil {
-		return connect.NewError(
-			connect.CodeFailedPrecondition,
-			fmt.Errorf("prepare Litecoin signet mining wallet: %w", err),
-		)
-	}
-
-	addrResp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
-		Method:     "getnewaddress",
-		ParamsJson: "[]",
-		Wallet:     litecoinSignetMiningWallet,
-	}))
+	wallet, err := s.wallet.Get(ctx)
 	if err != nil {
 		return connect.NewError(
-			connect.CodeFailedPrecondition,
-			fmt.Errorf("get Litecoin signet mining address through Core RPC: %w", err),
-		)
-	}
-
-	var address string
-	if err := json.Unmarshal([]byte(addrResp.Msg.ResultJson), &address); err != nil || address == "" {
-		if err == nil {
-			err = fmt.Errorf("empty address")
-		}
-		return connect.NewError(
-			connect.CodeFailedPrecondition,
-			fmt.Errorf("decode Litecoin signet mining address: %w", err),
+			connect.CodeUnavailable,
+			fmt.Errorf("connect to enforcer wallet service: %w", err),
 		)
 	}
 
@@ -1006,12 +982,20 @@ func (s *Server) mineLitecoinSignetBlocks(ctx context.Context, stream *connect.S
 	var blocksFound uint64
 
 	for {
-		hashes, err := mineLitecoinSignetBlock(ctx, orchClient, address)
+		hashes, err := generateLitecoinSignetBlock(ctx, wallet)
 		if err != nil {
-			return connect.NewError(
-				connect.CodeFailedPrecondition,
-				fmt.Errorf("mine Litecoin signet block through Core RPC: %w", err),
-			)
+			enforcerErr := err
+			hashes, err = s.generateControlledLitecoinSignetBlock(ctx)
+			if err != nil {
+				return connect.NewError(
+					connect.CodeFailedPrecondition,
+					fmt.Errorf(
+						"mine Litecoin signet block through enforcer wallet service: %w; controlled signet fallback failed: %w",
+						enforcerErr,
+						err,
+					),
+				)
+			}
 		}
 
 		for _, blockHash := range hashes {
@@ -1048,89 +1032,157 @@ func (s *Server) mineLitecoinSignetBlocks(ctx context.Context, stream *connect.S
 	}
 }
 
-func ensureLitecoinSignetMiningWallet(ctx context.Context, orchClient orchrpc.OrchestratorServiceClient) error {
-	listResp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
-		Method:     "listwallets",
-		ParamsJson: "[]",
-	}))
-	if err != nil {
-		return fmt.Errorf("list loaded wallets: %w", err)
-	}
-
-	var loaded []string
-	if err := json.Unmarshal([]byte(listResp.Msg.ResultJson), &loaded); err != nil {
-		return fmt.Errorf("decode loaded wallets: %w", err)
-	}
-	if slices.Contains(loaded, litecoinSignetMiningWallet) {
-		return nil
-	}
-
-	dirResp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
-		Method:     "listwalletdir",
-		ParamsJson: "[]",
-	}))
-	if err != nil {
-		return fmt.Errorf("list wallet directory: %w", err)
-	}
-
-	var walletDir struct {
-		Wallets []struct {
-			Name string `json:"name"`
-		} `json:"wallets"`
-	}
-	if err := json.Unmarshal([]byte(dirResp.Msg.ResultJson), &walletDir); err != nil {
-		return fmt.Errorf("decode wallet directory: %w", err)
-	}
-
-	for _, wallet := range walletDir.Wallets {
-		if wallet.Name == litecoinSignetMiningWallet {
-			params, err := json.Marshal([]string{litecoinSignetMiningWallet})
-			if err != nil {
-				return fmt.Errorf("encode loadwallet params: %w", err)
-			}
-			_, err = orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
-				Method:     "loadwallet",
-				ParamsJson: string(params),
-			}))
-			if err != nil {
-				return fmt.Errorf("load mining wallet: %w", err)
-			}
-			return nil
-		}
-	}
-
-	params, err := json.Marshal([]string{litecoinSignetMiningWallet})
-	if err != nil {
-		return fmt.Errorf("encode createwallet params: %w", err)
-	}
-	if _, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
-		Method:     "createwallet",
-		ParamsJson: string(params),
-	})); err != nil {
-		return fmt.Errorf("create mining wallet: %w", err)
-	}
-	return nil
-}
-
-func mineLitecoinSignetBlock(ctx context.Context, orchClient orchrpc.OrchestratorServiceClient, address string) ([]string, error) {
-	params, err := json.Marshal([]any{1, address, 10000000})
-	if err != nil {
-		return nil, fmt.Errorf("encode generatetoaddress params: %w", err)
-	}
-
-	resp, err := orchClient.CoreRawCall(ctx, connect.NewRequest(&orchpb.CoreRawCallRequest{
-		Method:     "generatetoaddress",
-		ParamsJson: string(params),
+func generateLitecoinSignetBlock(ctx context.Context, wallet validatorrpc.WalletServiceClient) ([]string, error) {
+	blockStream, err := wallet.GenerateBlocks(ctx, connect.NewRequest(&validatorpb.GenerateBlocksRequest{
+		Blocks:          wrapperspb.UInt32(1),
+		AckAllProposals: true,
 	}))
 	if err != nil {
 		return nil, err
 	}
 
 	var hashes []string
-	if err := json.Unmarshal([]byte(resp.Msg.ResultJson), &hashes); err != nil {
-		return nil, fmt.Errorf("decode generatetoaddress result: %w", err)
+	for blockStream.Receive() {
+		blockHash := blockStream.Msg().GetBlockHash().GetHex().GetValue()
+		if blockHash == "" {
+			return nil, fmt.Errorf("enforcer returned an empty block hash")
+		}
+		hashes = append(hashes, blockHash)
+	}
+	if err := blockStream.Err(); err != nil {
+		return nil, err
+	}
+	if len(hashes) == 0 {
+		return nil, fmt.Errorf("enforcer did not return a generated block hash")
 	}
 	return hashes, nil
+}
+
+type controlledLitecoinSignetMiner struct {
+	script        string
+	authorityFile string
+	litecoinRoot  string
+	workspaceRoot string
+}
+
+func (s *Server) generateControlledLitecoinSignetBlock(ctx context.Context) ([]string, error) {
+	if s.config.OrchestratorAddr == "" {
+		return nil, fmt.Errorf("orchestrator.addr not configured")
+	}
+
+	miner, err := findControlledLitecoinSignetMiner()
+	if err != nil {
+		return nil, err
+	}
+
+	confClient := orchrpc.NewBitcoinConfServiceClient(http.DefaultClient, s.config.OrchestratorAddr, connect.WithGRPC())
+	confResp, err := confClient.GetBitcoinConfig(ctx, connect.NewRequest(&orchpb.GetBitcoinConfigRequest{}))
+	if err != nil {
+		return nil, fmt.Errorf("read Litecoin Core config from orchestrator: %w", err)
+	}
+
+	rpcURL := fmt.Sprintf("http://127.0.0.1:%d/", confResp.Msg.RpcPort)
+	cmd := exec.CommandContext(ctx, "python", miner.script, "1")
+	cmd.Dir = miner.workspaceRoot
+	cmd.Env = append(os.Environ(),
+		"LITECOIN_ROOT="+miner.litecoinRoot,
+		"LITECOIN_SIGNET_AUTHORITY_FILE="+miner.authorityFile,
+		"LITECOIN_RPC_URL="+rpcURL,
+		"LITECOIN_GBT_URL="+rpcURL,
+		"LITECOIN_SUBMIT_URL="+rpcURL,
+		"LITECOIN_RPC_USER="+confResp.Msg.RpcUser,
+		"LITECOIN_RPC_PASSWORD="+confResp.Msg.RpcPassword,
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("run controlled Litecoin signet miner: %w: %s", err, strings.TrimSpace(string(output)))
+	}
+
+	match := controlledLitecoinSignetHashRE.FindSubmatch(output)
+	if len(match) != 2 {
+		return nil, fmt.Errorf("controlled Litecoin signet miner did not report a block hash: %s", strings.TrimSpace(string(output)))
+	}
+	return []string{string(bytes.ToLower(match[1]))}, nil
+}
+
+func findControlledLitecoinSignetMiner() (*controlledLitecoinSignetMiner, error) {
+	if script := os.Getenv("LITWINDOW_LITECOIN_SIGNET_MINER_SCRIPT"); script != "" {
+		authority := os.Getenv("LITECOIN_SIGNET_AUTHORITY_FILE")
+		litecoinRoot := os.Getenv("LITECOIN_ROOT")
+		if authority == "" || litecoinRoot == "" {
+			return nil, fmt.Errorf("LITWINDOW_LITECOIN_SIGNET_MINER_SCRIPT requires LITECOIN_SIGNET_AUTHORITY_FILE and LITECOIN_ROOT")
+		}
+		return &controlledLitecoinSignetMiner{
+			script:        script,
+			authorityFile: authority,
+			litecoinRoot:  litecoinRoot,
+			workspaceRoot: filepath.Dir(filepath.Dir(filepath.Dir(script))),
+		}, nil
+	}
+
+	for _, root := range candidateWorkspaceRoots() {
+		miner := &controlledLitecoinSignetMiner{
+			script:        filepath.Join(root, "drivechain-evm", "tools", "mine-controlled-litecoin-signet.py"),
+			authorityFile: filepath.Join(root, "litecoin-signet-authority", "authority.json"),
+			litecoinRoot:  filepath.Join(root, "tools", "litecoin-signet-build"),
+			workspaceRoot: root,
+		}
+		if fileExists(miner.script) && fileExists(miner.authorityFile) && dirExists(filepath.Join(miner.litecoinRoot, "test", "functional")) {
+			return miner, nil
+		}
+	}
+
+	return nil, fmt.Errorf("controlled Litecoin signet miner not found; set LITWINDOW_LITECOIN_SIGNET_MINER_SCRIPT, LITECOIN_SIGNET_AUTHORITY_FILE, and LITECOIN_ROOT")
+}
+
+func candidateWorkspaceRoots() []string {
+	var roots []string
+	addAncestors := func(path string) {
+		if path == "" {
+			return
+		}
+		abs, err := filepath.Abs(path)
+		if err != nil {
+			return
+		}
+		for {
+			roots = append(roots, abs)
+			parent := filepath.Dir(abs)
+			if parent == abs {
+				break
+			}
+			abs = parent
+		}
+	}
+
+	addAncestors(os.Getenv("LITEVERSE_DEVELOPMENT_ROOT"))
+	if wd, err := os.Getwd(); err == nil {
+		addAncestors(wd)
+	}
+	if exe, err := os.Executable(); err == nil {
+		addAncestors(filepath.Dir(exe))
+	}
+
+	seen := make(map[string]struct{}, len(roots))
+	return slices.DeleteFunc(roots, func(root string) bool {
+		key := strings.ToLower(filepath.Clean(root))
+		if _, ok := seen[key]; ok {
+			return true
+		}
+		seen[key] = struct{}{}
+		return false
+	})
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
 
 func (s *Server) mineProofOfWorkBlocks(ctx context.Context, stream *connect.ServerStream[pb.MineBlocksResponse]) error {

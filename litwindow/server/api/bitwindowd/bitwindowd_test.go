@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/config"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/database"
 	v1 "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1"
 	v1connect "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1/bitwindowdv1connect"
@@ -20,8 +19,7 @@ import (
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/tests/mocks"
 	commonv1 "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/cusf/common/v1"
 	mainchainv1 "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/cusf/mainchain/v1"
-	orchv1 "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/orchestrator/v1"
-	orchrpc "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/orchestrator/v1/orchestratorv1connect"
+	mainchainv1connect "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/cusf/mainchain/v1/mainchainv1connect"
 	corepb "github.com/barebitcoin/btc-buf/gen/bitcoin/bitcoind/v1alpha"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/stretchr/testify/assert"
@@ -1000,12 +998,13 @@ func TestService_MineBlocksNetworkGuards(t *testing.T) {
 		assert.Contains(t, stream.Err().Error(), "generating blocks on main is not supported")
 	})
 
-	t.Run("generates Litecoin signet blocks through Core RPC", func(t *testing.T) {
+	t.Run("generates Litecoin signet blocks through enforcer wallet service", func(t *testing.T) {
 		t.Parallel()
 
 		database := database.Test(t)
-		coreCalls := make(chan *orchv1.CoreRawCallRequest, 4)
-		orchServer := testOrchestratorServer(t, coreCalls)
+		generateCalls := make(chan *mainchainv1.GenerateBlocksRequest, 1)
+		walletServer := testWalletServer(t, generateCalls)
+		walletClient := mainchainv1connect.NewWalletServiceClient(walletServer.Client(), walletServer.URL)
 
 		ctrl := gomock.NewController(t)
 		mockBitcoind := mocks.NewMockBitcoinServiceClient(ctrl)
@@ -1031,7 +1030,7 @@ func TestService_MineBlocksNetworkGuards(t *testing.T) {
 			t,
 			database,
 			apitests.WithBitcoind(mockBitcoind),
-			apitests.WithServerConfig(config.Config{OrchestratorAddr: orchServer.URL}),
+			apitests.WithWallet(walletClient),
 		))
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -1046,30 +1045,22 @@ func TestService_MineBlocksNetworkGuards(t *testing.T) {
 		assert.Equal(t, "litecoin-signet-block-1", blockFound.BlockHash)
 
 		cancel()
-		assert.Equal(t, "listwallets", (<-coreCalls).Method)
-		assert.Equal(t, "listwalletdir", (<-coreCalls).Method)
-		createCall := <-coreCalls
-		assert.Equal(t, "createwallet", createCall.Method)
-		assert.Contains(t, createCall.ParamsJson, "litwindow_signet_mining")
-		addressCall := <-coreCalls
-		assert.Equal(t, "getnewaddress", addressCall.Method)
-		assert.Equal(t, "litwindow_signet_mining", addressCall.Wallet)
-		generateCall := <-coreCalls
-		assert.Equal(t, "generatetoaddress", generateCall.Method)
-		assert.Contains(t, generateCall.ParamsJson, "ltc1qlitwindowtest")
+		generateCall := <-generateCalls
+		assert.Equal(t, uint32(1), generateCall.GetBlocks().GetValue())
+		assert.True(t, generateCall.GetAckAllProposals())
 	})
 }
 
-type testOrchestrator struct {
-	orchrpc.UnimplementedOrchestratorServiceHandler
+type testWallet struct {
+	mainchainv1connect.UnimplementedWalletServiceHandler
 
-	calls chan<- *orchv1.CoreRawCallRequest
+	generateCalls chan<- *mainchainv1.GenerateBlocksRequest
 }
 
-func testOrchestratorServer(t *testing.T, calls chan<- *orchv1.CoreRawCallRequest) *httptest.Server {
+func testWalletServer(t *testing.T, generateCalls chan<- *mainchainv1.GenerateBlocksRequest) *httptest.Server {
 	t.Helper()
 
-	path, handler := orchrpc.NewOrchestratorServiceHandler(&testOrchestrator{calls: calls})
+	path, handler := mainchainv1connect.NewWalletServiceHandler(&testWallet{generateCalls: generateCalls})
 	mux := http.NewServeMux()
 	mux.Handle(path, handler)
 
@@ -1078,23 +1069,13 @@ func testOrchestratorServer(t *testing.T, calls chan<- *orchv1.CoreRawCallReques
 	return server
 }
 
-func (o *testOrchestrator) CoreRawCall(_ context.Context, req *connect.Request[orchv1.CoreRawCallRequest]) (*connect.Response[orchv1.CoreRawCallResponse], error) {
-	o.calls <- req.Msg
-
-	switch req.Msg.Method {
-	case "listwallets":
-		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `[]`}), nil
-	case "listwalletdir":
-		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `{"wallets":[]}`}), nil
-	case "createwallet":
-		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `{"name":"litwindow_signet_mining"}`}), nil
-	case "getnewaddress":
-		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `"ltc1qlitwindowtest"`}), nil
-	case "generatetoaddress":
-		return connect.NewResponse(&orchv1.CoreRawCallResponse{ResultJson: `["litecoin-signet-block-1"]`}), nil
-	default:
-		return nil, connect.NewError(connect.CodeUnimplemented, fmt.Errorf("unexpected method %q", req.Msg.Method))
-	}
+func (w *testWallet) GenerateBlocks(_ context.Context, req *connect.Request[mainchainv1.GenerateBlocksRequest], stream *connect.ServerStream[mainchainv1.GenerateBlocksResponse]) error {
+	w.generateCalls <- req.Msg
+	return stream.Send(&mainchainv1.GenerateBlocksResponse{
+		BlockHash: &commonv1.ReverseHex{
+			Hex: wrapperspb.String("litecoin-signet-block-1"),
+		},
+	})
 }
 
 func TestService_SetTransactionNote(t *testing.T) {
