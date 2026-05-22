@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/litecoin"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/wallet"
 	validatorrpc "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/cusf/mainchain/v1/mainchainv1connect"
 	orchpb "github.com/LayerTwo-Labs/sidesail/sidechain-orchestrator/gen/walletmanager/v1"
@@ -22,7 +23,6 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/wire"
 	"github.com/rs/zerolog"
 	"github.com/samber/lo"
 	"golang.org/x/sync/singleflight"
@@ -585,11 +585,7 @@ func (e *WalletEngine) CreateBitcoinCoreWalletFromSeed(
 		return fmt.Errorf("derive purpose: %w", err)
 	}
 
-	// Coin type: 0' for mainnet, 1' for testnet/signet
-	coinType := uint32(0)
-	if e.chainParams.Name != "mainnet" {
-		coinType = 1
-	}
+	coinType := litecoin.CoinType(e.chainParams)
 	coin, err := purpose.Derive(hdkeychain.HardenedKeyStart + coinType)
 	if err != nil {
 		return fmt.Errorf("derive coin type: %w", err)
@@ -1063,10 +1059,7 @@ func (e *WalletEngine) createBitcoinCoreWalletForSync(
 	}
 
 	// Coin type
-	coinType := uint32(1)
-	if e.chainParams.Net == wire.MainNet {
-		coinType = 0
-	}
+	coinType := litecoin.CoinType(e.chainParams)
 	coin, err := purpose.Derive(hdkeychain.HardenedKeyStart + coinType)
 	if err != nil {
 		return fmt.Errorf("derive coin type: %w", err)

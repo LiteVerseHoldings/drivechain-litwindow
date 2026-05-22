@@ -19,6 +19,7 @@ import (
 	bitwindowdv1 "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1"
 	pb "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/wallet/v1"
 	rpc "github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/wallet/v1/walletv1connect"
+	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/litecoin"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/logpool"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/models/addressbook"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/models/cheques"
@@ -447,7 +448,10 @@ func (s *Server) GetNewAddress(ctx context.Context, c *connect.Request[pb.GetNew
 			zerolog.Ctx(ctx).Error().Err(err).Msg("could not create new address")
 			return nil, err
 		}
-		address = resp.Msg.Address
+		address, err = litecoin.NormalizeAddress(resp.Msg.Address, s.walletEngine.GetChainParams())
+		if err != nil {
+			return nil, fmt.Errorf("normalize enforcer address: %w", err)
+		}
 
 	case engines.WalletTypeBitcoinCore:
 		// Litecoin Core path
@@ -519,10 +523,7 @@ func (s *Server) deriveAndCheckAddresses(ctx context.Context, walletId string) (
 
 	// Derive to BIP84 receiving path: m/84'/coinType'/0'/0
 	chainParams := s.walletEngine.GetChainParams()
-	coinType := uint32(0)
-	if chainParams.Name != "mainnet" {
-		coinType = 1
-	}
+	coinType := litecoin.CoinType(chainParams)
 
 	purpose, err := masterKey.Derive(hdkeychain.HardenedKeyStart + 84)
 	if err != nil {

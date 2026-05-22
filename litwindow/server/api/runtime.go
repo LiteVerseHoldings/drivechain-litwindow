@@ -34,6 +34,7 @@ import (
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/database"
 	dial "github.com/LayerTwo-Labs/sidesail/bitwindow/server/dial"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/engines"
+	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/litecoin"
 
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/bitwindowd/v1/bitwindowdv1connect"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/gen/drivechain/v1/drivechainv1connect"
@@ -444,14 +445,14 @@ func (rt *Runtime) Close() {
 func chainParamsFor(network config.Network) *chaincfg.Params {
 	switch network {
 	case config.NetworkMainnet, config.NetworkForknet:
-		return &chaincfg.MainNetParams
+		return &litecoin.MainNetParams
 	case config.NetworkTestnet:
-		return &chaincfg.TestNet3Params
+		return &litecoin.TestNetParams
 	case config.NetworkSignet:
-		return &chaincfg.SigNetParams
+		return &litecoin.SigNetParams
 	case config.NetworkRegtest:
-		return &chaincfg.RegressionNetParams
+		return &litecoin.RegTestParams
 	default:
-		return &chaincfg.SigNetParams
+		return &litecoin.SigNetParams
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/litecoin"
 	"github.com/LayerTwo-Labs/sidesail/bitwindow/server/service"
 	corepb "github.com/barebitcoin/btc-buf/gen/bitcoin/bitcoind/v1alpha"
 	corerpc "github.com/barebitcoin/btc-buf/gen/bitcoin/bitcoind/v1alpha/bitcoindv1alphaconnect"
@@ -63,7 +64,7 @@ func (e *ChequeEngine) GetChainParams() *chaincfg.Params {
 	return e.chainParams
 }
 
-// deriveChequeKey derives the HD key at m/44'/0'/999'/{index}
+// deriveChequeKey derives the HD key at m/44'/coin_type'/999'/{index}
 func (e *ChequeEngine) deriveChequeKey(seedHex string, index uint32) (*hdkeychain.ExtendedKey, error) {
 	seedBytes, err := hex.DecodeString(seedHex)
 	if err != nil {
@@ -81,19 +82,19 @@ func (e *ChequeEngine) deriveChequeKey(seedHex string, index uint32) (*hdkeychai
 		return nil, fmt.Errorf("derive purpose: %w", err)
 	}
 
-	// m/44'/0'
-	coinType, err := purpose.Derive(hdkeychain.HardenedKeyStart + 0)
+	// m/44'/coin_type'
+	coinType, err := purpose.Derive(hdkeychain.HardenedKeyStart + litecoin.CoinType(e.chainParams))
 	if err != nil {
 		return nil, fmt.Errorf("derive coin type: %w", err)
 	}
 
-	// m/44'/0'/999'
+	// m/44'/coin_type'/999'
 	chequeAcct, err := coinType.Derive(hdkeychain.HardenedKeyStart + chequeAccount)
 	if err != nil {
 		return nil, fmt.Errorf("derive cheque account: %w", err)
 	}
 
-	// m/44'/0'/999'/{index} - index is NOT hardened per BIP44
+	// m/44'/coin_type'/999'/{index} - index is NOT hardened per BIP44
 	chequeKey, err := chequeAcct.Derive(index)
 	if err != nil {
 		return nil, fmt.Errorf("derive cheque key: %w", err)
@@ -102,7 +103,7 @@ func (e *ChequeEngine) deriveChequeKey(seedHex string, index uint32) (*hdkeychai
 	return chequeKey, nil
 }
 
-// DeriveChequeAddress derives the native segwit address at m/44'/0'/999'/{index}
+// DeriveChequeAddress derives the native segwit address at m/44'/coin_type'/999'/{index}
 // for a specific wallet
 func (e *ChequeEngine) DeriveChequeAddress(walletId string, index uint32) (string, error) {
 	// Get seed from wallet engine for the specific wallet
@@ -371,7 +372,7 @@ func (e *ChequeEngine) importDescriptorForWallet(ctx context.Context, bitcoind c
 		return fmt.Errorf("decode seed: %w", err)
 	}
 
-	// Create master key and derive to account level m/44'/0'/999'
+	// Create master key and derive to account level m/44'/coin_type'/999'
 	masterKey, err := hdkeychain.NewMaster(seedBytes, e.chainParams)
 	if err != nil {
 		return fmt.Errorf("create master key: %w", err)
@@ -382,7 +383,7 @@ func (e *ChequeEngine) importDescriptorForWallet(ctx context.Context, bitcoind c
 		return fmt.Errorf("derive purpose: %w", err)
 	}
 
-	coinType, err := purpose.Derive(hdkeychain.HardenedKeyStart + 0)
+	coinType, err := purpose.Derive(hdkeychain.HardenedKeyStart + litecoin.CoinType(e.chainParams))
 	if err != nil {
 		return fmt.Errorf("derive coin type: %w", err)
 	}

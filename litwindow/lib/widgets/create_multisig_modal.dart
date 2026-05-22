@@ -437,7 +437,7 @@ class CreateMultisigModalViewModel extends BaseViewModel {
 
   String get coinType => isMainnet ? "0'" : "1'";
   String get xpubPrefix => isMainnet ? 'xpub' : 'tpub';
-  String get bech32HRP => isMainnet ? 'bc' : 'tb';
+  String get bech32HRP => isMainnet ? 'ltc' : 'tltc';
 
   bool _isValidXpub(String xpub) {
     if (xpub.isEmpty) return false;
