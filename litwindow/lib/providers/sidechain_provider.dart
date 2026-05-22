@@ -65,19 +65,32 @@ class SidechainProvider extends ChangeNotifier {
     _isFetching = true;
 
     try {
-      final walletId = _walletReader.activeWalletId;
-      if (walletId == null) throw Exception('No active wallet');
-
       final newSidechains = await bitwindowd.drivechain.listSidechains();
       final newSidechainProposals = await bitwindowd.drivechain.listSidechainProposals();
+      final walletId = _walletReader.activeWalletId;
 
       // Create a new list with 256 slots
       List<SidechainOverview?> updatedSidechains = List.filled(256, null);
 
       // Fill in the slots with the data retrieved from the API
       for (var sidechain in newSidechains) {
-        final deposits = await bitwindowd.wallet.listSidechainDeposits(walletId, sidechain.slot);
-        final withdrawals = await bitwindowd.drivechain.listWithdrawals(sidechainId: sidechain.slot);
+        var deposits = <ListSidechainDepositsResponse_SidechainDeposit>[];
+        var withdrawals = <WithdrawalBundle>[];
+
+        if (walletId != null) {
+          try {
+            deposits = await bitwindowd.wallet.listSidechainDeposits(walletId, sidechain.slot);
+          } catch (e) {
+            log.w('Failed to fetch sidechain deposits for slot ${sidechain.slot}: $e');
+          }
+        }
+
+        try {
+          withdrawals = await bitwindowd.drivechain.listWithdrawals(sidechainId: sidechain.slot);
+        } catch (e) {
+          log.w('Failed to fetch sidechain withdrawals for slot ${sidechain.slot}: $e');
+        }
+
         updatedSidechains[sidechain.slot] = SidechainOverview(sidechain, deposits, withdrawals);
       }
 
