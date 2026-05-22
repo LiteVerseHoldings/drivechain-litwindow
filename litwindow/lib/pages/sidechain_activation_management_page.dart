@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:bitwindow/pages/explorer/block_explorer_dialog.dart';
 import 'package:bitwindow/pages/sidechain_proposal_page.dart';
@@ -91,6 +93,7 @@ class SidechainActivationManagementViewModel extends BaseViewModel {
 
   SidechainActivationManagementViewModel() {
     sidechainProvider.addListener(notifyListeners);
+    unawaited(sidechainProvider.fetch());
   }
 
   @override
@@ -196,15 +199,25 @@ class _ActiveSidechainsTableState extends State<ActiveSidechainsTable> {
   @override
   void initState() {
     super.initState();
-    blocks = widget.blocks;
+    blocks = List<SidechainOverview?>.from(widget.blocks);
     sortBlocks();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!listEquals(blocks, widget.blocks)) {
-      blocks = widget.blocks;
+    _updateBlocks(widget.blocks);
+  }
+
+  @override
+  void didUpdateWidget(covariant ActiveSidechainsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateBlocks(widget.blocks);
+  }
+
+  void _updateBlocks(List<SidechainOverview?> nextBlocks) {
+    if (!listEquals(blocks, nextBlocks)) {
+      blocks = List<SidechainOverview?>.from(nextBlocks);
       sortBlocks();
     }
   }
@@ -328,15 +341,25 @@ class _PendingSidechainProposalsTableState extends State<PendingSidechainProposa
   @override
   void initState() {
     super.initState();
-    proposals = widget.proposals;
+    proposals = List<SidechainProposal>.from(widget.proposals);
     sortProposals();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!listEquals(proposals, widget.proposals)) {
-      proposals = widget.proposals;
+    _updateProposals(widget.proposals);
+  }
+
+  @override
+  void didUpdateWidget(covariant PendingSidechainProposalsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateProposals(widget.proposals);
+  }
+
+  void _updateProposals(List<SidechainProposal> nextProposals) {
+    if (!listEquals(proposals, nextProposals)) {
+      proposals = List<SidechainProposal>.from(nextProposals);
       sortProposals();
     }
   }
@@ -399,7 +422,7 @@ class _PendingSidechainProposalsTableState extends State<PendingSidechainProposa
   @override
   Widget build(BuildContext context) {
     return SailTable(
-      getRowId: (index) => widget.proposals[index].slot.toString(),
+      getRowId: (index) => proposals[index].slot.toString(),
       headerBuilder: (context) => [
         const SailTableHeaderCell(name: 'Vote'),
         const SailTableHeaderCell(name: 'SC #'),
@@ -411,7 +434,7 @@ class _PendingSidechainProposalsTableState extends State<PendingSidechainProposa
         const SailTableHeaderCell(name: 'Hash'),
       ],
       rowBuilder: (context, row, selected) {
-        final proposal = widget.proposals[row];
+        final proposal = proposals[row];
         return [
           SailTableCell(value: proposal.voteCount.toString()),
           SailTableCell(value: proposal.slot.toString()),
@@ -423,7 +446,7 @@ class _PendingSidechainProposalsTableState extends State<PendingSidechainProposa
           SailTableCell(value: proposal.dataHash),
         ];
       },
-      rowCount: widget.proposals.length,
+      rowCount: proposals.length,
       emptyPlaceholder: 'No pending sidechain proposals',
       sortColumnIndex: ['voteCount', 'slot', 'age', 'fails', 'hash'].indexOf(sortColumn),
       sortAscending: sortAscending,
