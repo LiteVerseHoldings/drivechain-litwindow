@@ -24,7 +24,7 @@ cpumine *args:
 
 clean:
     rm -rf ./bin
-    rm -rf bip300301_enforcer.mdb
+    rm -rf lip005_enforcer.mdb
     rm -rf .crates*
     go clean
 
@@ -48,21 +48,21 @@ download-enforcer:
         exit 1
     fi
 
-    binary_name="bip300301-enforcer"
+    binary_name="lip005-enforcer"
     if ! test -f ./bin/$binary_name; then
         echo "Downloading $binary_name..."
         mkdir -p ./bin
         
         # Download
-        enforcer_zip=bip300301-enforcer-latest-x86_64-$enforcer_version_postfix.zip
+        enforcer_zip=lip005-enforcer-latest-x86_64-$enforcer_version_postfix.zip
         curl --fail -O https://releases.drivechain.info/$enforcer_zip
         
         # Unpack directly to bin directory
-        echo "Unpacking: unzip -j $enforcer_zip '**/bip300301-enforcer*' -d ./bin/"
-        unzip -j $enforcer_zip '**/bip300301-enforcer*' -d ./bin/
+        echo "Unpacking: unzip -j $enforcer_zip '**/lip005-enforcer*' -d ./bin/"
+        unzip -j $enforcer_zip '**/lip005-enforcer*' -d ./bin/
         
         # Rename the extracted file to our standard name
-        mv ./bin/bip300301-enforcer* ./bin/$binary_name
+        mv ./bin/lip005-enforcer* ./bin/$binary_name
         chmod +x ./bin/$binary_name
         
         # Clean up

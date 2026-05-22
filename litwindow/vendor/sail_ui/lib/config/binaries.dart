@@ -599,7 +599,7 @@ abstract class Binary {
         // Individual log file + entire logs directory
         paths.addAll(
           await _getExistingFilesInDir(datadirNetwork(), [
-            'bip300301_enforcer.log',
+            'lip005_enforcer.log',
             'logs',
           ]),
         );
@@ -1355,7 +1355,7 @@ class Enforcer extends Binary {
     super.name = 'LIP 005 Enforcer',
     super.version = '0.1.0',
     super.description = 'Manages drivechain validation rules',
-    super.repoUrl = 'https://github.com/LayerTwo-Labs/bip300301-enforcer',
+    super.repoUrl = 'https://github.com/LiteVerseHoldings/lip005_enforcer',
     DirectoryConfig? directories,
     MetadataConfig? metadata,
     int? port,
@@ -1367,9 +1367,9 @@ class Enforcer extends Binary {
              directories ??
              DirectoryConfig(
                binary: allNetworks({
-                 OS.linux: 'bip300301_enforcer',
-                 OS.macos: 'bip300301_enforcer',
-                 OS.windows: 'bip300301_enforcer',
+                 OS.linux: 'lip005_enforcer',
+                 OS.macos: 'lip005_enforcer',
+                 OS.windows: 'lip005_enforcer',
                }),
                flutterFrontend: {
                  OS.linux: '', // N/A
@@ -1382,11 +1382,11 @@ class Enforcer extends Binary {
              MetadataConfig(
                downloadConfig: DownloadConfig(
                  baseUrls: allNetworksUrl('https://releases.drivechain.info/'),
-                 binary: 'bip300301-enforcer',
+                 binary: 'lip005-enforcer',
                  files: allNetworks({
-                   OS.linux: 'bip300301-enforcer-latest-x86_64-unknown-linux-gnu.zip',
-                   OS.macos: 'bip300301-enforcer-latest-x86_64-apple-darwin.zip',
-                   OS.windows: 'bip300301-enforcer-latest-x86_64-pc-windows-gnu.zip',
+                   OS.linux: 'lip005-enforcer-latest-x86_64-unknown-linux-gnu.zip',
+                   OS.macos: 'lip005-enforcer-latest-x86_64-apple-darwin.zip',
+                   OS.windows: 'lip005-enforcer-latest-x86_64-pc-windows-gnu.zip',
                  }),
                ),
                remoteTimestamp: null,
@@ -1405,7 +1405,7 @@ class Enforcer extends Binary {
 
   @override
   List<RegExp> get startupLogPatterns => [
-    RegExp(r'Starting up bip300301_enforcer'),
+    RegExp(r'Starting up lip005_enforcer'),
     RegExp(r'verified mainchain REST server is enabled'),
     RegExp(r'verified mainchain REST server at'),
     RegExp(r'created mainchain JSON-RPC client'),
@@ -1652,23 +1652,23 @@ extension BinaryPaths on Binary {
     if (!logsDir.existsSync()) {
       return filePath([
         datadirNetwork(),
-        'bip300301_enforcer.log',
+        'lip005_enforcer.log',
       ]); // Fallback to original
     }
 
-    // Find all enforcer log files matching the pattern: bip300301_enforcer.log.YYYY-MM-DD.N
+    // Find all enforcer log files matching the pattern: lip005_enforcer.log.YYYY-MM-DD.N
     final logFiles = logsDir.listSync().whereType<File>().where((file) {
       final fileName = file.path.split(Platform.pathSeparator).last;
-      return fileName.startsWith('bip300301_enforcer.log.') &&
+      return fileName.startsWith('lip005_enforcer.log.') &&
           RegExp(
-            r'bip300301_enforcer\.log\.\d{4}-\d{2}-\d{2}\.\d+$',
+            r'lip005_enforcer\.log\.\d{4}-\d{2}-\d{2}\.\d+$',
           ).hasMatch(fileName);
     }).toList();
 
     if (logFiles.isEmpty) {
       return filePath([
         datadirNetwork(),
-        'bip300301_enforcer.log',
+        'lip005_enforcer.log',
       ]); // Fallback to original
     }
 
@@ -1679,10 +1679,10 @@ extension BinaryPaths on Binary {
 
       // Extract date and sequence number from filename
       final aMatch = RegExp(
-        r'bip300301_enforcer\.log\.(\d{4}-\d{2}-\d{2})\.(\d+)$',
+        r'lip005_enforcer\.log\.(\d{4}-\d{2}-\d{2})\.(\d+)$',
       ).firstMatch(aFileName);
       final bMatch = RegExp(
-        r'bip300301_enforcer\.log\.(\d{4}-\d{2}-\d{2})\.(\d+)$',
+        r'lip005_enforcer\.log\.(\d{4}-\d{2}-\d{2})\.(\d+)$',
       ).firstMatch(bFileName);
 
       if (aMatch == null || bMatch == null) return 0;
@@ -1931,7 +1931,7 @@ extension BinaryPaths on Binary {
 
       if (type == BinaryType.BINARY_TYPE_ENFORCER) {
         final versionLine = lines.firstWhere(
-          (line) => line.contains('bip300301_enforcer_lib'),
+          (line) => line.contains('lip005_enforcer_lib'),
           orElse: () => '',
         );
         final commitLine = lines.firstWhere(

@@ -92,7 +92,7 @@ type EnforcerConfManager struct {
 // NewEnforcerConfManager creates a new EnforcerConfManager and loads config.
 // configDir is the directory where bitwindow-enforcer.conf lives (typically
 // the orchestrator's bitwindowDir). It must be set; tests previously
-// scribbled on the user's real ~/Library/Application Support/bip300301_enforcer/
+// scribbled on the user's real ~/Library/Application Support/lip005_enforcer/
 // because there was no required dir parameter and the old fallback used a
 // hardcoded global path.
 // Dart: EnforcerConfProvider.create() (L25)
@@ -498,7 +498,7 @@ func (m *EnforcerConfManager) reloadConfigFromFileSystem() {
 // required at construction time, so there's no global-path fallback —
 // previously that fallback caused tests (which never set ConfigDir) to
 // open and rewrite the user's real enforcer.conf under
-// ~/Library/Application Support/bip300301_enforcer/.
+// ~/Library/Application Support/lip005_enforcer/.
 func (m *EnforcerConfManager) getConfigPath() string {
 	return filepath.Join(m.ConfigDir, bitwindowEnforcerConfFilename)
 }

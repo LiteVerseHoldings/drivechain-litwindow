@@ -73,7 +73,7 @@ func bitwindowRoot(home string) string {
 }
 
 func enforcerRoot(home string) string {
-	return filepath.Join(appRoot(home), "bip300301_enforcer")
+	return filepath.Join(appRoot(home), "lip005_enforcer")
 }
 
 // writeStub creates a file with parent directories. Used to seed a
@@ -152,7 +152,7 @@ func bootedLayout(t *testing.T, home, network string) []string {
 	writeDir(t, filepath.Join(enfRoot, "wallet", networkName))
 	// GetLogPaths for enforcer checks <rootdir> (no network subdir) so
 	// that is where we seed the logs we expect the preview to find.
-	writeStub(t, filepath.Join(enfRoot, "bip300301_enforcer.log"))
+	writeStub(t, filepath.Join(enfRoot, "lip005_enforcer.log"))
 	writeDir(t, filepath.Join(enfRoot, "logs"))
 
 	add(
@@ -160,7 +160,7 @@ func bootedLayout(t *testing.T, home, network string) []string {
 		filepath.Join(enfRoot, "bitwindow-enforcer.conf"),
 		filepath.Join(enfRoot, networkName),
 		filepath.Join(enfRoot, "wallet", networkName),
-		filepath.Join(enfRoot, "bip300301_enforcer.log"),
+		filepath.Join(enfRoot, "lip005_enforcer.log"),
 		filepath.Join(enfRoot, "logs"),
 	)
 

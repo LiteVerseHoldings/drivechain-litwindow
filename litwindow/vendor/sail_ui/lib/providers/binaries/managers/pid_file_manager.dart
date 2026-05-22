@@ -128,7 +128,7 @@ class PidFileManager {
 
   /// Get the process name for a PID (platform-specific)
   ///
-  /// Returns the executable name (e.g., "litwindowd", "bip300301-enforcer")
+  /// Returns the executable name (e.g., "litwindowd", "lip005-enforcer")
   /// or null if the process doesn't exist or name can't be determined.
   Future<String?> getProcessName(int pid) async {
     try {
@@ -182,7 +182,7 @@ class PidFileManager {
     if (processName == null) return false;
 
     // The process name should contain the binary name.
-    // e.g., processName="bip300301-enforcer" should match binary.binaryName="bip300301-enforcer".
+    // e.g., processName="lip005-enforcer" should match binary.binaryName="lip005-enforcer".
     // Process name may be truncated on some systems, so check both directions
     final procName = processName.toLowerCase();
     final expectedNames = [

@@ -76,7 +76,7 @@ extension type WalletServiceClient(connect.Transport _transport) {
     );
   }
 
-  /// Create a new sidechain proposal (M1 in BIP300) and persist to the local
+  /// Create a new sidechain proposal (M1 in LIP005) and persist to the local
   /// database for further processing.
   /// Sidechain proposals must be included in the coinbase transaction of a
   /// newly mined block, so this proposal is not active until the wallet has

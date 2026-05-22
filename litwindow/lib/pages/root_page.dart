@@ -1426,7 +1426,7 @@ class AboutBitwindowDialog extends StatelessWidget {
                       ..onTap = () async {
                         await launchUrl(
                           Uri.parse(
-                            'https://github.com/LayerTwo-Labs/bip300301_enforcer',
+                            'https://github.com/LiteVerseHoldings/lip005_enforcer',
                           ),
                         );
                       },

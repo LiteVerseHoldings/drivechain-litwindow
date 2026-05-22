@@ -1064,7 +1064,7 @@ class WithdrawalBundle extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   void clearBlockHeight() => clearField(6);
 
-  /// Score tracking fields (BIP300)
+  /// Score tracking fields (LIP005)
   @$pb.TagNumber(7)
   $core.int get age => $_getIZ(6);
   @$pb.TagNumber(7)

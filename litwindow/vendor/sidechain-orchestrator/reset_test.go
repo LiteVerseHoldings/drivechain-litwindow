@@ -206,7 +206,7 @@ func TestStreamResetData_DeletesSeededFiles(t *testing.T) {
 	// Seed files in the bin directory (node_software category).
 	binDir := BinDir(o.BitwindowDir)
 	seedFile(t, filepath.Join(binDir, "bitcoind"))
-	seedFile(t, filepath.Join(binDir, "bip300301-enforcer"))
+	seedFile(t, filepath.Join(binDir, "lip005-enforcer"))
 
 	// Verify they exist in preview.
 	preview, err := o.PreviewResetData(ResetCategory{DeleteNodeSoftware: true})
@@ -239,7 +239,7 @@ func TestStreamResetData_EmitsPerFileEvents(t *testing.T) {
 
 	binDir := BinDir(o.BitwindowDir)
 	seedFile(t, filepath.Join(binDir, "bitcoind"))
-	seedFile(t, filepath.Join(binDir, "bip300301-enforcer"))
+	seedFile(t, filepath.Join(binDir, "lip005-enforcer"))
 
 	ch, err := o.StreamResetData(context.Background(), ResetCategory{DeleteNodeSoftware: true})
 	require.NoError(t, err)
@@ -273,7 +273,7 @@ func TestStreamResetData_CountsAreCumulative(t *testing.T) {
 
 	binDir := BinDir(o.BitwindowDir)
 	seedFile(t, filepath.Join(binDir, "bitcoind"))
-	seedFile(t, filepath.Join(binDir, "bip300301-enforcer"))
+	seedFile(t, filepath.Join(binDir, "lip005-enforcer"))
 	seedFile(t, filepath.Join(binDir, "thunder"))
 
 	ch, err := o.StreamResetData(context.Background(), ResetCategory{DeleteNodeSoftware: true})

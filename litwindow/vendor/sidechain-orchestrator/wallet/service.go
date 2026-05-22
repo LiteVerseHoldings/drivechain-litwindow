@@ -103,7 +103,7 @@ func (s *Service) Subscribe(ctx context.Context) <-chan struct{} {
 // moveToBackup relocates `path` under `<parent>/wallet_backups/<ts>/<base>`,
 // keeping the backup local to the original binary's data tree (Bitcoin
 // Core wallets stay under the bitcoind datadir, the enforcer's wallet stays
-// under bip300301_enforcer, etc.). Same-fs rename keeps it atomic and
+// under lip005_enforcer, etc.). Same-fs rename keeps it atomic and
 // avoids cross-device move pitfalls. No-ops cleanly when `path` doesn't
 // exist. Used in lieu of os.Remove anywhere a wallet-bearing file or
 // directory could be touched: deletion is irreversible, but a renamed copy
@@ -1127,7 +1127,7 @@ func (s *Service) DeleteAllWallets(onStatusUpdate func(string), beforeBoot func(
 
 	// Soft-delete per-binary wallet paths the same way: each lands under
 	// its own parent's wallet_backups/<ts>/, keeping bitcoind's wallets
-	// in the bitcoind datadir, the enforcer's under bip300301_enforcer,
+	// in the bitcoind datadir, the enforcer's under lip005_enforcer,
 	// etc., and never touching the user's keys destructively.
 	if s.GetBinaryWalletPaths != nil {
 		paths := s.GetBinaryWalletPaths()

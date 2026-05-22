@@ -950,7 +950,7 @@ var versionPattern = regexp.MustCompile(`[-_]v?\d+\.\d+\.\d+[-_]?`)
 //
 //	"thunder-orchard-0.1.0-x86_64-apple-darwin" -> "thunder-orchard"
 //	"grpcurl_1.9.1_linux_x86_64" -> "grpcurl"
-//	"bip300301-enforcer-latest-x86_64-unknown-linux-gnu" -> "bip300301-enforcer-latest"
+//	"lip005-enforcer-latest-x86_64-unknown-linux-gnu" -> "lip005-enforcer-latest"
 func StripPlatformSuffix(name string) string {
 	result := name
 

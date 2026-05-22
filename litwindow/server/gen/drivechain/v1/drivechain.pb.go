@@ -477,7 +477,7 @@ type WithdrawalBundle struct {
 	SequenceNumber uint64                 `protobuf:"varint,4,opt,name=sequence_number,json=sequenceNumber,proto3" json:"sequence_number,omitempty"`
 	TransactionHex string                 `protobuf:"bytes,5,opt,name=transaction_hex,json=transactionHex,proto3" json:"transaction_hex,omitempty"`
 	BlockHeight    uint32                 `protobuf:"varint,6,opt,name=block_height,json=blockHeight,proto3" json:"block_height,omitempty"` // Block when bundle was submitted
-	// Score tracking fields (BIP300)
+	// Score tracking fields (LIP005)
 	Age           uint32 `protobuf:"varint,7,opt,name=age,proto3" json:"age,omitempty"`                                 // Blocks since submission
 	MaxAge        uint32 `protobuf:"varint,8,opt,name=max_age,json=maxAge,proto3" json:"max_age,omitempty"`             // Maximum voting period (26300 blocks)
 	BlocksLeft    uint32 `protobuf:"varint,9,opt,name=blocks_left,json=blocksLeft,proto3" json:"blocks_left,omitempty"` // Remaining blocks before expiry

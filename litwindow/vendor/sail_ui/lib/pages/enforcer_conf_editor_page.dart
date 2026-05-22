@@ -281,7 +281,7 @@ class _CliPreview extends StatelessWidget {
           const SailSpacing(SailStyleValues.padding08),
           Expanded(
             child: SelectableText(
-              displayArgs.isEmpty ? '(no args)' : 'bip300301-enforcer ${displayArgs.join(' ')}',
+              displayArgs.isEmpty ? '(no args)' : 'lip005-enforcer ${displayArgs.join(' ')}',
               style: TextStyle(
                 fontFamily: 'IBMPlexMono',
                 fontSize: 12,

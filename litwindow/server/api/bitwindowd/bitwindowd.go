@@ -205,7 +205,7 @@ func (s *Server) Stop(ctx context.Context, req *connect.Request[pb.BitwindowdSer
 	}
 
 	if s.config.GuiBootedEnforcer {
-		zerolog.Ctx(ctx).Info().Msg("enforcer was booted by GUI, shutting down bip300301-enforcer..")
+		zerolog.Ctx(ctx).Info().Msg("enforcer was booted by GUI, shutting down lip005-enforcer..")
 		validator, err := s.validator.Get(ctx)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
@@ -216,9 +216,9 @@ func (s *Server) Stop(ctx context.Context, req *connect.Request[pb.BitwindowdSer
 			zerolog.Ctx(ctx).Error().Err(err).Msg("could not stop enforcer")
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
-		zerolog.Ctx(ctx).Info().Msg("bip300301-enforcer shutdown complete")
+		zerolog.Ctx(ctx).Info().Msg("lip005-enforcer shutdown complete")
 	} else {
-		zerolog.Ctx(ctx).Info().Msg("enforcer was not booted by GUI, not shutting down bip300301-enforcer..")
+		zerolog.Ctx(ctx).Info().Msg("enforcer was not booted by GUI, not shutting down lip005-enforcer..")
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
@@ -1365,9 +1365,9 @@ func (s *Server) GetNetworkStats(ctx context.Context, req *connect.Request[empty
 	}
 
 	var enforcerBandwidth *pb.ProcessBandwidth
-	enforcerPID := findPIDByName("bip300301-enforcer")
+	enforcerPID := findPIDByName("lip005-enforcer")
 	if enforcerPID > 0 {
-		stats, err := s.bandwidthTracker.GetStats(enforcerPID, "bip300301-enforcer")
+		stats, err := s.bandwidthTracker.GetStats(enforcerPID, "lip005-enforcer")
 		if err == nil {
 			enforcerBandwidth = &pb.ProcessBandwidth{
 				ProcessName:     stats.ProcessName,

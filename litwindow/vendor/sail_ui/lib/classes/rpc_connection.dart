@@ -192,7 +192,7 @@ bool isExpectedBootError(Object error) {
 }
 
 /// Extracts just the message from log lines like:
-/// `2025-11-26T06:16:51.195731Z INFO bip300301_enforcer: app/main.rs:376: Listening for JSON-RPC`
+/// `2025-11-26T06:16:51.195731Z INFO lip005_enforcer: app/main.rs:376: Listening for JSON-RPC`
 String prettifyLogMessage(String message) {
   var cleaned = message.replaceAll(RegExp(r'\x1B\[[0-9;]*m'), '');
 

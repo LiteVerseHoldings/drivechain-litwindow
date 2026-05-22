@@ -273,7 +273,7 @@ var (
 // Matches against the JSON key, display Name, or BinaryName (case-insensitive).
 // The JSON-key match is what lets runtime config names like "enforcer" resolve
 // to the dir config keyed under "enforcer" despite its BinaryName being
-// "bip300301-enforcer".
+// "lip005-enforcer".
 func DirConfigByName(name string) (BinaryDirConfig, bool) {
 	lower := strings.ToLower(name)
 	for key, d := range loadDirConfigs() {
@@ -336,7 +336,7 @@ func (b BinaryDirConfig) GetBlockchainDataPaths(networkDir string, network Netwo
 			"mempool.dat", "peers.dat", "settings.json",
 		}, log)
 
-	case b.BinaryName == "bip300301-enforcer":
+	case b.BinaryName == "lip005-enforcer":
 		rootdir := b.RootDir()
 		networkName := strings.ReplaceAll(strings.ReplaceAll(network.ReadableName(), "mainnet", "bitcoin"), "forknet", "bitcoin")
 		return GetExistingFilesInDir(rootdir, []string{"validator", "bitwindow-enforcer.conf", networkName}, log)
@@ -358,7 +358,7 @@ func (b BinaryDirConfig) GetWalletPaths(networkDir string, network Network, log 
 	var paths []string
 
 	switch {
-	case b.BinaryName == "bip300301-enforcer":
+	case b.BinaryName == "lip005-enforcer":
 		rootdir := b.RootDir()
 		networkName := strings.ReplaceAll(strings.ReplaceAll(network.ReadableName(), "mainnet", "bitcoin"), "forknet", "bitcoin")
 		walletDir := filepath.Join(rootdir, "wallet", networkName)
@@ -461,8 +461,8 @@ func (b BinaryDirConfig) GetLogPaths(networkDir string, log zerolog.Logger) []st
 	case b.IsBitcoinCore:
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"debug.log"}, log)...)
 
-	case b.BinaryName == "bip300301-enforcer":
-		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"bip300301_enforcer.log", "logs"}, log)...)
+	case b.BinaryName == "lip005-enforcer":
+		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"lip005_enforcer.log", "logs"}, log)...)
 
 	case b.BinaryName == "bitwindowd":
 		paths = append(paths, GetExistingFilesInDir(networkDir, []string{"server.log"}, log)...)
@@ -495,7 +495,7 @@ func (b BinaryDirConfig) LogPath(networkDir string) string {
 	case b.BinaryName == "bitwindowd":
 		return filepath.Join(networkDir, "server.log")
 
-	case b.BinaryName == "bip300301-enforcer":
+	case b.BinaryName == "lip005-enforcer":
 		return findLatestEnforcerLog(networkDir)
 
 	case b.BinaryName == "thunder" || b.BinaryName == "plain_bitnames" || b.BinaryName == "plain_bitassets" || b.BinaryName == "thunder-orchard" || b.BinaryName == "truthcoin" || b.BinaryName == "photon" || b.BinaryName == "coinshift":
@@ -510,14 +510,14 @@ func (b BinaryDirConfig) LogPath(networkDir string) string {
 // Dart: _findLatestEnforcerLog (L1394-1437)
 func findLatestEnforcerLog(datadirNetwork string) string {
 	logsDir := filepath.Join(datadirNetwork, "logs")
-	fallback := filepath.Join(datadirNetwork, "bip300301_enforcer.log")
+	fallback := filepath.Join(datadirNetwork, "lip005_enforcer.log")
 
 	entries, err := os.ReadDir(logsDir)
 	if err != nil {
 		return fallback
 	}
 
-	pattern := regexp.MustCompile(`^bip300301_enforcer\.log\.(\d{4}-\d{2}-\d{2})\.(\d+)$`)
+	pattern := regexp.MustCompile(`^lip005_enforcer\.log\.(\d{4}-\d{2}-\d{2})\.(\d+)$`)
 	type logEntry struct {
 		path string
 		date string
@@ -678,7 +678,7 @@ func (b BinaryDirConfig) staticExtraFiles() []string {
 		return []string{"litecoin-cli", "litecoin-tx", "litecoin-wallet", "litecoin-cli.exe", "litecoin-tx.exe", "litecoin-wallet.exe", "qt"}
 	}
 	switch b.BinaryName {
-	case "bip300301-enforcer":
+	case "lip005-enforcer":
 		return []string{"LICENSE", "grpcurl"}
 	case "bitwindowd":
 		return []string{"data", "lib", "bitwindow.exe",

@@ -92,28 +92,28 @@
       "name": "LIP 005 Enforcer",
       "version": "0.1.0",
       "description": "Manages drivechain validation rules",
-      "repo_url": "https://github.com/LayerTwo-Labs/bip300301-enforcer",
+      "repo_url": "https://github.com/LiteVerseHoldings/lip005_enforcer",
       "port": 50051,
       "chain_layer": 1,
       "color": "green",
       "directories": {
         "binary": {
           "default": {
-            "linux": "bip300301_enforcer",
-            "macos": "bip300301_enforcer",
-            "windows": "bip300301_enforcer"
+            "linux": "lip005_enforcer",
+            "macos": "lip005_enforcer",
+            "windows": "lip005_enforcer"
           }
         },
         "flutter_frontend": { "linux": "", "macos": "", "windows": "" }
       },
       "download": {
-        "binary": "bip300301-enforcer",
+        "binary": "lip005-enforcer",
         "files": {
           "default": {
             "base_url": "https://releases.drivechain.info/",
-            "linux": "bip300301-enforcer-latest-x86_64-unknown-linux-gnu.zip",
-            "macos": "bip300301-enforcer-latest-x86_64-apple-darwin.zip",
-            "windows": "bip300301-enforcer-latest-x86_64-pc-windows-gnu.zip"
+            "linux": "lip005-enforcer-latest-x86_64-unknown-linux-gnu.zip",
+            "macos": "lip005-enforcer-latest-x86_64-apple-darwin.zip",
+            "windows": "lip005-enforcer-latest-x86_64-pc-windows-gnu.zip"
           }
         }
       },

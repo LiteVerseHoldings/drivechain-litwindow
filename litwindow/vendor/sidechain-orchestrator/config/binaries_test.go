@@ -79,11 +79,11 @@ func TestEnforcerPath(t *testing.T) {
 	var want string
 	switch runtime.GOOS {
 	case "darwin":
-		want = filepath.Join(home(), "Library", "Application Support", "bip300301_enforcer")
+		want = filepath.Join(home(), "Library", "Application Support", "lip005_enforcer")
 	case "windows":
-		want = filepath.Join(home(), "AppData", "Roaming", "bip300301_enforcer")
+		want = filepath.Join(home(), "AppData", "Roaming", "lip005_enforcer")
 	default:
-		want = filepath.Join(home(), ".local", "share", "bip300301_enforcer")
+		want = filepath.Join(home(), ".local", "share", "lip005_enforcer")
 	}
 	if p != want {
 		t.Errorf("Enforcer path = %q, want %q", p, want)

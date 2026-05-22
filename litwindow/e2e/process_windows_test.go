@@ -65,7 +65,7 @@ func runTaskkill(pid int, force bool) error {
 // its RPC ports. In-run shutdown is the orchestrator's responsibility.
 func sweepPriorRunOrphans(t *testing.T) {
 	t.Helper()
-	for _, name := range []string{"bitwindowd.exe", "orchestratord.exe", "bitcoind.exe", "bip300301_enforcer.exe"} {
+	for _, name := range []string{"bitwindowd.exe", "orchestratord.exe", "bitcoind.exe", "lip005_enforcer.exe"} {
 		_ = exec.Command("taskkill", "/F", "/IM", name).Run()
 	}
 }

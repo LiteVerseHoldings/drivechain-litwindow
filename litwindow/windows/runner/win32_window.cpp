@@ -48,7 +48,7 @@ void TerminateManagedDaemons() {
       L"bitwindowd.exe",
       L"orchestratord.exe",
       L"litecoind.exe",
-      L"bip300301_enforcer.exe",
+      L"lip005_enforcer.exe",
       L"thunder.exe",
       L"zside.exe",
       L"plain_bitnames.exe",

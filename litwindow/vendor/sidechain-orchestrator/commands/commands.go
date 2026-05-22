@@ -592,11 +592,11 @@ func binaryVersion(binPath string) string {
 
 	lines := strings.Split(output, "\n")
 
-	// Enforcer: look for bip300301_enforcer_lib line + commit
-	if strings.Contains(binPath, "enforcer") || strings.Contains(binPath, "bip300301") {
+	// Enforcer: look for lip005_enforcer_lib line + commit
+	if strings.Contains(binPath, "enforcer") || strings.Contains(binPath, "lip005") {
 		var versionLine, commitLine string
 		for _, line := range lines {
-			if strings.Contains(line, "bip300301_enforcer_lib") {
+			if strings.Contains(line, "lip005_enforcer_lib") {
 				versionLine = line
 			}
 			if strings.Contains(strings.TrimSpace(line), "commit:") {

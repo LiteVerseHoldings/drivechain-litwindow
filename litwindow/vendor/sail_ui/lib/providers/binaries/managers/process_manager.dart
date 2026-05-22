@@ -437,11 +437,11 @@ bool isSpam(String data) {
     return true;
   }
 
-  if (data.contains('Ripemd160') && data.contains('bip300301_enforcer')) {
+  if (data.contains('Ripemd160') && data.contains('lip005_enforcer')) {
     return true;
   }
 
-  if (data.contains('listed') && data.contains('wallet utxos in') && data.contains('bip300301_enforcer')) {
+  if (data.contains('listed') && data.contains('wallet utxos in') && data.contains('lip005_enforcer')) {
     return true;
   }
 

@@ -1722,7 +1722,7 @@ func (*GetSyncStatusRequest) Descriptor() ([]byte, []int) {
 type GetSyncStatusResponse struct {
 	state     protoimpl.MessageState `protogen:"open.v1"`
 	Mainchain *ChainSync             `protobuf:"bytes,1,opt,name=mainchain,proto3" json:"mainchain,omitempty"` // bitcoind
-	Enforcer  *ChainSync             `protobuf:"bytes,2,opt,name=enforcer,proto3" json:"enforcer,omitempty"`   // BIP300/301 enforcer
+	Enforcer  *ChainSync             `protobuf:"bytes,2,opt,name=enforcer,proto3" json:"enforcer,omitempty"`   // LIP005 enforcer
 	// All sidechains the orchestrator knows about. Always includes every
 	// configured sidechain — daemons that aren't running yet appear with
 	// their `sync.error` set so the UI can render a placeholder. While a

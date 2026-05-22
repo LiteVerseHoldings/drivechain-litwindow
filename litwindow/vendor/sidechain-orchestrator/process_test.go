@@ -48,7 +48,7 @@ func TestIsSpam(t *testing.T) {
 	assert.True(t, isSpam("tower_http::trace::on_request"))
 	assert.True(t, isSpam("Ripemd160 hash mismatch"))
 	assert.True(t, isSpam("rpc: fetch completed in 50ms"))
-	assert.False(t, isSpam("Starting up bip300301_enforcer"))
+	assert.False(t, isSpam("Starting up lip005_enforcer"))
 	assert.False(t, isSpam("Connected to mainchain"))
 }
 
@@ -146,8 +146,8 @@ func TestProcessNameMatches(t *testing.T) {
 		{"bitcoin", "bitcoind", true},    // ps truncation
 		{"bitcoind", "bitcoin", true},    // reverse contains
 		{"unrelated", "bitcoind", false}, // no overlap
-		{"bip300301-enforcer", "bip300301-enforcer", true},
-		{"bip300301", "bip300301-enforcer", true}, // truncated
+		{"lip005-enforcer", "lip005-enforcer", true},
+		{"lip005", "lip005-enforcer", true}, // truncated
 	}
 	for _, tt := range tests {
 		t.Run(tt.proc+"_vs_"+tt.bin, func(t *testing.T) {

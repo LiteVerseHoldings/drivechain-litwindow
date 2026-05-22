@@ -84,7 +84,7 @@ type WalletServiceClient interface {
 	CreateBmmCriticalDataTransaction(context.Context, *connect.Request[v1.CreateBmmCriticalDataTransactionRequest]) (*connect.Response[v1.CreateBmmCriticalDataTransactionResponse], error)
 	CreateDepositTransaction(context.Context, *connect.Request[v1.CreateDepositTransactionRequest]) (*connect.Response[v1.CreateDepositTransactionResponse], error)
 	CreateNewAddress(context.Context, *connect.Request[v1.CreateNewAddressRequest]) (*connect.Response[v1.CreateNewAddressResponse], error)
-	// Create a new sidechain proposal (M1 in BIP300) and persist to the local
+	// Create a new sidechain proposal (M1 in LIP005) and persist to the local
 	// database for further processing.
 	// Sidechain proposals must be included in the coinbase transaction of a
 	// newly mined block, so this proposal is not active until the wallet has
@@ -297,7 +297,7 @@ type WalletServiceHandler interface {
 	CreateBmmCriticalDataTransaction(context.Context, *connect.Request[v1.CreateBmmCriticalDataTransactionRequest]) (*connect.Response[v1.CreateBmmCriticalDataTransactionResponse], error)
 	CreateDepositTransaction(context.Context, *connect.Request[v1.CreateDepositTransactionRequest]) (*connect.Response[v1.CreateDepositTransactionResponse], error)
 	CreateNewAddress(context.Context, *connect.Request[v1.CreateNewAddressRequest]) (*connect.Response[v1.CreateNewAddressResponse], error)
-	// Create a new sidechain proposal (M1 in BIP300) and persist to the local
+	// Create a new sidechain proposal (M1 in LIP005) and persist to the local
 	// database for further processing.
 	// Sidechain proposals must be included in the coinbase transaction of a
 	// newly mined block, so this proposal is not active until the wallet has
