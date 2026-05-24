@@ -220,7 +220,7 @@ func (s *Server) getServiceStatuses(ctx context.Context) ([]*healthv1.CheckRespo
 
 	pool.Go("wallet", func(ctx context.Context) (*healthv1.CheckResponse_ServiceStatus, error) {
 		return checkHealth(ctx, "wallet", s.wallet, func(ctx context.Context, client validatorrpc.WalletServiceClient) error {
-			_, err := client.GetInfo(ctx, connect.NewRequest(&mainchainv1.GetInfoRequest{}))
+			_, err := client.GetBalance(ctx, connect.NewRequest(&mainchainv1.GetBalanceRequest{}))
 			return err
 		}), nil
 	})

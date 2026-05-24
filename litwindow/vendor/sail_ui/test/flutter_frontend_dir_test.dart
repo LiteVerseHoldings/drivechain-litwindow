@@ -19,10 +19,10 @@ void main() {
       );
     });
 
-    test('Windows keeps 10520LayertwoLabs/BitWindow', () {
+    test('Windows uses 10520LayertwoLabs/LitWindow', () {
       expect(
         flutterFrontendDirFor(BinaryType.BINARY_TYPE_BITWINDOWD, OS.windows, home),
-        p.join(home, 'AppData', 'Roaming', '10520LayertwoLabs', 'BitWindow'),
+        p.join(home, 'AppData', 'Roaming', '10520LayertwoLabs', 'LitWindow'),
       );
     });
   });

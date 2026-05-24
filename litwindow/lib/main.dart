@@ -168,7 +168,7 @@ Future<(Directory, File, Logger)> init(String arguments) async {
   // Load initial binary states
   final binaryProvider = await BinaryProvider.create(
     appDir: applicationDir,
-    initialBinaries: initalBinaries(),
+    initialBinaries: initalBinaries(applicationDir),
   );
   GetIt.I.registerSingleton<BinaryProvider>(binaryProvider);
   GetIt.I.registerSingleton<BitcoindConnection>(BitcoindConnection());
@@ -270,7 +270,7 @@ Future<void> runMainWindow(Logger log, Directory applicationDir, File logFile) a
     minimumSize: Size(400, 400),
     size: Size(1200, 600),
     titleBarStyle: TitleBarStyle.normal,
-    title: 'Litecoin Core + CUSF LIP 005 Enforcer',
+    title: 'LitWindow',
   );
 
   await windowManager.ensureInitialized();
@@ -1011,12 +1011,24 @@ class SubWindowTypes {
   );
 }
 
-List<Binary> initalBinaries() {
-  return [
+List<Binary> initalBinaries(Directory applicationDir) {
+  final binaries = [
     ...coreBinaries,
     ...sidechainBinaries,
     resolveFromConfig(BinaryType.BINARY_TYPE_GRPCURL, () => GRPCurl()),
   ];
+
+  for (final binary in binaries) {
+    if (binary is BitWindow) {
+      binary.extraBootArgs = [
+        ...binary.extraBootArgs,
+        '--datadir',
+        applicationDir.path,
+      ];
+    }
+  }
+
+  return binaries;
 }
 
 Future<void> initAutoUpdater(Logger log) async {

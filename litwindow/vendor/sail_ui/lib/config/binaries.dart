@@ -789,19 +789,20 @@ abstract class Binary {
 
     // For L1 binaries, also check LitWindow's assets directory
     // This allows sidechains to reuse already-downloaded binaries
-    final isCurrentlyBitwindow = appDir.path.toLowerCase().contains(
-      'bitwindow',
-    );
-    if (chainLayer == 1 && !isCurrentlyBitwindow) {
-      final bitwindowDir = path.join(appDir.parent.path, 'bitwindow');
-      final binaryPath = path.join(
-        binDir(bitwindowDir).path,
-        subfolder,
-        baseBinary,
-      );
-      paths.add(binaryPath);
-      if (Platform.isWindows && !baseBinary.endsWith('.exe')) {
-        paths.add('$binaryPath.exe');
+    final appDirLower = appDir.path.toLowerCase();
+    final isCurrentlyLitWindow = appDirLower.contains('litwindow') || appDirLower.contains('bitwindow');
+    if (chainLayer == 1 && !isCurrentlyLitWindow) {
+      for (final litwindowDirName in ['LitWindow', 'bitwindow']) {
+        final litwindowDir = path.join(appDir.parent.path, litwindowDirName);
+        final binaryPath = path.join(
+          binDir(litwindowDir).path,
+          subfolder,
+          baseBinary,
+        );
+        paths.add(binaryPath);
+        if (Platform.isWindows && !baseBinary.endsWith('.exe')) {
+          paths.add('$binaryPath.exe');
+        }
       }
     }
 
@@ -1125,12 +1126,12 @@ class BitWindow extends Binary {
                binary: allNetworks({
                  OS.linux: 'bitwindow',
                  OS.macos: 'bitwindow',
-                 OS.windows: '10520LayertwoLabs/BitWindow',
+                 OS.windows: '10520LayertwoLabs/LitWindow',
                }),
                flutterFrontend: {
                  OS.linux: 'bitwindow',
                  OS.macos: 'bitwindow',
-                 OS.windows: '10520LayertwoLabs/BitWindow',
+                 OS.windows: '10520LayertwoLabs/LitWindow',
                },
              ),
          metadata:
@@ -1177,6 +1178,7 @@ class BitWindow extends Binary {
     int? port,
     int? chainLayer,
     DownloadInfo? downloadInfo,
+    List<String>? extraBootArgs,
   }) {
     return BitWindow(
       name: name,
@@ -1188,6 +1190,7 @@ class BitWindow extends Binary {
       port: port ?? this.port,
       chainLayer: chainLayer ?? this.chainLayer,
       downloadInfo: downloadInfo ?? this.downloadInfo,
+      extraBootArgs: extraBootArgs ?? this.extraBootArgs,
     );
   }
 }
@@ -1544,7 +1547,7 @@ String? flutterFrontendDirFor(BinaryType type, OS os, String home) {
   return switch (type) {
     BinaryType.BINARY_TYPE_BITWINDOWD => switch (os) {
       OS.macos => path.join(home, 'Library', 'Application Support', 'bitwindow'),
-      OS.windows => path.join(home, 'AppData', 'Roaming', '10520LayertwoLabs', 'BitWindow'),
+      OS.windows => path.join(home, 'AppData', 'Roaming', '10520LayertwoLabs', 'LitWindow'),
       OS.linux => path.join(home, '.local', 'share', 'bitwindow'),
     },
     BinaryType.BINARY_TYPE_THUNDER => switch (os) {

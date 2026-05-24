@@ -51,7 +51,7 @@ func flutterAppProcessName() string {
 	case "linux":
 		return "bitwindow"
 	case "windows":
-		return "BitWindows"
+		return "LitWindow"
 	default:
 		return "BitWindow"
 	}

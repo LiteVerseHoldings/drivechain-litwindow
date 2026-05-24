@@ -64,9 +64,9 @@ func TestService_Check(t *testing.T) {
 			AnyTimes()
 
 		mockWallet.EXPECT().
-			GetInfo(gomock.Any(), gomock.Any()).
-			Return(&connect.Response[mainchainv1.GetInfoResponse]{
-				Msg: &mainchainv1.GetInfoResponse{},
+			GetBalance(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[mainchainv1.GetBalanceResponse]{
+				Msg: &mainchainv1.GetBalanceResponse{},
 			}, nil).
 			AnyTimes()
 
@@ -276,7 +276,7 @@ func TestService_Check(t *testing.T) {
 		mockWallet := mocks.NewMockWalletServiceClient(ctrl)
 		// Health check fails
 		mockWallet.EXPECT().
-			GetInfo(gomock.Any(), gomock.Any()).
+			GetBalance(gomock.Any(), gomock.Any()).
 			Return(nil, connect.NewError(connect.CodeUnavailable, nil)).
 			AnyTimes()
 
@@ -393,9 +393,9 @@ func TestService_Check(t *testing.T) {
 		// wallet healthy
 		mockWallet := mocks.NewMockWalletServiceClient(ctrl)
 		mockWallet.EXPECT().
-			GetInfo(gomock.Any(), gomock.Any()).
-			Return(&connect.Response[mainchainv1.GetInfoResponse]{
-				Msg: &mainchainv1.GetInfoResponse{},
+			GetBalance(gomock.Any(), gomock.Any()).
+			Return(&connect.Response[mainchainv1.GetBalanceResponse]{
+				Msg: &mainchainv1.GetBalanceResponse{},
 			}, nil).
 			AnyTimes()
 
