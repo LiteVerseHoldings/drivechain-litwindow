@@ -1157,6 +1157,7 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
           router: GetIt.I.get<AppRouter>(),
           onComplete: () async {
             await windowManager.destroy();
+            exit(0);
           },
           showShutdownPage: false,
           forceKill: true,
@@ -1171,6 +1172,7 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
         router: GetIt.I.get<AppRouter>(),
         onComplete: () async {
           await windowManager.destroy();
+          exit(0);
         },
         showShutdownPage: true,
       ),

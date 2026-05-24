@@ -270,7 +270,7 @@ Future<void> runMainWindow(Logger log, Directory applicationDir, File logFile) a
     minimumSize: Size(400, 400),
     size: Size(1200, 600),
     titleBarStyle: TitleBarStyle.normal,
-    title: 'Litecoin Core + CUSF LIP 005 Enforcer',
+    title: 'LitWindow',
   );
 
   await windowManager.ensureInitialized();
