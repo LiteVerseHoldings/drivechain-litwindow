@@ -93,13 +93,13 @@
           "default": {
             "linux": "bitwindow",
             "macos": "bitwindow",
-            "windows": "10520LayertwoLabs/BitWindow"
+            "windows": "10520LayertwoLabs/LitWindow"
           }
         },
         "flutter_frontend": {
           "linux": "bitwindow",
           "macos": "bitwindow",
-          "windows": "10520LayertwoLabs/BitWindow"
+          "windows": "10520LayertwoLabs/LitWindow"
         }
       },
       "download": {

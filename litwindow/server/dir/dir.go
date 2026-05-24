@@ -64,7 +64,7 @@ func DefaultDataDir() (string, error) {
 		}
 		dir = filepath.Join(home, "Library", "Application Support", macosAppName)
 	case "windows":
-		const windowsAppName = "BitWindow"
+		const windowsAppName = "LitWindow"
 
 		appData, ok := os.LookupEnv("APPDATA")
 		if !ok {

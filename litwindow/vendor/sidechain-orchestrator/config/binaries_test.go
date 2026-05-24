@@ -97,7 +97,7 @@ func TestBitWindowPath(t *testing.T) {
 	case "darwin":
 		want = filepath.Join(home(), "Library", "Application Support", "bitwindow")
 	case "windows":
-		want = filepath.Join(home(), "AppData", "Roaming", "10520LayertwoLabs", "BitWindow")
+		want = filepath.Join(home(), "AppData", "Roaming", "10520LayertwoLabs", "LitWindow")
 	default:
 		want = filepath.Join(home(), ".local", "share", "bitwindow")
 	}

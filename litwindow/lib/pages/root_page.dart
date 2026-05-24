@@ -1142,19 +1142,6 @@ class _RootPageState extends State<RootPage> with WidgetsBindingObserver, Window
     _walletReader.removeListener(_onProviderChanged);
     _bitnamesRPC.removeListener(_onProviderChanged);
     _confProvider.removeListener(_onNetworkChange);
-    // Only trigger shutdown if we're not navigating away (e.g., during reset).
-    // If isNavigatingAway is true, we're just changing routes, not closing the app.
-    if (!isNavigatingAway) {
-      GetIt.I.get<BinaryProvider>().onShutdown(
-        shutdownOptions: ShutdownOptions(
-          router: GetIt.I.get<AppRouter>(),
-          onComplete: () async {
-            await windowManager.destroy();
-          },
-          showShutdownPage: true,
-        ),
-      );
-    }
     isNavigatingAway = false; // Reset the flag
     windowManager.removeListener(this);
     WidgetsBinding.instance.removeObserver(this);

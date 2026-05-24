@@ -98,12 +98,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "10520LayertwoLabs" "\0"
-            VALUE "FileDescription", "BitWindow" "\0"
+            VALUE "FileDescription", "LitWindow" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "BitWindow" "\0"
+            VALUE "InternalName", "LitWindow" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 LayerTwo Labs, Inc. All rights reserved." "\0"
-            VALUE "OriginalFilename", "BitWindow.exe" "\0"
-            VALUE "ProductName", "BitWindow" "\0"
+            VALUE "OriginalFilename", "LitWindow.exe" "\0"
+            VALUE "ProductName", "LitWindow" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

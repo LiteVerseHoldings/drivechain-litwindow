@@ -76,6 +76,8 @@ class ChainsConfigProvider extends ChangeNotifier {
       ).i('Paranoid mode: skipping chains_config.json migrations');
     }
 
+    await _runLitWindowPathMigration(configFile);
+
     final provider = ChainsConfigProvider._(configFile: configFile);
     await provider._loadConfig();
     provider._setupFileWatcher();
@@ -162,6 +164,51 @@ class ChainsConfigProvider extends ChangeNotifier {
       await configFile.writeAsString(encoder.convert(userConfig));
     } catch (e) {
       log.w('Migration failed (config unchanged): $e');
+    }
+  }
+
+  static Future<void> _runLitWindowPathMigration(File configFile) async {
+    final log = Logger(level: Level.info);
+
+    try {
+      final contents = _stripBom(await configFile.readAsString());
+      final config = json.decode(contents) as Map<String, dynamic>;
+      var changed = false;
+
+      Object? migrate(Object? value) {
+        if (value is Map<String, dynamic>) {
+          return value.map((key, child) => MapEntry(key, migrate(child)));
+        }
+        if (value is List) {
+          return value.map(migrate).toList();
+        }
+        if (value is String) {
+          final next = value
+              .replaceAll('10520LayertwoLabs/BitWindow', '10520LayertwoLabs/LitWindow')
+              .replaceAll(r'10520LayertwoLabs\BitWindow', r'10520LayertwoLabs\LitWindow')
+              .replaceAll('10520LayertwoLabs/bitwindow', '10520LayertwoLabs/LitWindow')
+              .replaceAll(r'10520LayertwoLabs\bitwindow', r'10520LayertwoLabs\LitWindow');
+          if (next != value) changed = true;
+          return next;
+        }
+        return value;
+      }
+
+      final migrated = migrate(config) as Map<String, dynamic>;
+      final binaries = migrated['binaries'] as Map<String, dynamic>?;
+      final bitwindow = binaries?['bitwindow'] as Map<String, dynamic>?;
+      if (bitwindow?['name'] == 'BitWindow') {
+        bitwindow!['name'] = 'LitWindow';
+        changed = true;
+      }
+
+      if (!changed) return;
+
+      final encoder = const JsonEncoder.withIndent('  ');
+      await configFile.writeAsString(encoder.convert(migrated));
+      log.i('Migrated chains_config.json BitWindow paths to LitWindow');
+    } catch (e) {
+      log.w('LitWindow path migration failed (config unchanged): $e');
     }
   }
 

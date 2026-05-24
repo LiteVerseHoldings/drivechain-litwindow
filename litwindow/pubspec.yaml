@@ -154,12 +154,12 @@ flutter:
 # CI has a certificate.pfx we use to sign the build with
 # https://pub.dev/packages/msix
 msix_config:
-  display_name: BitWindows
+  display_name: LitWindow
   languages: en-us
   windows_build_args: --dart-define-from-file=build-vars.env
   publisher: CN=DE47B41F-F9FE-43D5-9243-DB15A080F621
   publisher_display_name: LayerTwo Labs
-  identity_name: 10520LayertwoLabs.BitWindows
+  identity_name: 10520LayertwoLabs.LitWindow
   msix_version: 1.0.0.0
   logo_path: windows/runner/resources/app_icon.ico
   capabilities: internetClient,internetClientServer
